@@ -1,12 +1,45 @@
 // Next.js API route proxy to Express backend
 import { NextRequest, NextResponse } from 'next/server';
 
-// Use API_BASE_URL for server-side (more secure, not exposed to client)
-// Fallback to NEXT_PUBLIC_API_URL for client-side compatibility
-// In production, this should point to the external backend URL
-// Normalize the URL: remove trailing slashes and ensure it doesn't include /api
+// ============================================================================
+// API Proxy Configuration
+// ============================================================================
+// Deze Next.js API route proxyt requests naar de backend Express API
+// Gebruikt NEXT_PUBLIC_API_URL voor de backend URL
+// 
+// Local development: NEXT_PUBLIC_API_URL=http://localhost:5001
+// Production (Netlify): NEXT_PUBLIC_API_URL=https://your-api-url.com
+// ============================================================================
+
+/**
+ * Haalt de backend API base URL op uit environment variables
+ * In productie MOET NEXT_PUBLIC_API_URL gezet zijn
+ * In development gebruikt het localhost als fallback
+ */
 function getApiBaseUrl(): string {
-  const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  // Prioriteit: API_BASE_URL (server-side only) > NEXT_PUBLIC_API_URL (client-accessible)
+  const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+  
+  // In productie: NEXT_PUBLIC_API_URL is verplicht
+  if (process.env.NODE_ENV === 'production') {
+    if (!rawUrl || rawUrl.trim() === '') {
+      throw new Error(
+        'NEXT_PUBLIC_API_URL is required in production. ' +
+        'Set it in Netlify environment variables to your backend API URL, ' +
+        'e.g., https://your-api.example.com'
+      );
+    }
+  }
+  
+  // In development: fallback naar localhost
+  if (!rawUrl || rawUrl.trim() === '') {
+    const fallback = 'http://localhost:5001';
+    console.warn(
+      `⚠️ NEXT_PUBLIC_API_URL is not set, using fallback: ${fallback}. ` +
+      'Set NEXT_PUBLIC_API_URL in .env.local for development.'
+    );
+    return fallback;
+  }
   
   // Remove trailing slashes
   let normalized = rawUrl.trim().replace(/\/+$/, '');
@@ -16,12 +49,6 @@ function getApiBaseUrl(): string {
     normalized = normalized.slice(0, -4);
   }
   
-  // Ensure we have a valid URL
-  if (!normalized || normalized === '') {
-    console.warn('⚠️ API_BASE_URL is empty, using fallback: http://localhost:5001');
-    return 'http://localhost:5001';
-  }
-  
   return normalized;
 }
 
@@ -29,7 +56,7 @@ const API_URL = getApiBaseUrl();
 
 // Log the configured API URL on module load (for debugging)
 if (process.env.NODE_ENV === 'development') {
-  console.log('🔧 Proxy configured with API base URL:', API_URL);
+  console.log('🔧 Next.js API Proxy configured with backend URL:', API_URL);
 }
 
 export async function GET(

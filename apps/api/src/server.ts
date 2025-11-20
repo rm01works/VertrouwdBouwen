@@ -10,8 +10,9 @@ dotenv.config();
 const PORT = env.PORT;
 
 // CORS middleware (moet vóór andere middleware komen)
+// Ondersteunt meerdere origins voor lokale dev en productie (Netlify)
 app.use(cors({
-  origin: env.CORS_ORIGIN,
+  origin: env.CORS_ORIGIN, // Kan string of string[] zijn
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -65,7 +66,10 @@ async function startServer() {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📡 API endpoints available at http://localhost:${PORT}/api`);
       console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
-      console.log(`🌐 CORS enabled for: ${env.CORS_ORIGIN}`);
+      const corsOrigins = Array.isArray(env.CORS_ORIGIN) 
+        ? env.CORS_ORIGIN.join(', ') 
+        : env.CORS_ORIGIN;
+      console.log(`🌐 CORS enabled for: ${corsOrigins}`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
