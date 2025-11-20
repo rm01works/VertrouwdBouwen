@@ -2,6 +2,8 @@
 
 Een Nederlands escrow platform voor het verbinden van klanten met aannemers voor bouwprojecten.
 
+![gemaakt door ruben!!!](Bouwzeker.png)
+
 ## Tech Stack
 
 - **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS
