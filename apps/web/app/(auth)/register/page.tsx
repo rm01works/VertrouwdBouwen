@@ -99,6 +99,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       success('Welkom bij VertrouwdBouwen! Account succesvol aangemaakt.');

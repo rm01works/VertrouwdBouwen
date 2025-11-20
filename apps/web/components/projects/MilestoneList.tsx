@@ -23,10 +23,10 @@ interface MilestoneListProps {
 export function MilestoneList({
   milestones,
   userRole,
-  projectOwnerId,
-  contractorId,
-  projectStatus,
-  projectBudget,
+  projectOwnerId: _projectOwnerId,
+  contractorId: _contractorId,
+  projectStatus: _projectStatus,
+  projectBudget: _projectBudget,
   onUpdate,
 }: MilestoneListProps) {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());

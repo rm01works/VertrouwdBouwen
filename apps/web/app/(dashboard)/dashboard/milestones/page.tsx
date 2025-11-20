@@ -12,12 +12,10 @@ import { MilestoneList } from '@/components/projects/MilestoneList';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils/format';
-import { useToast } from '@/hooks/useToast';
 
 export default function MilestonesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const { success, error: showError } = useToast();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

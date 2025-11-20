@@ -86,7 +86,7 @@ export const visibleDashboardNavItems = dashboardNavItems.filter((item) => item.
  * Beide rollen (CUSTOMER en CONTRACTOR) zien dezelfde navigatie-items
  * Permissies worden binnen de pagina's zelf gehandeld, niet op nav-level
  */
-export function getVisibleNavItemsForRole(role?: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN') {
+export function getVisibleNavItemsForRole(_role?: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN') {
   // Beide rollen zien alle enabled items
   // Permissies voor acties binnen pagina's worden per pagina bepaald
   return dashboardNavItems.filter((item) => item.enabled);

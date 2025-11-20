@@ -84,7 +84,7 @@ export function ProjectForm() {
     loadContractors();
   }, [showError]);
 
-  const updateFormData = (field: keyof ProjectFormData, value: any) => {
+  const updateFormData = (field: keyof ProjectFormData, value: string | string[] | MilestoneFormData[]) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -199,7 +199,7 @@ export function ProjectForm() {
 
     let totalMilestoneAmount = 0;
 
-    formData.milestones.forEach((milestone, index) => {
+    formData.milestones.forEach((milestone) => {
       const milestoneError: {
         title?: string;
         description?: string;

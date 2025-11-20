@@ -3,7 +3,6 @@
 import React from 'react';
 import { Input, Textarea } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { formatCurrency } from '@/lib/utils/format';
 
 export interface MilestoneFormData {
   title: string;

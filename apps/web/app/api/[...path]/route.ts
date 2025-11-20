@@ -66,7 +66,7 @@ export async function DELETE(
 
 export async function OPTIONS(
   request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
+  { params: _params }: { params: Promise<{ path: string[] }> }
 ) {
   // Handle CORS preflight requests
   return new NextResponse(null, {
@@ -225,8 +225,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     let setCookieHeaders: string[] = [];
     if (typeof response.headers.getSetCookie === 'function') {
       setCookieHeaders = response.headers.getSetCookie();
-    } else if (typeof (response.headers as any).getAll === 'function') {
-      setCookieHeaders = (response.headers as any).getAll('Set-Cookie');
+    } else if (typeof (response.headers as unknown as { getAll?: (name: string) => string[] }).getAll === 'function') {
+      setCookieHeaders = (response.headers as unknown as { getAll: (name: string) => string[] }).getAll('Set-Cookie');
     } else {
       const cookie = response.headers.get('Set-Cookie');
       if (cookie) {
@@ -257,7 +257,7 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     
     // Check if it's a connection error or timeout
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorCause = error instanceof Error && 'cause' in error ? (error as any).cause : null;
+    const errorCause = error instanceof Error && 'cause' in error ? (error as Error & { cause?: unknown }).cause : null;
     const isAbortError = error instanceof Error && error.name === 'AbortError';
     const isConnectionError = error instanceof Error && (
       isAbortError ||
