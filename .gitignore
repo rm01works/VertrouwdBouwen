@@ -58,3 +58,4 @@ apps/api/prisma/migrations/
 # OS
 Thumbs.db
 
+.direnv
