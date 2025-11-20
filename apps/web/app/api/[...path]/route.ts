@@ -20,8 +20,12 @@ function getApiBaseUrl(): string {
   // Prioriteit: API_BASE_URL (server-side only) > NEXT_PUBLIC_API_URL (client-accessible)
   const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
   
-  // In productie: NEXT_PUBLIC_API_URL is verplicht
-  if (process.env.NODE_ENV === 'production') {
+  // Check if we're in build phase (Next.js sets NEXT_PHASE during build)
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+  
+  // In productie runtime: NEXT_PUBLIC_API_URL is verplicht
+  // But during build, allow fallback to prevent build failures
+  if (process.env.NODE_ENV === 'production' && !isBuildPhase) {
     if (!rawUrl || rawUrl.trim() === '') {
       throw new Error(
         'NEXT_PUBLIC_API_URL is required in production. ' +
@@ -31,9 +35,13 @@ function getApiBaseUrl(): string {
     }
   }
   
-  // In development: fallback naar localhost
+  // In development or build phase: fallback naar localhost
   if (!rawUrl || rawUrl.trim() === '') {
     const fallback = 'http://localhost:5001';
+    if (isBuildPhase) {
+      // During build, just use fallback silently
+      return fallback;
+    }
     console.warn(
       `⚠️ NEXT_PUBLIC_API_URL is not set, using fallback: ${fallback}. ` +
       'Set NEXT_PUBLIC_API_URL in .env.local for development.'
@@ -52,11 +60,18 @@ function getApiBaseUrl(): string {
   return normalized;
 }
 
-const API_URL = getApiBaseUrl();
+// Lazy initialization - only compute when needed (at runtime, not build time)
+let API_URL: string | null = null;
 
-// Log the configured API URL on module load (for debugging)
-if (process.env.NODE_ENV === 'development') {
-  console.log('🔧 Next.js API Proxy configured with backend URL:', API_URL);
+function getApiUrl(): string {
+  if (API_URL === null) {
+    API_URL = getApiBaseUrl();
+    // Log the configured API URL on first access (for debugging)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 Next.js API Proxy configured with backend URL:', API_URL);
+    }
+  }
+  return API_URL;
 }
 
 export async function GET(
@@ -111,7 +126,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
   const url = new URL(request.url);
   const pathString = path.join('/');
   // Always add /api prefix since backend routes are mounted at /api
-  const backendUrl = `${API_URL}/api/${pathString}${url.search}`;
+  const apiUrl = getApiUrl();
+  const backendUrl = `${apiUrl}/api/${pathString}${url.search}`;
 
   // Declare timeout outside try block so it can be cleared in catch
   let timeoutId: NodeJS.Timeout | undefined;
@@ -119,7 +135,7 @@ async function proxyRequest(request: NextRequest, path: string[]) {
   try {
     console.log(`🔄 Proxying ${request.method} request to:`, backendUrl);
     console.log(`📋 Request path:`, pathString);
-    console.log(`🌐 API base URL:`, API_URL);
+    console.log(`🌐 API base URL:`, apiUrl);
     
     // Build headers - forward relevant headers from the request
     const headers: Record<string, string> = {};
@@ -276,10 +292,11 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     }
     
     console.error('❌ Proxy error:', error);
+    const apiUrl = getApiUrl();
     console.error('❌ Error details:', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      backendUrl: `${API_URL}/api/${path.join('/')}`,
+      backendUrl: `${apiUrl}/api/${path.join('/')}`,
     });
     
     // Check if it's a connection error or timeout
@@ -295,7 +312,7 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     );
     
     if (isConnectionError) {
-      console.error(`❌ Backend API server is niet bereikbaar op ${API_URL}`);
+      console.error(`❌ Backend API server is niet bereikbaar op ${apiUrl}`);
       console.error('   Start de API server met: cd apps/api && npm run dev');
     }
     
@@ -305,8 +322,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
         error: { 
           message: isConnectionError
             ? isAbortError
-              ? `Backend API server reageert niet op ${API_URL} (timeout). Controleer of de server draait: cd apps/api && npm run dev`
-              : `Backend API server is niet bereikbaar op ${API_URL}. Start de server met: cd apps/api && npm run dev`
+              ? `Backend API server reageert niet op ${apiUrl} (timeout). Controleer of de server draait: cd apps/api && npm run dev`
+              : `Backend API server is niet bereikbaar op ${apiUrl}. Start de server met: cd apps/api && npm run dev`
             : error instanceof Error 
             ? `Verbindingsfout: ${errorMessage}` 
             : 'Kan niet verbinden met de server. Controleer of de API server draait.' 
