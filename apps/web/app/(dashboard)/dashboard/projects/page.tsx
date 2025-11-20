@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { PageHeader, PageSection, PageShell } from '@/components/layout/Page';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useAuth } from '@/contexts/AuthContext';
 
 const statusFilters: Array<{ label: string; value: 'ALL' | Project['status'] }> = [
   { label: 'Alles', value: 'ALL' },
@@ -19,12 +20,16 @@ const statusFilters: Array<{ label: string; value: 'ALL' | Project['status'] }> 
 ];
 
 export default function ProjectsOverviewPage() {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'ALL' | Project['status']>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  
+  // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
+  const canCreateProject = user?.role === 'CUSTOMER';
 
   useEffect(() => {
     loadProjects();
@@ -81,12 +86,14 @@ export default function ProjectsOverviewPage() {
               <Button variant="ghost" size="sm" onClick={loadProjects}>
                 Vernieuwen
               </Button>
-              <Link
-                href="/dashboard/projects/new"
-                className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary-hover"
-              >
-                Nieuw project
-              </Link>
+              {canCreateProject && (
+                <Link
+                  href="/dashboard/projects/new"
+                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary-hover"
+                >
+                  Nieuw project
+                </Link>
+              )}
             </div>
           }
         />

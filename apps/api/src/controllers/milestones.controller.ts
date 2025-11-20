@@ -1,10 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import {
   approveMilestone,
+  rejectMilestone,
   getMilestoneById,
   submitMilestone,
   startMilestone,
+  getMilestonesForUser,
 } from '../services/milestones.service';
+import { transformMilestone, transformPayment, transformMilestones } from '../utils/serializers';
 
 /**
  * Keur milestone goed en geef betaling vrij
@@ -27,15 +30,20 @@ export async function approveMilestoneController(
       });
     }
 
-    const result = await approveMilestone(milestoneId, userId, req.body);
+    const result = await approveMilestone(milestoneId, userId, userRole as any, req.body);
+
+    const message = result.fullyApproved
+      ? 'Milestone volledig goedgekeurd en betaling vrijgegeven'
+      : `${userRole === 'CUSTOMER' ? 'Consument' : 'Aannemer'} heeft goedgekeurd, wachtend op andere partij`;
 
     res.status(200).json({
       success: true,
       data: {
-        milestone: result.milestone,
+        milestone: transformMilestone(result.milestone),
         approval: result.approval,
-        payment: result.payment,
-        message: 'Milestone goedgekeurd en betaling vrijgegeven',
+        payment: result.payment ? transformPayment(result.payment) : null,
+        fullyApproved: result.fullyApproved,
+        message,
       },
     });
   } catch (error) {
@@ -72,7 +80,7 @@ export async function getMilestoneByIdController(
 
     res.status(200).json({
       success: true,
-      data: milestone,
+      data: transformMilestone(milestone),
     });
   } catch (error) {
     next(error);
@@ -105,7 +113,7 @@ export async function startMilestoneController(
     res.status(200).json({
       success: true,
       data: {
-        milestone,
+        milestone: transformMilestone(milestone),
         message: 'Milestone gestart - werk kan beginnen',
       },
     });
@@ -140,9 +148,76 @@ export async function submitMilestoneController(
     res.status(200).json({
       success: true,
       data: {
-        milestone,
+        milestone: transformMilestone(milestone),
         message: 'Milestone ingediend voor goedkeuring',
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Keur milestone af
+ * POST /api/milestones/:id/reject
+ */
+export async function rejectMilestoneController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const milestoneId = req.params.id;
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
+
+    if (!userId || !userRole) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Niet geauthenticeerd' },
+      });
+    }
+
+    const result = await rejectMilestone(milestoneId, userId, req.body);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        milestone: transformMilestone(result.milestone),
+        approval: result.approval,
+        message: 'Milestone afgekeurd - aannemer kan herwerken',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Haal alle milestones op voor ingelogde gebruiker
+ * GET /api/milestones
+ */
+export async function getMilestonesController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
+
+    if (!userId || !userRole) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Niet geauthenticeerd' },
+      });
+    }
+
+    const milestones = await getMilestonesForUser(userId, userRole as any);
+
+    res.status(200).json({
+      success: true,
+      data: transformMilestones(milestones),
     });
   } catch (error) {
     next(error);

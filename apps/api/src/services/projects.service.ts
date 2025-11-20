@@ -16,12 +16,14 @@ export interface CreateProjectDto {
   totalBudget: number;
   startDate?: string; // ISO date string
   endDate?: string; // ISO date string
+  contractorId?: string; // ID van de aannemer die aan het project gekoppeld wordt
   milestones: CreateMilestoneDto[];
 }
 
 /**
  * Maak een nieuw project aan met milestones
- * Klanten en aannemers kunnen projecten aanmaken
+ * Alleen consumenten (CUSTOMER) kunnen projecten aanmaken
+ * Tijdens het aanmaken kan een aannemer (CONTRACTOR) gekoppeld worden
  */
 export async function createProject(
   userId: string,
@@ -36,15 +38,34 @@ export async function createProject(
     throw new NotFoundError('Gebruiker niet gevonden');
   }
 
-  // Klanten en aannemers kunnen projecten aanmaken
-  if (user.role !== UserRole.CUSTOMER && user.role !== UserRole.CONTRACTOR) {
-    throw new ForbiddenError('Alleen klanten en aannemers kunnen projecten aanmaken');
+  // Alleen consumenten (CUSTOMER) kunnen projecten aanmaken
+  if (user.role !== UserRole.CUSTOMER) {
+    throw new ForbiddenError('Alleen consumenten kunnen projecten aanmaken');
   }
 
-  // Voor klanten: customerId = userId, contractorId = null (wacht op aannemer)
-  // Voor aannemers: customerId = userId (aannemer is ook klant), contractorId = userId
+  // Consument is altijd de customer
   const customerId = userId;
-  const contractorId = user.role === UserRole.CONTRACTOR ? userId : null;
+  
+  // Valideer en zet contractorId
+  let contractorId: string | null = null;
+  
+  if (data.contractorId) {
+    // Valideer dat de contractor bestaat en de juiste rol heeft
+    const contractor = await prisma.user.findUnique({
+      where: { id: data.contractorId },
+      select: { id: true, role: true },
+    });
+
+    if (!contractor) {
+      throw new NotFoundError('Aannemer niet gevonden');
+    }
+
+    if (contractor.role !== UserRole.CONTRACTOR) {
+      throw new ValidationError('Geselecteerde gebruiker is geen aannemer');
+    }
+
+    contractorId = data.contractorId;
+  }
 
   // Valideer milestones
   if (!data.milestones || data.milestones.length === 0) {
@@ -102,7 +123,7 @@ export async function createProject(
       title: data.title,
       description: data.description,
       totalBudget: data.totalBudget,
-      status: user.role === UserRole.CUSTOMER ? ProjectStatus.DRAFT : ProjectStatus.ACTIVE,
+      status: contractorId ? ProjectStatus.ACTIVE : ProjectStatus.DRAFT,
       startDate: data.startDate ? new Date(data.startDate) : null,
       endDate: data.endDate ? new Date(data.endDate) : null,
       milestones: {
@@ -173,13 +194,22 @@ export async function getProjects(userId: string, userRole: UserRole) {
       },
     });
   } else if (userRole === UserRole.CONTRACTOR) {
-    // Aannemers zien projecten zonder contractor (beschikbaar voor acceptatie)
+    // Aannemers zien:
+    // 1. Projecten zonder contractor (beschikbaar voor acceptatie)
+    // 2. Projecten waar ze zelf contractor zijn (hun eigen projecten)
     return prisma.project.findMany({
       where: {
-        contractorId: null,
-        status: {
-          in: [ProjectStatus.DRAFT, ProjectStatus.PENDING_CONTRACTOR],
-        },
+        OR: [
+          {
+            contractorId: null,
+            status: {
+              in: [ProjectStatus.DRAFT, ProjectStatus.PENDING_CONTRACTOR],
+            },
+          },
+          {
+            contractorId: userId,
+          },
+        ],
       },
       include: {
         customer: {
@@ -188,6 +218,15 @@ export async function getProjects(userId: string, userRole: UserRole) {
             email: true,
             firstName: true,
             lastName: true,
+          },
+        },
+        contractor: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            companyName: true,
           },
         },
         milestones: {
@@ -291,5 +330,70 @@ export async function getProjectById(projectId: string, userId: string, userRole
   }
 
   return project;
+}
+
+/**
+ * Accepteer een project als aannemer
+ * Zet contractorId en update status naar ACTIVE
+ */
+export async function acceptProject(projectId: string, contractorId: string) {
+  // Haal project op
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+  });
+
+  if (!project) {
+    throw new NotFoundError('Project niet gevonden');
+  }
+
+  // Check of project al een contractor heeft
+  if (project.contractorId) {
+    throw new ValidationError('Project heeft al een aannemer');
+  }
+
+  // Check of project status geschikt is voor acceptatie
+  if (
+    project.status !== ProjectStatus.DRAFT &&
+    project.status !== ProjectStatus.PENDING_CONTRACTOR
+  ) {
+    throw new ValidationError(
+      `Project kan niet geaccepteerd worden in status: ${project.status}`
+    );
+  }
+
+  // Update project: zet contractor en status
+  const updatedProject = await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      contractorId,
+      status: ProjectStatus.ACTIVE,
+    },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+      contractor: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          companyName: true,
+        },
+      },
+      milestones: {
+        orderBy: {
+          order: 'asc',
+        },
+      },
+    },
+  });
+
+  return updatedProject;
 }
 

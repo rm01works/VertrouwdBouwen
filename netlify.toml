@@ -1,0 +1,28 @@
+# Netlify configuration for VertrouwdBouwen
+# Frontend: Next.js app in apps/web
+# Backend: External Express API (hosted separately)
+
+[build]
+  # Base directory is the monorepo root
+  base = "."
+  # Build command for the Next.js frontend
+  # This builds the shared package first, then the Next.js app
+  command = "npm run build:web"
+  # Publish directory - Netlify Next.js plugin will handle this automatically
+  # The plugin will detect Next.js and use the correct output directory
+  publish = "apps/web/.next"
+
+# Netlify Next.js plugin configuration
+# This plugin automatically handles Next.js App Router, server components, etc.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Environment variables (set these in Netlify UI):
+# - NEXT_PUBLIC_API_URL: URL of the external backend API (e.g., https://your-api.render.com)
+#   This is exposed to the client-side code
+# - API_BASE_URL: Server-side API URL (same as above, but not exposed to client)
+#   Used by the Next.js API proxy route
+
+# Note: The redirects below are handled automatically by Next.js App Router
+# They are kept here for reference but may not be needed
+

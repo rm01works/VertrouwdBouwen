@@ -3,6 +3,7 @@ import {
   createProjectController,
   getProjectsController,
   getProjectByIdController,
+  acceptProjectController,
 } from '../controllers/projects.controller';
 import { validateCreateProject } from '../middleware/validator';
 import { authenticate } from '../middleware/auth';
@@ -34,6 +35,13 @@ router.get('/', authenticate, getProjectsController);
  * @access  Private
  */
 router.get('/:id', authenticate, getProjectByIdController);
+
+/**
+ * @route   POST /api/projects/:id/accept
+ * @desc    Accepteer project als aannemer
+ * @access  Private (alleen CONTRACTOR)
+ */
+router.post('/:id/accept', authenticate, acceptProjectController);
 
 export default router;
 

@@ -12,7 +12,7 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
     "build": "npm run build --workspace=packages/shared && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
-    "build:web": "npm run build --workspace=apps/web",
+    "build:web": "npm run build --workspace=packages/shared && npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "start:web": "npm run start --workspace=apps/web",
     "start:api": "npm run start --workspace=apps/api",
@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@netlify/plugin-nextjs": "^4.39.0"
   },
   "engines": {
     "node": ">=18.0.0",

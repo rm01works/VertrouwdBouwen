@@ -1,7 +1,36 @@
 // Next.js API route proxy to Express backend
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+// Use API_BASE_URL for server-side (more secure, not exposed to client)
+// Fallback to NEXT_PUBLIC_API_URL for client-side compatibility
+// In production, this should point to the external backend URL
+// Normalize the URL: remove trailing slashes and ensure it doesn't include /api
+function getApiBaseUrl(): string {
+  const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  
+  // Remove trailing slashes
+  let normalized = rawUrl.trim().replace(/\/+$/, '');
+  
+  // Remove /api suffix if present (to avoid double /api in the proxy)
+  if (normalized.endsWith('/api')) {
+    normalized = normalized.slice(0, -4);
+  }
+  
+  // Ensure we have a valid URL
+  if (!normalized || normalized === '') {
+    console.warn('⚠️ API_BASE_URL is empty, using fallback: http://localhost:5001');
+    return 'http://localhost:5001';
+  }
+  
+  return normalized;
+}
+
+const API_URL = getApiBaseUrl();
+
+// Log the configured API URL on module load (for debugging)
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔧 Proxy configured with API base URL:', API_URL);
+}
 
 export async function GET(
   request: NextRequest,
@@ -54,6 +83,7 @@ export async function OPTIONS(
 async function proxyRequest(request: NextRequest, path: string[]) {
   const url = new URL(request.url);
   const pathString = path.join('/');
+  // Always add /api prefix since backend routes are mounted at /api
   const backendUrl = `${API_URL}/api/${pathString}${url.search}`;
 
   // Declare timeout outside try block so it can be cleared in catch
@@ -62,6 +92,7 @@ async function proxyRequest(request: NextRequest, path: string[]) {
   try {
     console.log(`🔄 Proxying ${request.method} request to:`, backendUrl);
     console.log(`📋 Request path:`, pathString);
+    console.log(`🌐 API base URL:`, API_URL);
     
     // Build headers - forward relevant headers from the request
     const headers: Record<string, string> = {};

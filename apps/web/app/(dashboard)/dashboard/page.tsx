@@ -4,20 +4,25 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ProjectCard } from '@/components/projects/ProjectCard';
-import { getProjects, Project } from '@/lib/api/projects';
+import { getProjects, acceptProject, Project } from '@/lib/api/projects';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 import { PageHeader, PageSection, PageShell } from '@/components/layout/Page';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatCurrency } from '@/lib/utils/format';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ContractorDashboard() {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'title' | 'status'>('recent');
   const router = useRouter();
+  
+  // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
+  const canCreateProject = user?.role === 'CUSTOMER';
 
   useEffect(() => {
     loadProjects();
@@ -46,7 +51,17 @@ export default function ContractorDashboard() {
   };
 
   const handleAcceptProject = async (projectId: string) => {
-    alert(`Project ${projectId} accepteren - nog te implementeren`);
+    try {
+      const response = await acceptProject(projectId);
+      if (response.success) {
+        // Reload projects to show updated list
+        await loadProjects();
+      } else {
+        alert(response.error?.message || 'Fout bij het accepteren van project');
+      }
+    } catch (err) {
+      alert('Er is een onverwachte fout opgetreden');
+    }
   };
 
   const sortProjects = (projectsToSort: Project[]) => {
@@ -128,12 +143,14 @@ export default function ContractorDashboard() {
               >
                 Alle projecten
               </Link>
-              <Link
-                href="/dashboard/projects/new"
-                className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary-hover"
-              >
-                Nieuw project
-              </Link>
+              {canCreateProject && (
+                <Link
+                  href="/dashboard/projects/new"
+                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary-hover"
+                >
+                  Nieuw project
+                </Link>
+              )}
             </div>
           }
         />

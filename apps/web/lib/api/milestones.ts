@@ -9,8 +9,28 @@ export interface Milestone {
   status: string;
   order: number;
   dueDate?: string | null;
+  approvedByConsumer?: boolean;
+  approvedByContractor?: boolean;
   createdAt: string;
   updatedAt: string;
+  project?: {
+    id: string;
+    title: string;
+    status: string;
+    customer?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+    contractor?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      companyName?: string | null;
+    } | null;
+  };
   payments?: Array<{
     id: string;
     amount: number;
@@ -47,7 +67,17 @@ export async function approveMilestone(id: string, comments?: string) {
   });
 }
 
+export async function rejectMilestone(id: string, comments?: string) {
+  return apiClient.post<Milestone>(`/milestones/${id}/reject`, {
+    comments,
+  });
+}
+
 export async function startMilestone(id: string) {
   return apiClient.post<Milestone>(`/milestones/${id}/start`);
+}
+
+export async function getAllMilestones() {
+  return apiClient.get<Milestone[]>('/milestones');
 }
 

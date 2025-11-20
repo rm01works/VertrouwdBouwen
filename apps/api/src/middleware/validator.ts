@@ -10,12 +10,6 @@ export function handleValidationErrors(
   res: Response,
   next: NextFunction
 ) {
-  console.log('───────────────────────────────────────────────────────────');
-  console.log('🔍 VALIDATOR MIDDLEWARE - Validatie check');
-  console.log('───────────────────────────────────────────────────────────');
-  console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
-  console.log('📋 Body keys:', Object.keys(req.body || {}));
-  
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {

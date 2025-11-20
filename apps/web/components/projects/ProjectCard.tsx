@@ -6,6 +6,7 @@ import { Badge, getStatusBadgeVariant, getStatusLabel } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Project } from '@/lib/api/projects';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -20,11 +21,19 @@ export function ProjectCard({
   onAccept,
   showAcceptButton = false,
 }: ProjectCardProps) {
+  const { user } = useAuth();
   const totalMilestones = project.milestones?.length || 0;
   const completedMilestones =
     project.milestones?.filter((m) => m.status === 'PAID').length || 0;
+  const pendingMilestones =
+    project.milestones?.filter((m) => m.status === 'PENDING' || m.status === 'IN_PROGRESS').length || 0;
   const progressPercentage =
     totalMilestones === 0 ? 0 : Math.round((completedMilestones / totalMilestones) * 100);
+  
+  // Bepaal welke partij informatie te tonen
+  const isCustomer = user?.role === 'CUSTOMER';
+  const showContractorInfo = isCustomer && project.contractor;
+  const showCustomerInfo = !isCustomer && project.customer;
 
   return (
     <Card className="flex h-full flex-col border border-border bg-surface shadow-subtle transition duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-elevated">
@@ -80,7 +89,29 @@ export function ProjectCard({
           )}
         </div>
 
-        {project.customer && (
+        {totalMilestones > 0 && (
+          <div className="rounded-xl border border-border bg-background-muted/40 p-3">
+            <p className="text-xs uppercase tracking-wide text-foreground-muted">Milestones</p>
+            <p className="mt-1 font-semibold text-foreground">
+              {totalMilestones} totaal • {completedMilestones} voltooid
+              {pendingMilestones > 0 && ` • ${pendingMilestones} in afwachting`}
+            </p>
+          </div>
+        )}
+
+        {showContractorInfo && (
+          <div className="rounded-2xl border border-border bg-surface-muted/30 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Aannemer</p>
+            <p className="mt-1 font-semibold text-foreground">
+              {project.contractor?.companyName || `${project.contractor?.firstName} ${project.contractor?.lastName}`}
+            </p>
+            {project.contractor?.email && (
+              <p className="text-sm text-foreground-muted">{project.contractor.email}</p>
+            )}
+          </div>
+        )}
+
+        {showCustomerInfo && project.customer && (
           <div className="rounded-2xl border border-border bg-surface-muted/30 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Klant</p>
             <p className="mt-1 font-semibold text-foreground">

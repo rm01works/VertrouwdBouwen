@@ -6,27 +6,37 @@ import { Badge, getStatusBadgeVariant, getStatusLabel } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
-import { submitMilestone, approveMilestone, startMilestone, Milestone } from '@/lib/api/milestones';
+import { submitMilestone, approveMilestone, rejectMilestone, startMilestone, Milestone } from '@/lib/api/milestones';
 import { useToast } from '@/hooks/useToast';
+import { useRouter } from 'next/navigation';
 
 interface MilestoneListProps {
   milestones: Milestone[];
   userRole: 'CUSTOMER' | 'CONTRACTOR';
+  projectOwnerId?: string;
+  contractorId?: string | null;
+  projectStatus?: string;
+  projectBudget?: number;
   onUpdate?: () => void;
 }
 
 export function MilestoneList({
   milestones,
   userRole,
+  projectOwnerId,
+  contractorId,
+  projectStatus,
+  projectBudget,
   onUpdate,
 }: MilestoneListProps) {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [pendingAction, setPendingAction] = useState<{
-    type: 'SUBMIT' | 'APPROVE';
+    type: 'SUBMIT' | 'APPROVE' | 'REJECT';
     milestone: Milestone;
   } | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const { success, error: showError } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (milestoneId: string) => {
     try {
@@ -38,6 +48,8 @@ export function MilestoneList({
         success('Milestone succesvol ingediend voor goedkeuring');
         if (onUpdate) {
           onUpdate();
+        } else {
+          router.refresh();
         }
       } else {
         showError(response.error?.message || 'Fout bij het indienen van milestone');
@@ -60,12 +72,44 @@ export function MilestoneList({
       const response = await approveMilestone(milestoneId);
 
       if (response.success) {
-        success('Milestone goedgekeurd en betaling vrijgegeven!');
+        const message = response.data?.fullyApproved
+          ? 'Milestone volledig goedgekeurd en betaling vrijgegeven!'
+          : 'Milestone goedgekeurd - wachtend op andere partij';
+        success(message);
         if (onUpdate) {
           onUpdate();
+        } else {
+          router.refresh();
         }
       } else {
         showError(response.error?.message || 'Fout bij het goedkeuren van milestone');
+      }
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Er is een onverwachte fout opgetreden');
+    } finally {
+      setLoadingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(milestoneId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleReject = async (milestoneId: string) => {
+    try {
+      setLoadingIds((prev) => new Set(prev).add(milestoneId));
+
+      const response = await rejectMilestone(milestoneId);
+
+      if (response.success) {
+        success('Milestone afgekeurd - aannemer kan herwerken');
+        if (onUpdate) {
+          onUpdate();
+        } else {
+          router.refresh();
+        }
+      } else {
+        showError(response.error?.message || 'Fout bij het afkeuren van milestone');
       }
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Er is een onverwachte fout opgetreden');
@@ -88,6 +132,8 @@ export function MilestoneList({
         success('Milestone gestart - werk kan beginnen!');
         if (onUpdate) {
           onUpdate();
+        } else {
+          router.refresh();
         }
       } else {
         showError(response.error?.message || 'Fout bij het starten van milestone');
@@ -111,9 +157,28 @@ export function MilestoneList({
   };
 
   const canApprove = (milestone: Milestone) => {
+    if (milestone.status !== 'SUBMITTED') return false;
+    if (!milestone.payments?.some((p) => p.status === 'HELD')) return false;
+    
+    // Consument kan goedkeuren als nog niet goedgekeurd
+    if (userRole === 'CUSTOMER') {
+      return !milestone.approvedByConsumer;
+    }
+    
+    // Aannemer kan goedkeuren als nog niet goedgekeurd
+    if (userRole === 'CONTRACTOR') {
+      return !milestone.approvedByContractor;
+    }
+    
+    return false;
+  };
+
+  const canReject = (milestone: Milestone) => {
+    // Alleen consument kan afkeuren
     return (
       userRole === 'CUSTOMER' &&
       milestone.status === 'SUBMITTED' &&
+      !milestone.approvedByConsumer &&
       milestone.payments?.some((p) => p.status === 'HELD')
     );
   };
@@ -249,6 +314,7 @@ export function MilestoneList({
                     size="md"
                     onClick={() => setPendingAction({ type: 'SUBMIT', milestone })}
                     className="w-full sm:w-auto"
+                    isLoading={loadingIds.has(milestone.id)}
                   >
                     ✓ Markeer als Voltooid
                   </Button>
@@ -260,8 +326,21 @@ export function MilestoneList({
                     size="md"
                     onClick={() => setPendingAction({ type: 'APPROVE', milestone })}
                     className="w-full sm:w-auto"
+                    isLoading={loadingIds.has(milestone.id)}
                   >
-                    ✓ Goedkeuren en Betaling Vrijgeven
+                    ✓ {userRole === 'CUSTOMER' ? 'Goedkeuren' : 'Goedkeuren (Aannemer)'}
+                  </Button>
+                )}
+
+                {canReject(milestone) && (
+                  <Button
+                    variant="danger"
+                    size="md"
+                    onClick={() => setPendingAction({ type: 'REJECT', milestone })}
+                    className="w-full sm:w-auto"
+                    isLoading={loadingIds.has(milestone.id)}
+                  >
+                    ✗ Afkeuren
                   </Button>
                 )}
 
@@ -337,14 +416,24 @@ export function MilestoneList({
           title={
             pendingAction.type === 'SUBMIT'
               ? 'Milestone markeren als voltooid'
-              : 'Milestone goedkeuren'
+              : pendingAction.type === 'APPROVE'
+              ? 'Milestone goedkeuren'
+              : 'Milestone afkeuren'
           }
           description={
             pendingAction.type === 'SUBMIT'
               ? 'Bevestig dat het werk is afgerond. De klant krijgt een notificatie om goed te keuren.'
-              : 'Na bevestiging wordt de escrow-betaling vrijgegeven aan de aannemer.'
+              : pendingAction.type === 'APPROVE'
+              ? 'Na bevestiging wordt de escrow-betaling vrijgegeven aan de aannemer.'
+              : 'Na afwijzing blijft het geld in escrow en kan de aannemer het werk herzien en opnieuw indienen.'
           }
-          confirmLabel={pendingAction.type === 'SUBMIT' ? 'Indienen' : 'Goedkeuren'}
+          confirmLabel={
+            pendingAction.type === 'SUBMIT'
+              ? 'Indienen'
+              : pendingAction.type === 'APPROVE'
+              ? 'Goedkeuren'
+              : 'Afkeuren'
+          }
           isConfirmLoading={isConfirming}
           onClose={() => setPendingAction(null)}
           onConfirm={async () => {
@@ -353,8 +442,10 @@ export function MilestoneList({
             try {
               if (pendingAction.type === 'SUBMIT') {
                 await handleSubmit(pendingAction.milestone.id);
-              } else {
+              } else if (pendingAction.type === 'APPROVE') {
                 await handleApprove(pendingAction.milestone.id);
+              } else {
+                await handleReject(pendingAction.milestone.id);
               }
               setPendingAction(null);
             } finally {

@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       } catch (fetchError) {
         console.error('❌ Network error bij login:', fetchError);
-        throw new Error('Kan niet verbinden met de server. Controleer of de API server draait op http://localhost:5002');
+        throw new Error('Kan niet verbinden met de server. Controleer of de API server beschikbaar is.');
       }
 
       console.log('📥 Login response status:', response.status);

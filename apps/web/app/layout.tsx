@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/components/providers/ToastProvider';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'VertrouwdBouwen - Escrow Platform',
@@ -16,11 +17,13 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <body className="antialiased">
-        <AuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

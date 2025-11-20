@@ -37,6 +37,8 @@ export interface Milestone {
   status: string;
   order: number;
   dueDate?: string | null;
+  approvedByConsumer?: boolean;
+  approvedByContractor?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +57,7 @@ export async function createProject(data: {
   totalBudget: number;
   startDate?: string;
   endDate?: string;
+  contractorId?: string;
   milestones: Array<{
     title: string;
     description: string;
@@ -64,5 +67,9 @@ export async function createProject(data: {
   }>;
 }) {
   return apiClient.post<Project>('/projects', data);
+}
+
+export async function acceptProject(id: string) {
+  return apiClient.post<Project>(`/projects/${id}/accept`);
 }
 

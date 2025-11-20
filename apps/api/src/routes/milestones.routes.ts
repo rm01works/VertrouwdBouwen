@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import {
   approveMilestoneController,
+  rejectMilestoneController,
   getMilestoneByIdController,
   submitMilestoneController,
   startMilestoneController,
+  getMilestonesController,
 } from '../controllers/milestones.controller';
 import {
   getMilestonePaymentsController,
@@ -12,6 +14,13 @@ import {
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
+
+/**
+ * @route   GET /api/milestones
+ * @desc    Haal alle milestones op voor ingelogde gebruiker
+ * @access  Private
+ */
+router.get('/', authenticate, getMilestonesController);
 
 /**
  * @route   GET /api/milestones/:id
@@ -54,6 +63,13 @@ router.post('/:id/submit', authenticate, submitMilestoneController);
  * @access  Private (alleen CUSTOMER)
  */
 router.post('/:id/approve', authenticate, approveMilestoneController);
+
+/**
+ * @route   POST /api/milestones/:id/reject
+ * @desc    Keur milestone af
+ * @access  Private (alleen CUSTOMER)
+ */
+router.post('/:id/reject', authenticate, rejectMilestoneController);
 
 export default router;
 

@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Textarea } from '../ui/Input';
+import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 import { Card, CardBody, CardHeader } from '../ui/Card';
 import { MilestoneForm, MilestoneFormData } from './MilestoneForm';
 import { createProject } from '@/lib/api/projects';
+import { getContractors, Contractor } from '@/lib/api/users';
 import { formatCurrency } from '@/lib/utils/format';
 import { useToast } from '@/hooks/useToast';
 
@@ -16,6 +18,7 @@ interface ProjectFormData {
   totalBudget: string;
   startDate: string;
   endDate: string;
+  contractorId: string;
   milestones: MilestoneFormData[];
 }
 
@@ -25,6 +28,7 @@ interface FormErrors {
   totalBudget?: string;
   startDate?: string;
   endDate?: string;
+  contractorId?: string;
   milestones?: Array<{
     title?: string;
     description?: string;
@@ -43,6 +47,7 @@ export function ProjectForm() {
     totalBudget: '',
     startDate: '',
     endDate: '',
+    contractorId: '',
     milestones: [
       {
         title: '',
@@ -55,6 +60,29 @@ export function ProjectForm() {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [isLoadingContractors, setIsLoadingContractors] = useState(true);
+
+  // Haal aannemers op bij mount
+  useEffect(() => {
+    const loadContractors = async () => {
+      try {
+        setIsLoadingContractors(true);
+        const response = await getContractors();
+        if (response.success && response.data) {
+          setContractors(response.data);
+        } else {
+          showError('Fout bij het laden van aannemers');
+        }
+      } catch (error) {
+        showError('Fout bij het laden van aannemers');
+      } finally {
+        setIsLoadingContractors(false);
+      }
+    };
+
+    loadContractors();
+  }, [showError]);
 
   const updateFormData = (field: keyof ProjectFormData, value: any) => {
     setFormData((prev) => ({
@@ -158,6 +186,9 @@ export function ProjectForm() {
       }
     }
 
+    // Validate contractor selection (optional, maar aanbevolen)
+    // We maken het optioneel zodat consumenten ook zonder aannemer kunnen starten
+
     // Validate milestones
     const milestoneErrors: Array<{
       title?: string;
@@ -242,6 +273,7 @@ export function ProjectForm() {
         totalBudget: parseFloat(formData.totalBudget),
         startDate: formData.startDate || undefined,
         endDate: formData.endDate || undefined,
+        contractorId: formData.contractorId || undefined,
         milestones: formData.milestones.map((milestone, index) => ({
           title: milestone.title.trim(),
           description: milestone.description.trim(),
@@ -310,6 +342,26 @@ export function ProjectForm() {
             rows={5}
             error={errors.description}
             helperText="Minimaal 10 karakters"
+          />
+
+          <Select
+            label="Aannemer"
+            name="contractorId"
+            value={formData.contractorId}
+            onChange={(e) => updateFormData('contractorId', e.target.value)}
+            placeholder="Selecteer een aannemer (optioneel)"
+            options={
+              isLoadingContractors
+                ? [{ value: '', label: 'Laden...' }]
+                : contractors.map((contractor) => ({
+                    value: contractor.id,
+                    label: `${contractor.firstName} ${contractor.lastName}${
+                      contractor.companyName ? ` - ${contractor.companyName}` : ''
+                    }`,
+                  }))
+            }
+            error={errors.contractorId}
+            helperText="Kies een aannemer om direct aan het project te koppelen, of laat leeg om later te selecteren"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

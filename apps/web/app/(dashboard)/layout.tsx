@@ -7,7 +7,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
-import { visibleDashboardNavItems } from '@/lib/navigation/dashboard';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { getVisibleNavItemsForRole } from '@/lib/navigation/dashboard';
 
 export default function DashboardLayout({
   children,
@@ -51,6 +52,12 @@ export default function DashboardLayout({
     return null;
   }
 
+  // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
+  const canCreateProject = user.role === 'CUSTOMER';
+  
+  // Haal zichtbare navigatie-items op basis van rol
+  const visibleNavItems = getVisibleNavItemsForRole(user.role);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -64,10 +71,11 @@ export default function DashboardLayout({
             </div>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
-            {visibleDashboardNavItems.map((link) => (
+            {visibleNavItems.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={link.status === 'stub' ? false : undefined}
                 className={[
                   'rounded-full px-3 py-2 text-sm font-medium transition-colors',
                   isActive(link.href)
@@ -90,12 +98,15 @@ export default function DashboardLayout({
             </div>
             <div className="hidden h-10 w-px bg-border md:block" />
             <div className="flex items-center gap-2">
-              <Link
-                href="/dashboard/projects/new"
-                className="hidden rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-border-strong hover:bg-surface-muted lg:inline-flex"
-              >
-                Nieuw project
-              </Link>
+              <ThemeToggle />
+              {canCreateProject && (
+                <Link
+                  href="/dashboard/projects/new"
+                  className="hidden rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-border-strong hover:bg-surface-muted lg:inline-flex"
+                >
+                  Nieuw project
+                </Link>
+              )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 Uitloggen
               </Button>
@@ -104,10 +115,11 @@ export default function DashboardLayout({
         </div>
         <nav className="border-t border-border bg-background/80 md:hidden">
           <div className="flex items-center gap-2 overflow-x-auto px-4 py-3 text-sm">
-            {visibleDashboardNavItems.map((link) => (
+            {visibleNavItems.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={link.status === 'stub' ? false : undefined}
                 className={[
                   'flex-1 rounded-full px-3 py-2 text-center font-medium transition-colors',
                   isActive(link.href)
@@ -120,12 +132,14 @@ export default function DashboardLayout({
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/dashboard/projects/new"
-              className="rounded-full border border-border bg-surface px-3 py-2 text-center font-medium text-primary transition-colors hover:border-border-strong"
-            >
-              Nieuw
-            </Link>
+            {canCreateProject && (
+              <Link
+                href="/dashboard/projects/new"
+                className="rounded-full border border-border bg-surface px-3 py-2 text-center font-medium text-primary transition-colors hover:border-border-strong"
+              >
+                Nieuw
+              </Link>
+            )}
           </div>
         </nav>
       </header>
