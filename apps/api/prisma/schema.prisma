@@ -1,0 +1,280 @@
+// ============================================================================
+// VertrouwdBouwen - Escrow Platform Prisma Schema
+// ============================================================================
+// PostgreSQL database schema voor het escrow platform
+// Verbindt klanten met aannemers voor bouwprojecten
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User roles: CUSTOMER, CONTRACTOR, ADMIN
+enum UserRole {
+  CUSTOMER
+  CONTRACTOR
+  ADMIN
+}
+
+// Project statuses
+enum ProjectStatus {
+  DRAFT
+  PENDING_CONTRACTOR
+  ACTIVE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+// Milestone statuses
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+}
+
+// Escrow payment statuses
+enum PaymentStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+// Approval statuses
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Dispute statuses
+enum DisputeStatus {
+  OPEN
+  RESOLVED
+  CLOSED
+}
+
+// ============================================================================
+// USER MODEL
+// ============================================================================
+// Gebruikers van het platform: klanten, aannemers en admins
+// Klanten kunnen projecten aanmaken, aannemers kunnen projecten accepteren
+// ============================================================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  companyName  String?  @map("company_name") // Verplicht voor CONTRACTOR
+  kvkNumber    String?  @map("kvk_number")   // KVK nummer voor aannemers
+  phone        String?  // Optioneel telefoonnummer
+  address      Json?    // Flexibel JSON object voor adresgegevens
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  customerProjects  Project[] @relation("CustomerProjects")
+  contractorProjects Project[] @relation("ContractorProjects")
+  approvals         Approval[]
+  sentMessages      Message[]  @relation("SentMessages")
+  initiatedDisputes Dispute[]  @relation("InitiatorDisputes")
+
+  @@index([email])
+  @@index([role])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// ============================================================================
+// PROJECT MODEL
+// ============================================================================
+// Projecten die klanten met aannemers verbinden
+// Status flow: DRAFT → PENDING_CONTRACTOR → ACTIVE → IN_PROGRESS → COMPLETED
+// ============================================================================
+
+model Project {
+  id          String        @id @default(uuid())
+  customerId  String        @map("customer_id")
+  contractorId String?       @map("contractor_id") // Null tot acceptatie door aannemer
+  title       String
+  description String
+  totalBudget Decimal       @map("total_budget") @db.Decimal(10, 2)
+  status      ProjectStatus @default(DRAFT)
+  startDate   DateTime?     @map("start_date") @db.Date
+  endDate     DateTime?     @map("end_date") @db.Date
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  customer    User       @relation("CustomerProjects", fields: [customerId], references: [id], onDelete: Restrict)
+  contractor  User?      @relation("ContractorProjects", fields: [contractorId], references: [id], onDelete: SetNull)
+  milestones  Milestone[]
+  messages    Message[]
+  disputes    Dispute[]
+
+  @@index([customerId])
+  @@index([contractorId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+// ============================================================================
+// MILESTONE MODEL
+// ============================================================================
+// Project fasen met specifieke bedragen en deadlines
+// Status flow: PENDING → IN_PROGRESS → SUBMITTED → APPROVED → PAID
+// Elke milestone heeft een volgorde (order) binnen het project
+// ============================================================================
+
+model Milestone {
+  id          String          @id @default(uuid())
+  projectId   String          @map("project_id")
+  title       String
+  description String
+  amount      Decimal         @db.Decimal(10, 2) // Bedrag in euro
+  status      MilestoneStatus @default(PENDING)
+  order       Int             // Volgorde binnen project (1, 2, 3, ...)
+  dueDate     DateTime?       @map("due_date") @db.Date
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  payments    EscrowPayment[]
+  approvals   Approval[]
+  disputes    Dispute[]
+
+  @@unique([projectId, order]) // Unieke combinatie van project en volgorde
+  @@index([projectId])
+  @@index([status])
+  @@index([projectId, order])
+  @@map("milestones")
+}
+
+// ============================================================================
+// ESCROW PAYMENT MODEL
+// ============================================================================
+// Escrow betalingen voor milestones
+// Status flow: PENDING → HELD → RELEASED (bij goedkeuring) of REFUNDED
+// Geld wordt in escrow gehouden tot goedkeuring door klant
+// ============================================================================
+
+model EscrowPayment {
+  id                String        @id @default(uuid())
+  milestoneId       String        @map("milestone_id")
+  amount            Decimal       @db.Decimal(10, 2) // Bedrag in escrow
+  status            PaymentStatus @default(PENDING)
+  heldAt            DateTime?     @map("held_at")     // Wanneer geld in escrow gezet
+  releasedAt        DateTime?     @map("released_at") // Wanneer geld vrijgegeven
+  transactionRef    String        @unique @map("transaction_reference") // Unieke transactie ID
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  milestone         Milestone     @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+
+  @@index([milestoneId])
+  @@index([status])
+  @@index([transactionRef])
+  @@index([heldAt])
+  @@map("escrow_payments")
+}
+
+// ============================================================================
+// APPROVAL MODEL
+// ============================================================================
+// Goedkeuringen van milestones door klanten
+// Status: PENDING → APPROVED of REJECTED
+// Bij goedkeuring wordt betaling vrijgegeven, bij afwijzing blijft geld in escrow
+// ============================================================================
+
+model Approval {
+  id          String          @id @default(uuid())
+  milestoneId String          @map("milestone_id")
+  approverId  String          @map("approver_id") // ID van de klant die goedkeurt
+  status      ApprovalStatus  @default(PENDING)
+  comments    String?         // Optionele opmerkingen van klant
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  milestone   Milestone       @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  approver    User            @relation(fields: [approverId], references: [id], onDelete: Restrict)
+
+  @@index([milestoneId])
+  @@index([approverId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("approvals")
+}
+
+// ============================================================================
+// MESSAGE MODEL
+// ============================================================================
+// Berichten tussen klant en aannemer binnen een project
+// Gebruikt voor communicatie over project voortgang
+// ============================================================================
+
+model Message {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  senderId  String   @map("sender_id")
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+// ============================================================================
+// DISPUTE MODEL
+// ============================================================================
+// Geschillen over projecten of specifieke milestones
+// Status: OPEN → RESOLVED → CLOSED
+// milestoneId is optioneel: null = geschil over hele project
+// ============================================================================
+
+model Dispute {
+  id          String        @id @default(uuid())
+  projectId   String        @map("project_id")
+  milestoneId String?       @map("milestone_id") // Null als geschil over hele project
+  initiatorId String        @map("initiator_id")  // Wie heeft geschil gestart
+  reason      String        // Reden voor geschil
+  status      DisputeStatus @default(OPEN)
+  resolution  String?       // Oplossing (bij RESOLVED status)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone   Milestone?    @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  initiator   User          @relation("InitiatorDisputes", fields: [initiatorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([milestoneId])
+  @@index([initiatorId])
+  @@index([status])
+  @@map("disputes")
+}
+

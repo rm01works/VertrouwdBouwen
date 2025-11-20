@@ -1,0 +1,180 @@
+import { Request, Response, NextFunction } from 'express';
+import { register, login, getUserById } from '../services/auth.service';
+import { AppError } from '../utils/errors';
+
+/**
+ * Registreer nieuwe gebruiker
+ * POST /api/auth/register
+ */
+export async function registerController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('📝 REGISTRATIE CONTROLLER - Start');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('📥 Ontvangen POST body:', JSON.stringify(req.body, null, 2));
+    console.log('📋 Body keys:', Object.keys(req.body));
+    console.log('📋 Body values:', {
+      email: req.body.email,
+      role: req.body.role,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      hasPassword: !!req.body.password,
+      passwordLength: req.body.password?.length || 0,
+      phone: req.body.phone,
+      companyName: req.body.companyName,
+    });
+    
+    const result = await register(req.body);
+    
+    console.log('✅ Registratie succesvol in controller:', { 
+      userId: result.user.id, 
+      email: result.user.email,
+      hasToken: !!result.token 
+    });
+    
+    // Set httpOnly cookie with token
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
+    console.log('🍪 Cookie gezet voor gebruiker:', result.user.id);
+    console.log('📤 Response wordt verzonden met status 201');
+    console.log('═══════════════════════════════════════════════════════');
+
+    res.status(201).json({
+      success: true,
+      message: 'Registratie succesvol',
+      data: {
+        user: result.user,
+        // Don't send token in response body when using cookies
+      },
+    });
+  } catch (error) {
+    console.error('═══════════════════════════════════════════════════════');
+    console.error('❌ REGISTRATIE CONTROLLER - FOUT');
+    console.error('═══════════════════════════════════════════════════════');
+    console.error('Error type:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    if (error instanceof Error && 'statusCode' in error) {
+      console.error('Status code:', (error as any).statusCode);
+    }
+    console.error('═══════════════════════════════════════════════════════');
+    next(error);
+  }
+}
+
+/**
+ * Login gebruiker
+ * POST /api/auth/login
+ */
+export async function loginController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    console.log('🔐 Login poging:', { email: req.body.email });
+    
+    const result = await login(req.body);
+    
+    console.log('✅ Login succesvol:', { userId: result.user.id, email: result.user.email, role: result.user.role });
+    
+    // Set httpOnly cookie with token
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login succesvol',
+      data: {
+        user: result.user,
+        // Don't send token in response body when using cookies
+      },
+    });
+  } catch (error) {
+    console.error('❌ Login fout:', error instanceof Error ? error.message : error);
+    next(error);
+  }
+}
+
+/**
+ * Haal huidige gebruiker op
+ * GET /api/auth/me
+ */
+export async function getMeController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    console.log('🔍 GET /api/auth/me - Start');
+    console.log('   req.user:', req.user ? 'aanwezig' : 'afwezig');
+    console.log('   req.user details:', req.user ? { userId: req.user.userId, email: req.user.email } : 'geen user');
+    
+    // req.user wordt gezet door auth middleware
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      console.log('❌ GET /api/auth/me: Geen userId gevonden');
+      throw new AppError(401, 'Niet geauthenticeerd');
+    }
+
+    console.log('🔍 GET /api/auth/me: Ophalen gebruiker met ID:', userId);
+    const user = await getUserById(userId);
+    
+    console.log('✅ GET /api/auth/me: Gebruiker opgehaald:', { id: user.id, email: user.email });
+    
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error('❌ GET /api/auth/me: Fout opgetreden');
+    console.error('   Error type:', error?.constructor?.name);
+    console.error('   Error message:', error instanceof Error ? error.message : String(error));
+    console.error('   Error stack:', error instanceof Error ? error.stack : 'geen stack');
+    next(error);
+  }
+}
+
+/**
+ * Logout gebruiker
+ * POST /api/auth/logout
+ */
+export async function logoutController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    // Clear httpOnly cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Uitgelogd',
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
