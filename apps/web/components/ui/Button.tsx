@@ -13,7 +13,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed';
+  'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed min-w-0';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -48,10 +48,10 @@ export function Button({
   ...props
 }: ButtonProps) {
   const content = (
-    <span className="flex items-center justify-center gap-2">
+    <span className="flex items-center justify-center gap-2 min-w-0">
       {isLoading && (
         <svg
-          className="h-4 w-4 animate-spin"
+          className="h-4 w-4 animate-spin flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -73,11 +73,11 @@ export function Button({
         </svg>
       )}
       {!isLoading && startIcon && (
-        <span className="inline-flex h-4 w-4 items-center justify-center">{startIcon}</span>
+        <span className="inline-flex h-4 w-4 items-center justify-center flex-shrink-0">{startIcon}</span>
       )}
-      <span className="whitespace-nowrap">{children}</span>
+      <span className="whitespace-nowrap truncate">{children}</span>
       {!isLoading && endIcon && (
-        <span className="inline-flex h-4 w-4 items-center justify-center">{endIcon}</span>
+        <span className="inline-flex h-4 w-4 items-center justify-center flex-shrink-0">{endIcon}</span>
       )}
     </span>
   );
