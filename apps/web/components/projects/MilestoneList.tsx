@@ -72,7 +72,9 @@ export function MilestoneList({
       const response = await approveMilestone(milestoneId);
 
       if (response.success) {
-        const message = response.data?.fullyApproved
+        const milestone = response.data;
+        const isFullyApproved = milestone?.approvedByConsumer && milestone?.approvedByContractor;
+        const message = isFullyApproved
           ? 'Milestone volledig goedgekeurd en betaling vrijgegeven!'
           : 'Milestone goedgekeurd - wachtend op andere partij';
         success(message);

@@ -15,7 +15,11 @@ export function handleValidationErrors(
   if (!errors.isEmpty()) {
     console.log('❌ VALIDATIE FOUTEN GEVONDEN:');
     errors.array().forEach((err, index) => {
-      console.log(`   ${index + 1}. ${err.param}: ${err.msg} (value: ${err.value})`);
+      if ('param' in err && 'value' in err) {
+        console.log(`   ${index + 1}. ${err.param}: ${err.msg} (value: ${err.value})`);
+      } else {
+        console.log(`   ${index + 1}. ${err.msg}`);
+      }
     });
     const errorMessages = errors.array().map((err) => err.msg);
     console.log('───────────────────────────────────────────────────────────');

@@ -87,10 +87,10 @@ export async function approveMilestone(
   }
 
   // Check of deze rol al heeft goedgekeurd
-  if (userRole === UserRole.CUSTOMER && milestone.approvedByConsumer) {
+  if (userRole === UserRole.CUSTOMER && (milestone as any).approvedByConsumer) {
     throw new ValidationError('Consument heeft deze milestone al goedgekeurd');
   }
-  if (userRole === UserRole.CONTRACTOR && milestone.approvedByContractor) {
+  if (userRole === UserRole.CONTRACTOR && (milestone as any).approvedByContractor) {
     throw new ValidationError('Aannemer heeft deze milestone al goedgekeurd');
   }
 
@@ -128,9 +128,9 @@ export async function approveMilestone(
 
   // Check of beide partijen al hebben goedgekeurd (na deze update)
   const willBeFullyApproved = 
-    (userRole === UserRole.CUSTOMER && milestone.approvedByContractor) ||
-    (userRole === UserRole.CONTRACTOR && milestone.approvedByConsumer) ||
-    (milestone.approvedByConsumer && milestone.approvedByContractor);
+    (userRole === UserRole.CUSTOMER && (milestone as any).approvedByContractor) ||
+    (userRole === UserRole.CONTRACTOR && (milestone as any).approvedByConsumer) ||
+    ((milestone as any).approvedByConsumer && (milestone as any).approvedByContractor);
 
   // Alles valide, voer goedkeuring uit in transactie
   const result = await prisma.$transaction(async (tx) => {
@@ -154,7 +154,7 @@ export async function approveMilestone(
     });
 
     // 3. Als beide partijen hebben goedgekeurd, geef betaling vrij
-    const isFullyApproved = updatedMilestone.approvedByConsumer && updatedMilestone.approvedByContractor;
+    const isFullyApproved = (updatedMilestone as any).approvedByConsumer && (updatedMilestone as any).approvedByContractor;
     
     if (isFullyApproved) {
       console.log('  → Both parties approved, releasing payment...');

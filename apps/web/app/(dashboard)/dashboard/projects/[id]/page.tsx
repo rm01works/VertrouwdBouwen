@@ -167,7 +167,6 @@ export default function ProjectDetailPage() {
         </PageSection>
 
         <PageSection
-          id="milestones"
           className="mt-10"
           title="Milestones"
           description="Elke milestone wordt uitbetaald zodra deze is goedgekeurd."

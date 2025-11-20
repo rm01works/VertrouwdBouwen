@@ -294,9 +294,9 @@ export default function MilestonesPage() {
                       milestones={projectMilestones}
                       userRole={user.role as 'CUSTOMER' | 'CONTRACTOR'}
                       projectOwnerId={project?.customer?.id}
-                      contractorId={project?.contractorId || null}
+                      contractorId={project?.contractor?.id || null}
                       projectStatus={project?.status}
-                      projectBudget={project?.totalBudget}
+                      projectBudget={undefined}
                       onUpdate={loadMilestones}
                     />
                   </div>

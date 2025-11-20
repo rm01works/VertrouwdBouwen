@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { env } from '../config/env';
 import { UnauthorizedError } from './errors';
 
@@ -16,9 +16,12 @@ export function generateToken(payload: JWTPayload): string {
     throw new Error('JWT_SECRET is not configured');
   }
   
-  return jwt.sign(payload, env.JWT_SECRET, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const options: any = {
     expiresIn: env.JWT_EXPIRES_IN,
-  });
+  };
+  
+  return jwt.sign(payload, env.JWT_SECRET, options);
 }
 
 /**

@@ -10,6 +10,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   helperText?: string;
   options: SelectOption[];
+  placeholder?: string;
 }
 
 const baseFieldClasses =
