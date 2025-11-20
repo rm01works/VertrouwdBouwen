@@ -55,20 +55,11 @@ npm start
 
 ## Environment Variables
 
-Kopieer `.env.local.example` naar `.env.local` en pas aan:
+Maak een `.env.local` bestand aan:
 
 ```env
-# Local development
 NEXT_PUBLIC_API_URL=http://localhost:5001
-
-# Production (Netlify): gebruik je publieke API URL
-# NEXT_PUBLIC_API_URL=https://your-api.example.com
 ```
-
-**Belangrijk**:
-- `NEXT_PUBLIC_API_URL` wordt gebruikt door de Next.js API proxy route
-- In productie (Netlify) MOET deze variabele gezet zijn in Netlify environment variables
-- Deze variabele is publiek (NEXT_PUBLIC_*) en wordt ingebouwd in de client bundle
 
 ## Componenten
 

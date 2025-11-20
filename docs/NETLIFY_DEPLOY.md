@@ -61,31 +61,22 @@ Stel deze in in de Netlify UI onder **Site settings > Environment variables**:
 - Zorg dat de backend URL eindigt **zonder** trailing slash
 - Voor production: gebruik HTTPS URLs
 
-### Voor Externe Backend Host (bijv. Render/Railway/Kubernetes)
+### Voor Externe Backend Host (bijv. Render/Railway)
 
 Stel deze in op je backend hosting platform:
 
 | Variable | Beschrijving | Voorbeeld |
 |----------|--------------|-----------|
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db?schema=public` |
-| **OF losse DB_* variabelen** (voor Kubernetes): | | |
-| `DB_HOST` | Database host (service name in k8s) | `postgres-service.default.svc.cluster.local` |
-| `DB_PORT` | Database port | `5432` |
-| `DB_USER` | Database user | `vertrouwdbouwen` |
-| `DB_PASSWORD` | Database password | (secure password) |
-| `DB_NAME` | Database name | `vertrouwdbouwen` |
-| `DB_SCHEMA` | Database schema | `public` |
-| `JWT_SECRET` | Secret voor JWT tokens | (random string, genereer met `openssl rand -base64 32`) |
+| `JWT_SECRET` | Secret voor JWT tokens | (random string) |
 | `JWT_EXPIRES_IN` | JWT expiration | `7d` |
 | `PORT` | Server port | `5001` (of automatisch door host) |
 | `NODE_ENV` | Environment | `production` |
-| `CORS_ORIGIN` | Allowed CORS origin(s) | `https://your-site.netlify.app` (of comma-separated voor meerdere) |
+| `CORS_ORIGIN` | Allowed CORS origin | `https://your-site.netlify.app` |
 
 **Belangrijk**: 
 - `CORS_ORIGIN` moet de Netlify URL bevatten waar je frontend draait
-- Voor meerdere origins: gebruik comma-separated list (bijv. `https://prod.netlify.app,https://staging.netlify.app`)
-- Wildcard (`*`) is **niet toegestaan** in productie voor veiligheidsredenen
-- Gebruik `DATABASE_URL` OF alle `DB_*` variabelen (niet beide)
+- Voor meerdere origins (dev + prod): gebruik comma-separated list of wildcard (minder veilig)
 
 ---
 

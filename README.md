@@ -42,30 +42,19 @@ npm install
 
 **Backend (`apps/api/.env`):**
 
-Kopieer `apps/api/.env.example` naar `apps/api/.env` en pas aan:
-
-```env
-# Database (gebruik DATABASE_URL of losse DB_* variabelen)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/vertrouwdbouwen?schema=public
-
-# JWT (genereer met: openssl rand -base64 32)
+```
+DATABASE_URL=postgresql://vertrouwdbouwen:password@localhost:5432/vertrouwdbouwen?schema=public
 JWT_SECRET=vervang_met_een_veilige_random_string
 JWT_EXPIRES_IN=7d
-
-# Server
-PORT=5001
+PORT=5000
 NODE_ENV=development
-
-# CORS (optioneel - defaults naar localhost:3000, localhost:5173)
-CORS_ORIGIN=http://localhost:3000,http://localhost:5173
+CORS_ORIGIN=http://localhost:3000
 ```
 
 **Frontend (`apps/web/.env.local`):**
 
-Kopieer `apps/web/.env.local.example` naar `apps/web/.env.local` en pas aan:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5001
+```
+NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
 > Tip: je kunt `./scripts/setup-db-improved.sh` draaien om automatisch een `.env` voor `apps/api` te genereren (inclusief een random `JWT_SECRET`).
@@ -113,7 +102,7 @@ npm run dev
 ```
 
 - Frontend: http://localhost:3000
-- API: http://localhost:5001 (via Express)
+- API: http://localhost:5000 (via Express)
 
 Gebruik `npm run dev:web` of `npm run dev:api` als je slechts één van de apps wilt draaien.
 

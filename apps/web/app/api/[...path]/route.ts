@@ -1,21 +1,10 @@
 // Next.js API route proxy to Express backend
 import { NextRequest, NextResponse } from 'next/server';
 
-// ============================================================================
-// API Proxy Configuration
-// ============================================================================
-// Deze Next.js API route proxyt requests naar de backend Express API
-// Gebruikt NEXT_PUBLIC_API_URL voor de backend URL
-// 
-// Local development: NEXT_PUBLIC_API_URL=http://localhost:5001
-// Production (Netlify): NEXT_PUBLIC_API_URL=https://your-api-url.com
-// ============================================================================
-
-/**
- * Haalt de backend API base URL op uit environment variables
- * In productie MOET NEXT_PUBLIC_API_URL gezet zijn
- * In development gebruikt het localhost als fallback
- */
+// Use API_BASE_URL for server-side (more secure, not exposed to client)
+// Fallback to NEXT_PUBLIC_API_URL for client-side compatibility
+// In production, this should point to the external backend URL
+// Normalize the URL: remove trailing slashes and ensure it doesn't include /api
 function getApiBaseUrl(): string {
   // Prioriteit: API_BASE_URL (server-side only) > NEXT_PUBLIC_API_URL (client-accessible)
   const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
@@ -55,6 +44,12 @@ function getApiBaseUrl(): string {
   // Remove /api suffix if present (to avoid double /api in the proxy)
   if (normalized.endsWith('/api')) {
     normalized = normalized.slice(0, -4);
+  }
+  
+  // Ensure we have a valid URL
+  if (!normalized || normalized === '') {
+    console.warn('⚠️ API_BASE_URL is empty, using fallback: http://localhost:5001');
+    return 'http://localhost:5001';
   }
   
   return normalized;
