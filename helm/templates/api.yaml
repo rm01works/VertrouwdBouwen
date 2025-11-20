@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api
+  replicas: {{ .minReplicas }}
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api
+        app.kubernetes.io/part-of: vertrouwd-bouwen
+    spec:
+      containers:
+        - name: api
+          image: {{ $.Values.steiger.api.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+          envFrom:
+          - secretRef:
+              name: api-secrets
+          env:
+            - name: ENVIRONMENT
+              value: {{ $.Values.env }}
+            - name: HOSTNAME
+              value: 0.0.0.0
+            - name: PORT
+              value: "5000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: beun-db-app
+                  key: uri
+      imagePullSecrets:
+        - name: github-registry
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  labels:
+    app.kubernetes.io/name: api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: api
+  ports:
+  - port: 80
+    targetPort: http

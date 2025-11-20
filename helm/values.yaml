@@ -1,0 +1,14 @@
+tls:
+  enabled: false
+
+controlPlane:
+  services:
+    - name: control-plane
+      subcommand: serve
+    - name: deployment-manager
+      subcommand: deploy
+    - name: api-server
+      subcommand: serve-api
+
+shadowDB: 
+  enabled: false

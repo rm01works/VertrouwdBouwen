@@ -1,0 +1,67 @@
+env: prod
+
+tls:
+  enabled: true
+
+gateway:
+  name: shared
+
+global:
+  imagePullSecrets:
+    - name: github-registry
+
+secrets: []
+
+clusterSecretStore: openbao
+
+opentelemetry:
+  clusterName: brainpod-prod
+  endpoint: http://otel.brainpod.signoz.brainhive.nl
+
+registry:
+  upstream: http://distribution-docker-registry.distribution:5000
+  host: registry.brainpod.io
+  gateway:
+    name: registry
+
+podStateController:
+  minReplicas: 1
+
+controlPlane:
+  minReplicas: 1
+  maxReplicas: 2
+
+frontend:
+  host: brainpod.io
+  trpcEndpoint: https://brainpod.io
+  minReplicas: 1
+  maxReplicas: 2
+  authURL: https://brainpod.io
+  basicAuth:
+    enabled: false
+  rateLimit:
+    requests: 5
+    unit: Second
+  openbao:
+    mountpoint: secret
+    endpoint: http://openbao.openbao:8200
+    token:
+      valueFrom:
+        secretKeyRef:
+          name: vault-token
+          key: token
+
+oidc:
+  issuer: https://nice-archimedes-mjynule68a.projects.oryapis.com
+  audience: d2c0ab1b-bb3b-4b12-b5e6-68407ebd772d
+
+clusterDB:
+  replicas: 3
+  sharedBuffers: 256MB
+  workMem: 64MB
+  resources:
+    requests:
+      cpu: 100m
+      memory: 350Mi
+    limits:
+      memory: 350Mi

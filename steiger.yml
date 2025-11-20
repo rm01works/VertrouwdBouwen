@@ -1,0 +1,25 @@
+build:
+  frontend:
+    type: docker
+    context: .
+    dockerfile: apps/web/Dockerfile
+  api:
+    type: docker
+    context: .
+    dockerfile: apps/api/Dockerfile
+
+profiles:
+  prod:
+    env: prod
+
+deploy:
+  vertrouwd-bouwen:
+    type: helm
+    path: helm
+    namespace: vertrouwd-bouwen
+    valuesFiles:
+      - helm/values.yaml
+      - helm/values-${env}.yaml
+
+insecureRegistries:
+  - brainpod-registry.localhost:5003

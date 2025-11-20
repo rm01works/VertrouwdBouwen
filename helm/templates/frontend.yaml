@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  replicas: {{ .minReplicas }}
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+        app.kubernetes.io/part-of: vertrouwd-bouwen
+    spec:
+      containers:
+        - name: frontend
+          image: {{ $.Values.steiger.frontend.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+          - secretRef:
+              name: frontend-secrets
+          env:
+            - name: ENVIRONMENT
+              value: {{ $.Values.env }}
+            - name: HOSTNAME
+              value: 0.0.0.0
+            - name: PORT
+              value: "3000"
+      imagePullSecrets:
+        - name: github-registry
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/name: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: frontend
+  ports:
+  - port: 80
+    targetPort: http
