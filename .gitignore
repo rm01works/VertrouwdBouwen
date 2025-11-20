@@ -45,9 +45,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Prisma
-apps/api/prisma/migrations/
-
 # IDE
 .idea/
 .vscode/
