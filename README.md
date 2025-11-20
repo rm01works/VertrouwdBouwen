@@ -27,51 +27,96 @@ vertrouwdbouwen/
 
 - Node.js 18+
 - npm 9+
-- Docker & Docker Compose (voor PostgreSQL)
+- Docker Desktop + Docker Compose (voor PostgreSQL)
+- OpenSSL (wordt gebruikt door het setup script om secrets te genereren)
 
-### Installatie
+### 1. Installeer dependencies
 
-1. Clone het project en installeer dependencies:
 ```bash
 npm install
 ```
 
-2. Kopieer `.env.example` naar `.env.local`:
-```bash
-cp .env.example .env.local
+### 2. Stel environment variables in
+
+**Backend (`apps/api/.env`):**
+
+```
+DATABASE_URL=postgresql://vertrouwdbouwen:password@localhost:5432/vertrouwdbouwen?schema=public
+JWT_SECRET=vervang_met_een_veilige_random_string
+JWT_EXPIRES_IN=7d
+PORT=5000
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
 ```
 
-3. Start PostgreSQL database:
-```bash
-docker-compose up -d
+**Frontend (`apps/web/.env.local`):**
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-4. Run database migrations:
+> Tip: je kunt `./scripts/setup-db-improved.sh` draaien om automatisch een `.env` voor `apps/api` te genereren (inclusief een random `JWT_SECRET`).
+
+### 3. Start en initialiseert de database
+
+**Optie A – snelle setup (aanbevolen):**
+
 ```bash
+./scripts/setup-db-improved.sh
+```
+
+Het script:
+- checkt of Docker draait
+- start de PostgreSQL container (`vertrouwdbouwen-postgres`)
+- maakt (indien nodig) `apps/api/.env`
+- installeert API dependencies
+- draait `prisma generate` en `prisma migrate dev`
+
+**Optie B – handmatig:**
+
+```bash
+# Start PostgreSQL
+docker-compose up -d postgres
+
+# Voer migraties uit vanuit de API app
+cd apps/api
+npm install         # alleen nodig bij de eerste keer
 npm run db:migrate
 ```
 
-5. (Optioneel) Seed de database:
+### 4. (Optioneel) Seed data en check status
+
 ```bash
-npm run db:seed
+cd apps/api
+npm run db:seed             # voeg test users/projecten toe
+npm run db:migrate:status   # controleer migratie status
+npm run db:studio           # open Prisma Studio (http://localhost:5555)
 ```
 
-6. Start development servers:
+### 5. Start de development servers
+
 ```bash
 npm run dev
 ```
 
-Dit start zowel de frontend (http://localhost:3000) als backend (http://localhost:5000).
+- Frontend: http://localhost:3000
+- API: http://localhost:5000 (via Express)
+
+Gebruik `npm run dev:web` of `npm run dev:api` als je slechts één van de apps wilt draaien.
 
 ## Scripts
 
-- `npm run dev` - Start frontend en backend in development mode
+- `npm run dev` - Start frontend en backend (concurrently)
+- `npm run dev:web` / `npm run dev:api` - Start slechts één van de apps
 - `npm run build` - Build alle packages en apps
-- `npm run db:migrate` - Run database migrations
+- `npm run db:migrate` - Run Prisma migraties (API workspace)
 - `npm run db:seed` - Seed de database met test data
 - `npm run db:studio` - Open Prisma Studio
-- `npm run lint` - Run linter op alle packages
-- `npm run clean` - Clean alle build artifacts en node_modules
+- `npm run lint` / `npm run type-check` - Code kwaliteit
+- `npm run clean` - Verwijder node_modules en build artifacts
+- `./scripts/setup-db-improved.sh` - Volledige database setup
+- `./scripts/test-escrow-flow.sh` - Simuleer een escrow happy-path
+- `./scripts/reset-and-test.sh` - Reset database en draaien van basistests
 
 ## Development
 
@@ -89,7 +134,7 @@ Dit start zowel de frontend (http://localhost:3000) als backend (http://localhos
 
 ## Architectuur
 
-Zie [ARCHITECTURE.md](./ARCHITECTURE.md) voor gedetailleerde architectuur documentatie.
+Zie [ARCHITECTURE.md](./ARCHITECTURE.md) voor gedetailleerde architectuur documentatie en [DATABASE_SETUP.md](./DATABASE_SETUP.md) + [QUICK_DATABASE_SETUP.md](./QUICK_DATABASE_SETUP.md) voor uitgebreidere instructies rond PostgreSQL/Prisma.
 
 ## Licentie
 
