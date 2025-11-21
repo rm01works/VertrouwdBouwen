@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogIn } from 'lucide-react';
+import { LogIn, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
   const { success, error: showError } = useToast();
   const router = useRouter();
 
@@ -39,6 +39,12 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = () => {
+    loginAsDemo();
+    success('Demo account geladen!');
+    router.push('/dashboard');
   };
 
   return (
@@ -91,6 +97,28 @@ export default function LoginPage() {
                 Inloggen
               </Button>
             </form>
+
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-foreground-muted">Of</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={handleDemoLogin}
+                startIcon={<Eye className="h-5 w-5" />}
+              >
+                Bekijk demo dashboard
+              </Button>
+            </div>
 
             <div className="text-center pt-4 border-t border-border">
               <p className="text-sm text-foreground-muted">

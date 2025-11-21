@@ -17,6 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<User | null>;
+  loginAsDemo: () => void;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -255,6 +256,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await checkAuth();
   };
 
+  const loginAsDemo = () => {
+    // Set a demo user without calling the API
+    // This allows viewing the dashboard without database connection
+    const demoUser: User = {
+      id: 'demo-user-id',
+      email: 'demo@example.com',
+      role: 'CUSTOMER',
+      firstName: 'Demo',
+      lastName: 'Gebruiker',
+      companyName: 'Demo Bedrijf',
+    };
+    setUser(demoUser);
+    console.log('✅ Demo gebruiker ingelogd');
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -262,6 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
+        loginAsDemo,
         register,
         logout,
         refreshUser,
