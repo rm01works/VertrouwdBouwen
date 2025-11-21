@@ -84,3 +84,27 @@ export function transformMilestones(milestones: any[]): any[] {
   return milestones.map(transformMilestone);
 }
 
+/**
+ * Serializeer een notificatie object
+ */
+export function serializeNotification(notification: any): any {
+  if (!notification) return notification;
+
+  return {
+    id: notification.id,
+    userId: notification.userId,
+    projectId: notification.projectId,
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    readStatus: notification.readStatus,
+    readAt: notification.readAt,
+    createdAt: notification.createdAt,
+    updatedAt: notification.updatedAt,
+    project: notification.project ? {
+      id: notification.project.id,
+      title: notification.project.title,
+    } : null,
+  };
+}
+

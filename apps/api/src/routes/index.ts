@@ -6,6 +6,7 @@ import paymentRoutes from './payments.routes';
 import payoutRoutes from './payouts.routes';
 import userRoutes from './users.routes';
 import adminRoutes from './admin.routes';
+import notificationRoutes from './notifications.routes';
 import { prisma } from '../config/database';
 
 const router = Router();
@@ -40,6 +41,7 @@ router.use('/payments', paymentRoutes);
 router.use('/payouts', payoutRoutes);
 router.use('/users', userRoutes);
 router.use('/admin', adminRoutes);
+router.use('/notifications', notificationRoutes);
 
 export default router;
 

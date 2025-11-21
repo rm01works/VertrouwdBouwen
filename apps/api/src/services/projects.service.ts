@@ -1,6 +1,7 @@
 import { prisma } from '../config/database';
-import { ProjectStatus, UserRole } from '@prisma/client';
+import { ProjectStatus, UserRole, NotificationType } from '@prisma/client';
 import { ValidationError, ForbiddenError, NotFoundError } from '../utils/errors';
+import { createNotification } from './notifications.service';
 
 export interface CreateMilestoneDto {
   title: string;
@@ -152,6 +153,23 @@ export async function createProject(
       },
     },
   });
+
+  // Maak notificatie aan voor aannemer als er een contractorId is
+  if (contractorId) {
+    try {
+      const customerName = `${user.firstName} ${user.lastName}`;
+      await createNotification(
+        contractorId,
+        NotificationType.PROJECT_CREATED,
+        'Nieuw project toegewezen',
+        `${customerName} heeft een nieuw project "${data.title}" aangemaakt en aan jou gekoppeld.`,
+        project.id
+      );
+    } catch (error) {
+      // Log error maar gooi niet - project is al aangemaakt
+      console.error('Fout bij aanmaken notificatie:', error);
+    }
+  }
 
   return project;
 }
