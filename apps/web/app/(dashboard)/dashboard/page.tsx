@@ -22,7 +22,6 @@ export default function ContractorDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'title' | 'status'>('recent');
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const router = useRouter();
   
   // Check if user is a demo user
@@ -75,7 +74,6 @@ export default function ContractorDashboard() {
 
   const loadNotifications = async () => {
     try {
-      setIsLoadingNotifications(true);
       const response = await getNotifications({ readStatus: 'UNREAD', limit: 5 });
 
       if (response.success && response.data) {
@@ -83,8 +81,6 @@ export default function ContractorDashboard() {
       }
     } catch (err) {
       console.error('Fout bij het laden van notificaties:', err);
-    } finally {
-      setIsLoadingNotifications(false);
     }
   };
 

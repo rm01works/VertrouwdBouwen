@@ -112,14 +112,29 @@ export default function AdminDashboard() {
       // Use Promise.allSettled instead of Promise.all to handle partial failures gracefully
       // Note: API client now has its own timeout, but we keep this as a safety net
       const timeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+        let timeoutId: NodeJS.Timeout | null = null;
+        const timeoutPromise = new Promise<T>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            console.error(`⏱️ Component-level timeout voor request na ${ms}ms`);
+            reject(new Error(`Request timeout na ${ms}ms`));
+          }, ms);
+        });
+        
         return Promise.race([
-          promise,
-          new Promise<T>((_, reject) =>
-            setTimeout(() => {
-              console.error(`⏱️ Component-level timeout voor request na ${ms}ms`);
-              reject(new Error(`Request timeout na ${ms}ms`));
-            }, ms)
-          ),
+          promise.then((result) => {
+            // Clear timeout if promise resolves first
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            return result;
+          }).catch((error) => {
+            // Clear timeout if promise rejects
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            throw error;
+          }),
+          timeoutPromise,
         ]);
       };
 
