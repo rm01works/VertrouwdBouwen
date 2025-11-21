@@ -200,9 +200,10 @@ export default function AdminPaymentsPage() {
                     Goedkeuren
                   </Button>
                   <Button
-                    variant="danger"
+                    variant="outline"
                     size="sm"
                     onClick={() => handleReject(payment.id)}
+                    className="border-danger/30 text-danger hover:bg-danger-subtle hover:border-danger/50 hover:text-danger"
                     startIcon={<XCircle className="h-4 w-4" />}
                   >
                     Afwijzen

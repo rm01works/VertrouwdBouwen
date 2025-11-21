@@ -3,9 +3,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, FolderKanban, TrendingUp, RefreshCw, Plus } from 'lucide-react';
+import { AlertCircle, FolderKanban, TrendingUp, RefreshCw, Plus, Bell, X } from 'lucide-react';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { getProjects, acceptProject, Project } from '@/lib/api/projects';
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from '@/lib/api/notifications';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
 import { PageHeader, PageSection, PageShell } from '@/components/layout/Page';
@@ -20,6 +21,8 @@ export default function ContractorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'title' | 'status'>('recent');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const router = useRouter();
   
   // Check if user is a demo user
@@ -45,6 +48,10 @@ export default function ContractorDashboard() {
         return;
       }
       loadProjects();
+      // Laad notificaties alleen voor aannemers
+      if (user.role === 'CONTRACTOR') {
+        loadNotifications();
+      }
     }
   }, [user, isDemoUser]);
 
@@ -63,6 +70,44 @@ export default function ContractorDashboard() {
       setError('Er is een onverwachte fout opgetreden');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadNotifications = async () => {
+    try {
+      setIsLoadingNotifications(true);
+      const response = await getNotifications({ readStatus: 'UNREAD', limit: 5 });
+
+      if (response.success && response.data) {
+        setNotifications(response.data);
+      }
+    } catch (err) {
+      console.error('Fout bij het laden van notificaties:', err);
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      const response = await markNotificationAsRead(notificationId);
+      if (response.success) {
+        // Verwijder notificatie uit lijst
+        setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      }
+    } catch (err) {
+      console.error('Fout bij markeren notificatie als gelezen:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const response = await markAllNotificationsAsRead();
+      if (response.success) {
+        setNotifications([]);
+      }
+    } catch (err) {
+      console.error('Fout bij markeren alle notificaties als gelezen:', err);
     }
   };
 
@@ -277,6 +322,69 @@ export default function ContractorDashboard() {
                   <Button variant="ghost" size="sm" onClick={loadProjects}>
                     Opnieuw
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Notificaties sectie voor aannemers */}
+            {isContractor && !isDemoUser && notifications.length > 0 && (
+              <div className="mb-8 rounded-2xl border border-primary bg-primary-subtle p-4">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="p-2 rounded-lg bg-primary/20">
+                      <Bell className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-foreground mb-1">
+                        Nieuwe notificaties
+                      </h3>
+                      <p className="text-sm text-foreground-muted">
+                        Je hebt {notifications.length} nieuwe notificatie{notifications.length > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleMarkAllAsRead}
+                    className="text-xs"
+                  >
+                    Alles markeren als gelezen
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="flex items-start justify-between gap-3 p-3 rounded-lg bg-surface border border-border hover:border-primary transition-colors"
+                    >
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-foreground mb-1">
+                          {notification.title}
+                        </p>
+                        <p className="text-sm text-foreground-muted mb-2">
+                          {notification.message}
+                        </p>
+                        {notification.project && (
+                          <Link
+                            href={`/dashboard/projects/${notification.projectId}`}
+                            className="text-xs text-primary hover:text-primary-hover font-medium"
+                          >
+                            Bekijk project →
+                          </Link>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleMarkAsRead(notification.id)}
+                        className="flex-shrink-0"
+                        title="Markeer als gelezen"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

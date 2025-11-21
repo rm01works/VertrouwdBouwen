@@ -244,9 +244,9 @@ export default function PaymentsPage() {
     // Bereken KPI's voor consument
     const confirmedPayments = payments.filter(p => p.status === 'ESCROW_CONFIRMED');
     const pendingPayments = payments.filter(p => p.status === 'PENDING_ADMIN_REVIEW' || p.status === 'PENDING_CONSUMER');
-    const totalPaid = confirmedPayments.reduce((sum, p) => sum + p.amount, 0);
-    const pendingAmount = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
-    const totalBudget = projects.reduce((sum, p) => sum + p.totalBudget, 0);
+    const totalPaid = confirmedPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const pendingAmount = pendingPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const totalBudget = projects.reduce((sum, p) => sum + Number(p.totalBudget || 0), 0);
     const remainingToFund = totalBudget - totalPaid;
 
     // Openstaande escrow betalingen (pending)
@@ -311,12 +311,13 @@ export default function PaymentsPage() {
             <PageSection
               title="Openstaande Escrow Betalingen"
               description="Betalingen die wachten op bevestiging"
+              className="mb-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {openPendingPayments.map((payment) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {openPendingPayments.map((payment, index) => {
                   const project = projects.find(p => p.id === payment.projectId);
                   return (
-                    <Card key={payment.id} className="hover:shadow-md transition-shadow">
+                    <Card key={payment.id} className={`hover:shadow-md transition-shadow ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -324,7 +325,7 @@ export default function PaymentsPage() {
                               {project?.title || 'Onbekend project'}
                             </CardTitle>
                             <p className="text-sm text-foreground-muted">
-                              {formatCurrency(payment.amount)}
+                              {formatCurrency(Number(payment.amount || 0))}
                             </p>
                           </div>
                           <Badge variant={payment.status === 'PENDING_ADMIN_REVIEW' ? 'warning' : 'neutral'}>
@@ -368,12 +369,13 @@ export default function PaymentsPage() {
             <PageSection
               title="Bevestigde Escrow Betalingen"
               description="Betalingen die zijn goedgekeurd en in escrow staan"
+              className="mb-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {confirmedEscrowPayments.map((payment) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {confirmedEscrowPayments.map((payment, index) => {
                   const project = projects.find(p => p.id === payment.projectId);
                   return (
-                    <Card key={payment.id} className="hover:shadow-md transition-shadow">
+                    <Card key={payment.id} className={`hover:shadow-md transition-shadow border-l-4 border-l-success ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                       <CardBody className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
@@ -381,7 +383,7 @@ export default function PaymentsPage() {
                               {project?.title || 'Onbekend project'}
                             </h4>
                             <p className="text-lg font-bold text-success">
-                              {formatCurrency(payment.amount)}
+                              {formatCurrency(Number(payment.amount || 0))}
                             </p>
                           </div>
                           <Badge variant="success">Bevestigd</Badge>
@@ -408,10 +410,11 @@ export default function PaymentsPage() {
             <PageSection
               title="Projecten Die Nog Gefund Moeten Worden"
               description="Start escrow-betalingen voor deze projecten"
+              className="mb-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {unfundedProjects.map((project) => (
-                  <Card key={project.id} className="hover:shadow-md transition-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {unfundedProjects.map((project, index) => (
+                  <Card key={project.id} className={`hover:shadow-md transition-shadow border-l-4 border-l-danger/50 ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -427,7 +430,7 @@ export default function PaymentsPage() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-foreground-muted">Totaal budget:</span>
-                          <span className="font-bold">{formatCurrency(project.totalBudget)}</span>
+                          <span className="font-bold">{formatCurrency(Number(project.totalBudget || 0))}</span>
                         </div>
                         <Button
                           variant="primary"
@@ -451,21 +454,23 @@ export default function PaymentsPage() {
             <PageSection
               title="Gefunde Projecten"
               description="Projecten met escrow-betalingen"
+              className="mb-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {fundedProjects.map((project) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {fundedProjects.map((project, index) => {
                   const projectPayments = paymentsByProject[project.id] || [];
                   const confirmedPayments = projectPayments.filter(
                     (p) => p.status === 'ESCROW_CONFIRMED'
                   );
                   const totalConfirmed = confirmedPayments.reduce(
-                    (sum, p) => sum + p.amount,
+                    (sum, p) => sum + Number(p.amount || 0),
                     0
                   );
-                  const fundingPercentage = (totalConfirmed / project.totalBudget) * 100;
+                  const fundingPercentage = (totalConfirmed / Number(project.totalBudget || 0)) * 100;
+                  const borderAccent = project.paymentStatus === 'FULLY_FUNDED' ? 'border-l-4 border-l-success' : 'border-l-4 border-l-warning';
 
                   return (
-                    <Card key={project.id} className="hover:shadow-md transition-shadow">
+                    <Card key={project.id} className={`hover:shadow-md transition-shadow ${borderAccent} ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -484,12 +489,12 @@ export default function PaymentsPage() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-foreground-muted">Totaal budget:</span>
-                              <span className="font-bold">{formatCurrency(project.totalBudget)}</span>
+                              <span className="font-bold">{formatCurrency(Number(project.totalBudget || 0))}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-foreground-muted">Gefund:</span>
                               <span className="font-bold text-success">
-                                {formatCurrency(project.escrowFundedAmount || totalConfirmed)}
+                                {formatCurrency(Number(project.escrowFundedAmount || 0) || totalConfirmed)}
                               </span>
                             </div>
                             <div className="w-full bg-surface-muted rounded-full h-2">
@@ -515,7 +520,7 @@ export default function PaymentsPage() {
                                   >
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">
-                                        {formatCurrency(payment.amount)}
+                                        {formatCurrency(Number(payment.amount || 0))}
                                       </span>
                                       <Badge
                                         variant={
@@ -591,18 +596,18 @@ export default function PaymentsPage() {
   const pendingPayouts = payouts.filter(p => p.status === 'PENDING_ADMIN_PAYOUT');
   
   // Bereken KPI's voor aannemer
-  const totalEarned = paidPayouts.reduce((sum, p) => sum + p.amount, 0);
-  const pendingAmount = pendingPayouts.reduce((sum, p) => sum + p.amount, 0);
+  const totalEarned = paidPayouts.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const pendingAmount = pendingPayouts.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   
   // Potentieel te verdienen (nog niet afgeronde milestones)
   let potentialEarnings = 0;
   let activeProjects = 0;
   contractorProjects.forEach(project => {
     const projectMilestones = project.milestones || [];
-    const incompleteMilestones = projectMilestones.filter(
+                const incompleteMilestones = projectMilestones.filter(
       m => m.status !== 'APPROVED' && m.status !== 'PAID'
     );
-    potentialEarnings += incompleteMilestones.reduce((sum, m) => sum + m.amount, 0);
+    potentialEarnings += incompleteMilestones.reduce((sum, m) => sum + Number(m.amount || 0), 0);
     if (project.status === 'IN_PROGRESS' || project.status === 'ACTIVE') {
       activeProjects++;
     }
@@ -661,16 +666,17 @@ export default function PaymentsPage() {
           <PageSection
             title="Project Financiën"
             description="Overzicht per project met milestones en uitbetalingen"
+            className="mb-8"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {contractorProjects.map((project) => {
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {contractorProjects.map((project, index) => {
                 const projectPayouts = payouts.filter(p => p.projectId === project.id);
                 const paidAmount = projectPayouts
                   .filter(p => p.status === 'PAID')
-                  .reduce((sum, p) => sum + p.amount, 0);
+                  .reduce((sum, p) => sum + Number(p.amount || 0), 0);
                 const pendingAmount = projectPayouts
                   .filter(p => p.status === 'PENDING_ADMIN_PAYOUT')
-                  .reduce((sum, p) => sum + p.amount, 0);
+                  .reduce((sum, p) => sum + Number(p.amount || 0), 0);
                 
                 const projectMilestones = project.milestones || [];
                 const completedMilestones = projectMilestones.filter(
@@ -680,12 +686,14 @@ export default function PaymentsPage() {
                   m => m.status !== 'APPROVED' && m.status !== 'PAID'
                 );
                 const potentialEarnings = remainingMilestones.reduce(
-                  (sum, m) => sum + m.amount,
+                  (sum, m) => sum + Number(m.amount || 0),
                   0
                 );
 
+                const borderAccent = project.paymentStatus === 'FULLY_FUNDED' ? 'border-l-4 border-l-success' : project.paymentStatus === 'PARTIALLY_FUNDED' ? 'border-l-4 border-l-warning' : 'border-l-4 border-l-danger/50';
+
                 return (
-                  <Card key={project.id} className="hover:shadow-md transition-shadow">
+                  <Card key={project.id} className={`hover:shadow-md transition-shadow ${borderAccent} ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -764,10 +772,11 @@ export default function PaymentsPage() {
           <PageSection
             title="Openstaande Uitbetalingen"
             description="Milestones die goedgekeurd zijn maar nog niet uitbetaald"
+            className="mb-8"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pendingPayouts.map((payout) => (
-                <Card key={payout.id} className="hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {pendingPayouts.map((payout, index) => (
+                <Card key={payout.id} className={`hover:shadow-md transition-shadow border-l-4 border-l-warning ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -785,7 +794,7 @@ export default function PaymentsPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-foreground-muted">Bedrag:</span>
-                        <span className="text-lg font-bold">{formatCurrency(payout.amount)}</span>
+                        <span className="text-lg font-bold">{formatCurrency(Number(payout.amount || 0))}</span>
                       </div>
                       {payout.requestedAt && (
                         <div className="flex items-center gap-2 text-xs text-foreground-muted">
@@ -815,10 +824,11 @@ export default function PaymentsPage() {
           <PageSection
             title="Ontvangen Betalingen"
             description="Betalingen die je al hebt ontvangen"
+            className="mb-8"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {paidPayouts.map((payout) => (
-                <Card key={payout.id} className="hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {paidPayouts.map((payout, index) => (
+                <Card key={payout.id} className={`hover:shadow-md transition-shadow border-l-4 border-l-success ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/20'}`}>
                   <CardBody className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -829,7 +839,7 @@ export default function PaymentsPage() {
                           {payout.project?.title || 'Onbekend project'}
                         </p>
                         <p className="text-lg font-bold text-success">
-                          {formatCurrency(payout.amount)}
+                          {formatCurrency(Number(payout.amount || 0))}
                         </p>
                       </div>
                       <Badge variant="success">Betaald</Badge>

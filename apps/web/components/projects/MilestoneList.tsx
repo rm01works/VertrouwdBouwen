@@ -189,7 +189,8 @@ export function MilestoneList({
     // - Consument heeft nog niet goedgekeurd (approvedByConsumer === false)
     if (userRole === 'CUSTOMER') {
       if (milestone.approvedByConsumer) return false; // Consument heeft al goedgekeurd
-      if (!milestone.requiresConsumerAction) return false; // Aannemer moet eerst milestone indienen
+      // Als requiresConsumerAction undefined is, toon knop toch (backend valideert)
+      if (milestone.requiresConsumerAction === false) return false;
       
       // Check payment: als payments data beschikbaar is, moet er een HELD payment zijn
       // Als payments data niet beschikbaar is (undefined of leeg), toon knop toch
@@ -216,6 +217,9 @@ export function MilestoneList({
     if (milestone.status !== 'SUBMITTED') return false;
     if (milestone.approvedByConsumer) return false;
     
+    // Als requiresConsumerAction undefined is, toon knop toch (backend valideert)
+    if (milestone.requiresConsumerAction === false) return false;
+    
     // Check payment: als payments data beschikbaar is, moet er een HELD payment zijn
     // Als payments data niet beschikbaar is, toon knop toch (backend valideert)
     if (milestone.payments && milestone.payments.length > 0) {
@@ -238,7 +242,7 @@ export function MilestoneList({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6">
 
       {milestones.length === 0 ? (
         <Card className="border border-dashed border-border bg-surface">
@@ -262,10 +266,20 @@ export function MilestoneList({
           </CardBody>
         </Card>
       ) : (
-        milestones.map((milestone) => (
+        milestones.map((milestone, index) => {
+          // Bepaal border accent kleur op basis van status
+          const getStatusAccent = () => {
+            if (milestone.status === 'SUBMITTED') return 'border-l-4 border-l-warning';
+            if (milestone.status === 'APPROVED' || milestone.status === 'PAID') return 'border-l-4 border-l-success';
+            if (milestone.status === 'REJECTED') return 'border-l-4 border-l-danger/50';
+            if (milestone.status === 'IN_PROGRESS') return 'border-l-4 border-l-primary/50';
+            return '';
+          };
+
+          return (
           <Card
             key={milestone.id}
-            className="border border-gray-200 dark:border-neutral-700 bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-md"
+            className={`border border-gray-200 dark:border-neutral-700 bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-md ${getStatusAccent()} ${index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/30'}`}
           >
             <CardBody className="p-6">
               {/* Header */}
@@ -289,7 +303,7 @@ export function MilestoneList({
               </div>
 
               {/* Info Grid */}
-              <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 dark:border-neutral-700 bg-surface-muted/40 p-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-200/50 dark:border-neutral-700/50 bg-surface-muted/20 dark:bg-surface-muted/30 p-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-foreground-muted flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -366,7 +380,7 @@ export function MilestoneList({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row">
+              <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center">
                 {canSubmit(milestone) && (
                   <Button
                     variant="primary"
@@ -380,30 +394,37 @@ export function MilestoneList({
                   </Button>
                 )}
 
-                {canApprove(milestone) && (
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={() => setPendingAction({ type: 'APPROVE', milestone })}
-                    className="w-full sm:w-auto"
-                    isLoading={loadingIds.has(milestone.id)}
-                    startIcon={<CheckCircle className="h-4 w-4" />}
-                  >
-                    {userRole === 'CUSTOMER' ? 'Goedkeuren' : 'Goedkeuren (Aannemer)'}
-                  </Button>
-                )}
+                {/* Goedkeuren/Afkeuren Button Group - Voor consumenten bij SUBMITTED milestones */}
+                {(canApprove(milestone) || canReject(milestone)) && (
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    {canApprove(milestone) && (
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => setPendingAction({ type: 'APPROVE', milestone })}
+                        className="group relative w-full sm:flex-1 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-success/20 active:scale-95"
+                        isLoading={loadingIds.has(milestone.id)}
+                        startIcon={<CheckCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />}
+                      >
+                        <span className="relative z-10">{userRole === 'CUSTOMER' ? 'Goedkeuren' : 'Goedkeuren (Aannemer)'}</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-success/20 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      </Button>
+                    )}
 
-                {canReject(milestone) && (
-                  <Button
-                    variant="danger"
-                    size="md"
-                    onClick={() => setPendingAction({ type: 'REJECT', milestone })}
-                    className="w-full sm:w-auto"
-                    isLoading={loadingIds.has(milestone.id)}
-                    startIcon={<XCircle className="h-4 w-4" />}
-                  >
-                    Afkeuren
-                  </Button>
+                    {canReject(milestone) && (
+                      <Button
+                        variant="outline"
+                        size="md"
+                        onClick={() => setPendingAction({ type: 'REJECT', milestone })}
+                        className="group relative w-full sm:flex-1 border-danger/30 text-danger hover:bg-danger-subtle hover:border-danger/50 hover:text-danger overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-danger/20 active:scale-95"
+                        isLoading={loadingIds.has(milestone.id)}
+                        startIcon={<XCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />}
+                      >
+                        <span className="relative z-10">Afkeuren</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-danger/10 to-danger/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      </Button>
+                    )}
+                  </div>
                 )}
 
                 {isCompleted(milestone) && (
@@ -492,7 +513,8 @@ export function MilestoneList({
                 )}
             </CardBody>
           </Card>
-        ))
+          );
+        })
       )}
       {pendingAction && (
         <Modal

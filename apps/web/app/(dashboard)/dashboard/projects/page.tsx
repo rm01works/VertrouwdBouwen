@@ -158,12 +158,13 @@ export default function ProjectsOverviewPage() {
               />
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
-                {filteredProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onViewDetails={handleViewDetails}
-                  />
+                {filteredProjects.map((project, index) => (
+                  <div key={project.id} className={index % 2 === 0 ? '' : ''}>
+                    <ProjectCard
+                      project={project}
+                      onViewDetails={handleViewDetails}
+                    />
+                  </div>
                 ))}
               </div>
             )}
