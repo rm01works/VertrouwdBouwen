@@ -3,19 +3,21 @@ import React from 'react';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 function classNames(...classes: Array<string | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function Card({ children, className }: CardProps) {
+export function Card({ children, className, onClick }: CardProps) {
   return (
     <div
       className={classNames(
         'rounded-xl border border-gray-200 dark:border-neutral-700 bg-surface text-foreground shadow-sm transition-all duration-300',
         className,
       )}
+      onClick={onClick}
     >
       {children}
     </div>

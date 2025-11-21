@@ -7,6 +7,12 @@ export interface Contractor {
   lastName: string;
   companyName?: string | null;
   phone?: string | null;
+  kvkNumber?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  _count?: {
+    contractorProjects: number;
+  };
 }
 
 export interface Customer {

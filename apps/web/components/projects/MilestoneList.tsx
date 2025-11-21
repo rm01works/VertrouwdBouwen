@@ -77,7 +77,12 @@ export function MilestoneList({
       if (response.success) {
         // Response data structuur: { milestone: {...}, approval: {...}, fullyApproved: boolean, message: string }
         // API client geeft data.data || data terug, dus response.data kan het hele object zijn
-        const responseData = response.data as any;
+        const responseData = response.data as {
+          milestone?: Milestone;
+          approval?: unknown;
+          fullyApproved?: boolean;
+          message?: string;
+        } & Milestone;
         const milestone = responseData?.milestone || responseData;
         const isFullyApproved = responseData?.fullyApproved ?? (milestone?.approvedByConsumer && milestone?.approvedByContractor);
         const message = responseData?.message || (isFullyApproved

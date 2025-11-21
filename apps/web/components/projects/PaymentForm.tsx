@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { CreditCard, ShieldCheck, AlertCircle, Info, X } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Card, CardHeader, CardTitle, CardBody } from '../ui/Card';
 import { formatCurrency } from '@/lib/utils/format';
 import { initiateProjectPayment } from '@/lib/api/project-payments';
 import { useToast } from '@/hooks/useToast';
@@ -108,112 +110,160 @@ export function PaymentForm({
 
   return createPortal(
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm p-4"
       onClick={handleBackdropClick}
     >
-      <div 
-        className="w-full max-w-md rounded-2xl border border-border bg-surface shadow-popover max-h-[90vh] overflow-y-auto"
+      <Card 
+        className="w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-border px-6 py-4">
-          <h3 className="text-lg font-semibold text-foreground">Escrow Betaling Bevestigen</h3>
-        </div>
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-6">
-        <div className="rounded-lg border border-info/30 bg-info/10 p-4 text-sm text-info mb-4">
-          <p className="font-medium mb-2">📋 Stap 1: Betaling Doen</p>
-          <p className="mb-2">
-            Maak eerst de betaling over naar het escrow account via je bank of betaalprovider.
-          </p>
-          <p className="font-medium mb-2">✅ Stap 2: Bevestig Hier</p>
-          <p>
-            Vul hieronder het bedrag en eventuele transactiereferentie in om te bevestigen dat je de betaling hebt gedaan.
-          </p>
-        </div>
-
-        <div>
-          <p className="text-sm text-foreground-muted mb-4">
-            Project: <span className="font-medium text-foreground">{projectTitle}</span>
-          </p>
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-foreground-muted">Totaal budget:</span>
-              <span className="font-medium">{formatCurrency(totalBudget)}</span>
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <ShieldCheck className="h-5 w-5" />
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-foreground-muted">Reeds gefund:</span>
-              <span className="font-medium">{formatCurrency(currentFunded)}</span>
-            </div>
-            <div className="flex justify-between text-sm font-semibold border-t border-border pt-2">
-              <span>Resterend budget:</span>
-              <span>{formatCurrency(remainingBudget)}</span>
-            </div>
+            <CardTitle className="text-lg">Escrow Betaling Bevestigen</CardTitle>
           </div>
-        </div>
+          <button
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="p-1 rounded-lg hover:bg-surface-muted transition-colors disabled:opacity-50"
+            aria-label="Sluiten"
+          >
+            <X className="h-5 w-5 text-foreground-muted" />
+          </button>
+        </CardHeader>
+        <CardBody className="pt-0">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Info box */}
+            <div className="rounded-xl border border-info/30 bg-info/10 dark:bg-info/20 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
+                <div className="space-y-2 text-sm text-info">
+                  <div>
+                    <p className="font-bold mb-1">Stap 1: Betaling Doen</p>
+                    <p className="text-info/90">
+                      Maak eerst de betaling over naar het escrow account via je bank of betaalprovider.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-bold mb-1">Stap 2: Bevestig Hier</p>
+                    <p className="text-info/90">
+                      Vul hieronder het bedrag en eventuele transactiereferentie in om te bevestigen dat je de betaling hebt gedaan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-foreground mb-2">
-            Bedrag dat je hebt overgemaakt *
-          </label>
-          <input
-            id="amount"
-            type="number"
-            step="0.01"
-            min="0.01"
-            max={remainingBudget}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            placeholder="0.00"
-            required
-          />
-          <p className="mt-1 text-xs text-foreground-muted">
-            Voer het exacte bedrag in dat je hebt overgemaakt. Maximum: {formatCurrency(remainingBudget)}
-          </p>
-        </div>
+            {/* Project info */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-medium text-foreground-muted mb-1">Project</p>
+                <p className="text-sm font-bold text-foreground">{projectTitle}</p>
+              </div>
+              <div className="rounded-lg border border-border bg-surface-muted/50 p-4 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-foreground-muted">Totaal budget:</span>
+                  <span className="font-bold text-foreground">{formatCurrency(totalBudget)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-foreground-muted">Reeds gefund:</span>
+                  <span className="font-medium text-foreground">{formatCurrency(currentFunded)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-border">
+                  <span className="font-semibold text-foreground">Resterend budget:</span>
+                  <span className="font-bold text-primary">{formatCurrency(remainingBudget)}</span>
+                </div>
+              </div>
+            </div>
 
-        <div>
-          <label htmlFor="transactionRef" className="block text-sm font-medium text-foreground mb-2">
-            Transactie Referentie (aanbevolen)
-          </label>
-          <input
-            id="transactionRef"
-            type="text"
-            value={transactionRef}
-            onChange={(e) => setTransactionRef(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            placeholder="Bijv. TXN-123456 of IBAN-REF-789"
-          />
-          <p className="mt-1 text-xs text-foreground-muted">
-            Voer de transactiereferentie in van je bankoverboeking (helpt de admin bij verificatie)
-          </p>
-        </div>
+            {/* Amount input */}
+            <div>
+              <label htmlFor="amount" className="block text-sm font-bold text-foreground mb-2">
+                Bedrag dat je hebt overgemaakt *
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={remainingBudget}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-surface pl-11 pr-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <p className="mt-2 text-xs text-foreground-muted">
+                Voer het exacte bedrag in dat je hebt overgemaakt. Maximum: <span className="font-semibold">{formatCurrency(remainingBudget)}</span>
+              </p>
+            </div>
 
-        <div className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
-          <p className="font-medium mb-1">⚠️ Belangrijk:</p>
-          <p className="mb-2">
-            Door op "Bevestig Betaling" te klikken, bevestig je dat je de betaling daadwerkelijk hebt gedaan.
-          </p>
-          <p>
-            Een admin zal deze betaling controleren en goedkeuren. Zodra het project volledig gefund is (FULLY_FUNDED), 
-            kan de aannemer beginnen met de milestones.
-          </p>
-        </div>
+            {/* Transaction reference */}
+            <div>
+              <label htmlFor="transactionRef" className="block text-sm font-bold text-foreground mb-2">
+                Transactie Referentie <span className="text-foreground-muted font-normal">(aanbevolen)</span>
+              </label>
+              <input
+                id="transactionRef"
+                type="text"
+                value={transactionRef}
+                onChange={(e) => setTransactionRef(e.target.value)}
+                className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Bijv. TXN-123456 of IBAN-REF-789"
+              />
+              <p className="mt-2 text-xs text-foreground-muted">
+                Voer de transactiereferentie in van je bankoverboeking (helpt de admin bij verificatie)
+              </p>
+            </div>
 
-        <div className="flex gap-3 justify-end">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
-            Annuleren
-          </Button>
-          <Button type="submit" variant="primary" isLoading={isSubmitting}>
-            Bevestig Betaling
-          </Button>
-        </div>
-      </form>
-      <div className="border-t border-border px-6 py-4">
-        <Button variant="ghost" size="sm" onClick={onClose} className="w-full">
-          Sluiten
-        </Button>
-      </div>
-      </div>
+            {/* Warning box */}
+            <div className="rounded-xl border border-warning/30 bg-warning/10 dark:bg-warning/20 p-4 space-y-2">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+                <div className="space-y-2 text-sm text-warning">
+                  <p className="font-bold">Belangrijk:</p>
+                  <p className="text-warning/90">
+                    Door op &quot;Bevestig Betaling&quot; te klikken, bevestig je dat je de betaling daadwerkelijk hebt gedaan.
+                  </p>
+                  <p className="text-warning/90">
+                    Een admin zal deze betaling controleren en goedkeuren. Zodra het project volledig gefund is (FULLY_FUNDED), 
+                    kan de aannemer beginnen met de milestones.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={onClose} 
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Annuleren
+              </Button>
+              <Button 
+                type="submit" 
+                variant="primary" 
+                isLoading={isSubmitting}
+                className="flex-1"
+                startIcon={<ShieldCheck className="h-4 w-4" />}
+              >
+                Bevestig Betaling
+              </Button>
+            </div>
+          </form>
+        </CardBody>
+      </Card>
     </div>,
     document.body
   );

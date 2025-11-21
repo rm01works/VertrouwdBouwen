@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { UserPlus, Mail, Lock, Phone, Building2, Hash } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';

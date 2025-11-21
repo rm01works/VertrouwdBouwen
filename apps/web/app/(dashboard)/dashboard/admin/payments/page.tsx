@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { CreditCard, CheckCircle, XCircle, RefreshCw, User, Calendar, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -22,7 +21,6 @@ export default function AdminPaymentsPage() {
   const [pendingPayments, setPendingPayments] = useState<ProjectPayment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const loadPayments = useCallback(async () => {
     try {

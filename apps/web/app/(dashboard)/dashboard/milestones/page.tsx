@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, RefreshCw, CheckCircle2, FileText, TrendingUp } from 'lucide-react';
+import { AlertCircle, RefreshCw, FileText, TrendingUp } from 'lucide-react';
 import { PageShell, PageHeader, PageSection } from '@/components/layout/Page';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';

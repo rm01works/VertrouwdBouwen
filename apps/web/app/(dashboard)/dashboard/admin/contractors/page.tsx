@@ -134,7 +134,7 @@ export default function AdminContractorsPage() {
                     <Calendar className="h-4 w-4 text-foreground-muted" />
                     <span className="text-foreground-muted">Geregistreerd:</span>
                     <span className="font-semibold text-foreground">
-                      {new Date(contractor.createdAt).toLocaleDateString('nl-NL')}
+                      {contractor.createdAt ? new Date(contractor.createdAt).toLocaleDateString('nl-NL') : 'N/A'}
                     </span>
                   </div>
                 </div>

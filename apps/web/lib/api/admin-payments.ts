@@ -1,6 +1,11 @@
 import { apiClient } from './client';
 import { ProjectPayment } from './project-payments';
 import { Payout } from './payouts';
+import { Project } from './projects';
+
+// Re-export types for convenience
+export type { ProjectPayment } from './project-payments';
+export type { Payout } from './payouts';
 
 /**
  * Haal alle escrow betalingen op die wachten op admin review
@@ -18,7 +23,7 @@ export async function approveEscrowPayment(
 ) {
   return apiClient.post<{
     payment: ProjectPayment;
-    project: any;
+    project: Project;
     message: string;
   }>(`/admin/escrow-payments/${paymentId}/approve`, data || {});
 }
@@ -52,7 +57,7 @@ export async function markPayoutPaid(
 ) {
   return apiClient.post<{
     payout: Payout;
-    project: any;
+    project: Project;
     message: string;
   }>(`/admin/payouts/${payoutId}/mark-paid`, data || {});
 }

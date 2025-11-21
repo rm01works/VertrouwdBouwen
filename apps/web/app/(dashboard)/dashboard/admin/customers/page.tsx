@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { getCustomers, Customer } from '@/lib/api/users';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatCurrency } from '@/lib/utils/format';
 
 export default function AdminCustomersPage() {
   const { user, isLoading: authLoading } = useAuth();

@@ -111,10 +111,10 @@ export default function AdminDashboard() {
       
       // Use Promise.allSettled instead of Promise.all to handle partial failures gracefully
       // Note: API client now has its own timeout, but we keep this as a safety net
-      const timeout = (promise: Promise<any>, ms: number) => {
+      const timeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
         return Promise.race([
           promise,
-          new Promise((_, reject) =>
+          new Promise<T>((_, reject) =>
             setTimeout(() => {
               console.error(`⏱️ Component-level timeout voor request na ${ms}ms`);
               reject(new Error(`Request timeout na ${ms}ms`));
@@ -508,7 +508,7 @@ export default function AdminDashboard() {
                           cy="50%"
                           labelLine={false}
                           label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
+                            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                           }
                           outerRadius={100}
                           fill="#8884d8"
@@ -555,7 +555,7 @@ export default function AdminDashboard() {
                           cy="50%"
                           labelLine={false}
                           label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
+                            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                           }
                           outerRadius={100}
                           fill="#8884d8"

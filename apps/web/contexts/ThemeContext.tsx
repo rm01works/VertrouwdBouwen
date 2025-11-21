@@ -45,11 +45,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // Voorkom flash van verkeerde theme tijdens SSR
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide the context, even during SSR
+  // This prevents "useTheme must be used within a ThemeProvider" errors during static generation
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
