@@ -248,6 +248,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Continue even if logout request fails
     } finally {
       setUser(null);
+      // Clear the token cookie (including demo token)
+      document.cookie = 'token=; path=/; max-age=0';
       router.push('/');
     }
   };
@@ -268,6 +270,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       companyName: 'Demo Bedrijf',
     };
     setUser(demoUser);
+    
+    // Set a demo token cookie so middleware allows access to protected routes
+    // The cookie value doesn't matter, just needs to exist for middleware check
+    document.cookie = 'token=demo-token; path=/; max-age=86400'; // 24 hours
+    
     console.log('✅ Demo gebruiker ingelogd');
   };
 

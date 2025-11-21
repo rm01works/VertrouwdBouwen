@@ -22,6 +22,9 @@ export default function ContractorDashboard() {
   const [sortBy, setSortBy] = useState<'recent' | 'title' | 'status'>('recent');
   const router = useRouter();
   
+  // Check if user is a demo user
+  const isDemoUser = user?.id === 'demo-user-id';
+  
   // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
   const canCreateProject = user?.role === 'CUSTOMER';
 
@@ -34,9 +37,16 @@ export default function ContractorDashboard() {
 
   useEffect(() => {
     if (user && user.role !== 'ADMIN') {
+      // Skip API calls for demo users - they don't have valid backend authentication
+      if (isDemoUser) {
+        setIsLoading(false);
+        setProjects([]);
+        setError(null);
+        return;
+      }
       loadProjects();
     }
-  }, [user]);
+  }, [user, isDemoUser]);
 
   const loadProjects = async () => {
     try {
@@ -249,7 +259,18 @@ export default function ContractorDashboard() {
           </div>
         ) : (
           <>
-            {error && (
+            {isDemoUser && (
+              <div className="mb-8 rounded-2xl border border-info bg-info-subtle p-4 text-info">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">Demo modus</p>
+                    <p className="text-sm">Je bekijkt het dashboard in demo modus. Om volledige functionaliteit te gebruiken, log in met een echt account.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {error && !isDemoUser && (
               <div className="mb-8 rounded-2xl border border-danger bg-danger-subtle p-4 text-danger">
                 <div className="flex items-start justify-between gap-4">
                   <p>{error}</p>
