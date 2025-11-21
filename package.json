@@ -24,13 +24,12 @@
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/.next apps/*/.turbo packages/*/dist"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.14.7",
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3",
-    "@netlify/plugin-nextjs": "^4.39.0"
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   }
 }
-
