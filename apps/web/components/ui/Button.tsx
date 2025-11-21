@@ -13,17 +13,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed min-w-0';
+  'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed min-w-0 active:scale-[0.98]';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active focus-visible:ring-primary-ring shadow-elevated',
+    'bg-primary text-primary-foreground hover:bg-primary-hover hover:shadow-lg hover:-translate-y-0.5 active:bg-primary-active focus-visible:ring-primary-ring shadow-elevated',
   secondary:
-    'bg-surface text-foreground border border-border hover:bg-surface-muted focus-visible:ring-primary-ring shadow-subtle',
+    'bg-surface text-foreground border border-border hover:bg-surface-muted hover:border-border-strong hover:-translate-y-0.5 focus-visible:ring-primary-ring shadow-subtle',
   ghost:
     'bg-transparent text-foreground hover:bg-surface-muted focus-visible:ring-primary-ring border border-transparent',
   danger:
-    'bg-danger text-danger-foreground hover:bg-danger/80 focus-visible:ring-danger/50 shadow-elevated',
+    'bg-danger text-danger-foreground hover:bg-danger/80 hover:shadow-lg hover:-translate-y-0.5 focus-visible:ring-danger/50 shadow-elevated',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

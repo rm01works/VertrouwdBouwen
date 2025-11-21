@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { DollarSign, Calendar, CreditCard, CheckCircle, XCircle, Play, AlertCircle } from 'lucide-react';
 import { Card, CardBody } from '../ui/Card';
 import { Badge, getStatusBadgeVariant, getStatusLabel } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -12,10 +13,11 @@ import { useRouter } from 'next/navigation';
 
 interface MilestoneListProps {
   milestones: Milestone[];
-  userRole: 'CUSTOMER' | 'CONTRACTOR';
+  userRole: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN';
   projectOwnerId?: string;
   contractorId?: string | null;
   projectStatus?: string;
+  projectPaymentStatus?: 'NOT_FUNDED' | 'PARTIALLY_FUNDED' | 'FULLY_FUNDED';
   projectBudget?: number;
   onUpdate?: () => void;
 }
@@ -26,6 +28,7 @@ export function MilestoneList({
   projectOwnerId: _projectOwnerId,
   contractorId: _contractorId,
   projectStatus: _projectStatus,
+  projectPaymentStatus,
   projectBudget: _projectBudget,
   onUpdate,
 }: MilestoneListProps) {
@@ -72,14 +75,23 @@ export function MilestoneList({
       const response = await approveMilestone(milestoneId);
 
       if (response.success) {
-        const milestone = response.data;
-        const isFullyApproved = milestone?.approvedByConsumer && milestone?.approvedByContractor;
-        const message = isFullyApproved
+        // Response data structuur: { milestone: {...}, approval: {...}, fullyApproved: boolean, message: string }
+        // API client geeft data.data || data terug, dus response.data kan het hele object zijn
+        const responseData = response.data as any;
+        const milestone = responseData?.milestone || responseData;
+        const isFullyApproved = responseData?.fullyApproved ?? (milestone?.approvedByConsumer && milestone?.approvedByContractor);
+        const message = responseData?.message || (isFullyApproved
           ? 'Milestone volledig goedgekeurd en betaling vrijgegeven!'
-          : 'Milestone goedgekeurd - wachtend op andere partij';
+          : 'Milestone goedgekeurd - wachtend op andere partij');
         success(message);
+        
+        // Sluit modal als die open is
+        setPendingAction(null);
+        
+        // Ververs data zodat knoppen correct worden getoond/verborgen
+        // Dit zorgt ervoor dat canApprove() opnieuw wordt geëvalueerd met de nieuwe flags
         if (onUpdate) {
-          onUpdate();
+          await onUpdate();
         } else {
           router.refresh();
         }
@@ -94,6 +106,7 @@ export function MilestoneList({
         newSet.delete(milestoneId);
         return newSet;
       });
+      setIsConfirming(false);
     }
   };
 
@@ -152,24 +165,41 @@ export function MilestoneList({
   };
 
   const canSubmit = (milestone: Milestone) => {
+    // Aannemer kan alleen indienen als:
+    // - Milestone IN_PROGRESS is
+    // - Aannemer heeft nog niet goedgekeurd (approvedByContractor === false)
     return (
       userRole === 'CONTRACTOR' &&
-      milestone.status === 'IN_PROGRESS'
+      milestone.status === 'IN_PROGRESS' &&
+      milestone.approvedByContractor !== true
     );
   };
 
   const canApprove = (milestone: Milestone) => {
+    // Milestone moet ingediend zijn door aannemer
     if (milestone.status !== 'SUBMITTED') return false;
-    if (!milestone.payments?.some((p) => p.status === 'HELD')) return false;
     
-    // Consument kan goedkeuren als nog niet goedgekeurd
+    // Consument kan goedkeuren als:
+    // - requiresConsumerAction === true (aannemer heeft milestone ingediend)
+    // - Consument heeft nog niet goedgekeurd (approvedByConsumer === false)
     if (userRole === 'CUSTOMER') {
-      return !milestone.approvedByConsumer;
+      if (milestone.approvedByConsumer) return false; // Consument heeft al goedgekeurd
+      if (!milestone.requiresConsumerAction) return false; // Aannemer moet eerst milestone indienen
+      
+      // Check payment: als payments data beschikbaar is, moet er een HELD payment zijn
+      // Als payments data niet beschikbaar is (undefined of leeg), toon knop toch
+      // Backend valideert payment bij goedkeuren
+      if (milestone.payments && milestone.payments.length > 0) {
+        return milestone.payments.some((p) => p.status === 'HELD');
+      }
+      // Geen payment data beschikbaar - toon knop (backend valideert)
+      return true;
     }
     
-    // Aannemer kan goedkeuren als nog niet goedgekeurd
+    // Aannemer kan NIET meer goedkeuren na indienen - alleen consument kan goedkeuren
+    // Aannemer heeft al goedgekeurd door milestone in te dienen (approvedByContractor = true)
     if (userRole === 'CONTRACTOR') {
-      return !milestone.approvedByContractor;
+      return false; // Aannemer kan niet meer goedkeuren na indienen
     }
     
     return false;
@@ -177,16 +207,29 @@ export function MilestoneList({
 
   const canReject = (milestone: Milestone) => {
     // Alleen consument kan afkeuren
-    return (
-      userRole === 'CUSTOMER' &&
-      milestone.status === 'SUBMITTED' &&
-      !milestone.approvedByConsumer &&
-      milestone.payments?.some((p) => p.status === 'HELD')
-    );
+    if (userRole !== 'CUSTOMER') return false;
+    if (milestone.status !== 'SUBMITTED') return false;
+    if (milestone.approvedByConsumer) return false;
+    
+    // Check payment: als payments data beschikbaar is, moet er een HELD payment zijn
+    // Als payments data niet beschikbaar is, toon knop toch (backend valideert)
+    if (milestone.payments && milestone.payments.length > 0) {
+      return milestone.payments.some((p) => p.status === 'HELD');
+    }
+    // Geen payment data beschikbaar - toon knop (backend valideert)
+    return true;
   };
 
   const isCompleted = (milestone: Milestone) => {
-    return milestone.status === 'PAID' || milestone.status === 'APPROVED';
+    // Milestone is voltooid als:
+    // 1. Status is PAID (volledig afgerond en betaald)
+    // 2. Status is APPROVED (volledig goedgekeurd door beide partijen)
+    // 3. Beide partijen hebben goedgekeurd (two-sided confirmation)
+    return (
+      milestone.status === 'PAID' ||
+      milestone.status === 'APPROVED' ||
+      (milestone.approvedByConsumer && milestone.approvedByContractor)
+    );
   };
 
   return (
@@ -217,7 +260,7 @@ export function MilestoneList({
         milestones.map((milestone) => (
           <Card
             key={milestone.id}
-            className="border border-border bg-surface shadow-subtle transition duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-elevated"
+            className="border border-gray-200 dark:border-neutral-700 bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-md"
           >
             <CardBody className="p-6">
               {/* Header */}
@@ -227,7 +270,7 @@ export function MilestoneList({
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                       #{milestone.order}
                     </span>
-                    <h3 className="truncate text-lg font-semibold text-foreground sm:text-xl">
+                    <h3 className="truncate text-lg font-bold text-foreground sm:text-xl">
                       {milestone.title}
                     </h3>
                     <Badge variant={getStatusBadgeVariant(milestone.status)}>
@@ -241,38 +284,47 @@ export function MilestoneList({
               </div>
 
               {/* Info Grid */}
-              <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-border bg-surface-muted/40 p-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex flex-col">
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-foreground-muted">
-                    Bedrag
-                  </p>
-                  <p className="text-base font-semibold text-foreground sm:text-lg">
-                    {formatCurrency(milestone.amount)}
-                  </p>
+              <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 dark:border-neutral-700 bg-surface-muted/40 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-foreground-muted flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                      Bedrag
+                    </p>
+                    <p className="text-base font-bold text-foreground sm:text-lg">
+                      {formatCurrency(milestone.amount)}
+                    </p>
+                  </div>
                 </div>
                 {milestone.dueDate && (
-                  <div className="flex flex-col">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-foreground-muted">
-                      Deadline
-                    </p>
-                    <p className="text-sm font-semibold text-foreground sm:text-base">
-                      {formatDate(milestone.dueDate)}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-foreground-muted flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                        Deadline
+                      </p>
+                      <p className="text-sm font-bold text-foreground sm:text-base">
+                        {formatDate(milestone.dueDate)}
+                      </p>
+                    </div>
                   </div>
                 )}
                 {milestone.payments && milestone.payments.length > 0 && (
-                  <div className="flex flex-col">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-foreground-muted">
-                      Betaling
-                    </p>
-                    <Badge
-                      variant={getStatusBadgeVariant(
-                        milestone.payments[0].status
-                      )}
-                      className="w-fit"
-                    >
-                      {getStatusLabel(milestone.payments[0].status)}
-                    </Badge>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-foreground-muted flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                        Betaling
+                      </p>
+                      <Badge
+                        variant={getStatusBadgeVariant(
+                          milestone.payments[0].status
+                        )}
+                        className="w-fit"
+                      >
+                        {getStatusLabel(milestone.payments[0].status)}
+                      </Badge>
+                    </div>
                   </div>
                 )}
                 {milestone.approvals && milestone.approvals.length > 0 && (
@@ -317,8 +369,9 @@ export function MilestoneList({
                     onClick={() => setPendingAction({ type: 'SUBMIT', milestone })}
                     className="w-full sm:w-auto"
                     isLoading={loadingIds.has(milestone.id)}
+                    startIcon={<CheckCircle className="h-4 w-4" />}
                   >
-                    ✓ Markeer als Voltooid
+                    Markeer als Voltooid
                   </Button>
                 )}
 
@@ -329,8 +382,9 @@ export function MilestoneList({
                     onClick={() => setPendingAction({ type: 'APPROVE', milestone })}
                     className="w-full sm:w-auto"
                     isLoading={loadingIds.has(milestone.id)}
+                    startIcon={<CheckCircle className="h-4 w-4" />}
                   >
-                    ✓ {userRole === 'CUSTOMER' ? 'Goedkeuren' : 'Goedkeuren (Aannemer)'}
+                    {userRole === 'CUSTOMER' ? 'Goedkeuren' : 'Goedkeuren (Aannemer)'}
                   </Button>
                 )}
 
@@ -341,8 +395,9 @@ export function MilestoneList({
                     onClick={() => setPendingAction({ type: 'REJECT', milestone })}
                     className="w-full sm:w-auto"
                     isLoading={loadingIds.has(milestone.id)}
+                    startIcon={<XCircle className="h-4 w-4" />}
                   >
-                    ✗ Afkeuren
+                    Afkeuren
                   </Button>
                 )}
 
@@ -368,15 +423,37 @@ export function MilestoneList({
                 )}
 
                 {milestone.status === 'PENDING' && userRole === 'CONTRACTOR' && (
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={() => handleStart(milestone.id)}
-                    isLoading={loadingIds.has(milestone.id)}
-                    className="w-full sm:w-auto"
-                  >
-                    ▶ Start Werk
-                  </Button>
+                  <>
+                    {projectPaymentStatus !== 'FULLY_FUNDED' && (
+                      <div className="mb-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-2 text-sm text-warning flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <div>
+                          {projectPaymentStatus === 'NOT_FUNDED' ? (
+                            <>
+                              Dit project is nog niet gefund. De consument moet eerst geld naar escrow overmaken, 
+                              de betaling bevestigen, en de admin moet dit goedkeuren voordat je kunt starten.
+                            </>
+                          ) : (
+                            <>
+                              Dit project is nog niet volledig gefund ({projectPaymentStatus === 'PARTIALLY_FUNDED' ? 'gedeeltelijk' : 'niet'} gefund). 
+                              Wacht tot het project volledig gefund is (FULLY_FUNDED) voordat je kunt starten.
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => handleStart(milestone.id)}
+                      isLoading={loadingIds.has(milestone.id)}
+                      disabled={projectPaymentStatus !== 'FULLY_FUNDED'}
+                      className="w-full sm:w-auto"
+                      startIcon={<Play className="h-4 w-4" />}
+                    >
+                      Start Werk
+                    </Button>
+                  </>
                 )}
               </div>
 
@@ -444,12 +521,17 @@ export function MilestoneList({
             try {
               if (pendingAction.type === 'SUBMIT') {
                 await handleSubmit(pendingAction.milestone.id);
+                setPendingAction(null);
               } else if (pendingAction.type === 'APPROVE') {
                 await handleApprove(pendingAction.milestone.id);
+                // Modal wordt gesloten in handleApprove
               } else {
                 await handleReject(pendingAction.milestone.id);
+                setPendingAction(null);
               }
-              setPendingAction(null);
+            } catch (err) {
+              // Error wordt al getoond in de handler
+              // Modal blijft open bij error zodat gebruiker kan proberen opnieuw
             } finally {
               setIsConfirming(false);
             }

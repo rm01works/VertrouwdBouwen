@@ -25,6 +25,15 @@ export default function DashboardLayout({
     }
   }, [isLoading, router, user]);
 
+  // Protect admin routes
+  useEffect(() => {
+    if (!isLoading && user && pathname?.startsWith('/dashboard/admin')) {
+      if (user.role !== 'ADMIN') {
+        router.push('/dashboard');
+      }
+    }
+  }, [isLoading, user, pathname, router]);
+
   const handleLogout = async () => {
     try {
       await logout();

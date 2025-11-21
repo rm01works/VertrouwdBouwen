@@ -35,17 +35,17 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'mb-8 flex flex-col gap-6 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between',
+        'mb-8 flex flex-col gap-6 border-b border-gray-200 dark:border-neutral-700 pb-6 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
       <div className="flex-1">
         {meta && (
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+          <div className="text-xs font-bold uppercase tracking-wide text-foreground-muted mb-2">
             {meta}
           </div>
         )}
-        <h1 className="text-3xl font-semibold text-foreground">{title}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
         {description && (
           <p className="mt-3 max-w-2xl text-base text-foreground-muted">{description}</p>
         )}
@@ -75,17 +75,17 @@ export function PageSection({
   const hasHeader = title || description || actions;
 
   return (
-    <section className={cn('rounded-2xl border border-border bg-surface shadow-subtle', className)}>
+    <section className={cn('rounded-xl border border-gray-200 dark:border-neutral-700 bg-surface shadow-sm', className)}>
       {hasHeader && (
-        <div className="flex flex-col gap-3 border-b border-border px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-gray-200 dark:border-neutral-700 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            {title && <h2 className="text-lg font-semibold text-foreground">{title}</h2>}
-            {description && <p className="text-sm text-foreground-muted">{description}</p>}
+            {title && <h2 className="text-xl font-bold text-foreground">{title}</h2>}
+            {description && <p className="text-sm text-foreground-muted mt-1">{description}</p>}
           </div>
           {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
         </div>
       )}
-      <div className={cn('px-6 py-5', contentClassName)}>{children}</div>
+      <div className={cn('px-5 py-5', contentClassName)}>{children}</div>
     </section>
   );
 }

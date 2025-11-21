@@ -33,16 +33,26 @@ class ApiClient {
     // Use cookies for authentication (httpOnly cookies are sent automatically)
     // Via Next.js proxy worden cookies automatisch doorgestuurd
 
+    // Add timeout using AbortController to prevent infinite hanging
+    const timeoutMs = 20000; // 20 seconds timeout (longer than proxy timeout of 10s)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.warn(`⏱️ Request timeout voor ${endpoint} na ${timeoutMs}ms`);
+      controller.abort();
+    }, timeoutMs);
+
     try {
-      console.log('🌐 API Client Request:', { method: options.method || 'GET', url, endpoint });
+      console.log('🌐 API Client Request:', { method: options.method || 'GET', url, endpoint, timestamp: new Date().toISOString() });
       
       const response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include', // Include cookies in requests (same-origin)
+        signal: controller.signal, // Add abort signal for timeout
       });
       
-      console.log('📥 API Client Response:', { status: response.status, url });
+      clearTimeout(timeoutId); // Clear timeout if request completes
+      console.log('📥 API Client Response:', { status: response.status, url, timestamp: new Date().toISOString() });
 
       let data;
       try {
@@ -73,7 +83,20 @@ class ApiClient {
         data: data.data || data,
       };
     } catch (error) {
-      console.error('❌ API Client: Network error:', error);
+      clearTimeout(timeoutId); // Clear timeout in case of error
+      
+      // Check if it's an abort error (timeout)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('❌ API Client: Request timeout:', { endpoint, url });
+        return {
+          success: false,
+          error: {
+            message: `Request timeout: De server reageert niet binnen ${timeoutMs}ms. Controleer of de API server draait.`,
+          },
+        };
+      }
+      
+      console.error('❌ API Client: Network error:', error, { endpoint, url });
       return {
         success: false,
         error: {

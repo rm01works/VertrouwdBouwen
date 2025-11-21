@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { getContractors, getUserById } from '../services/users.service';
+import { getContractors, getCustomers, getUserById } from '../services/users.service';
+import { UserRole } from '@prisma/client';
+import { ForbiddenError } from '../utils/errors';
 
 /**
  * Haal alle aannemers op
@@ -16,6 +18,32 @@ export async function getContractorsController(
     res.status(200).json({
       success: true,
       data: contractors,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Haal alle klanten op (alleen voor admins)
+ * GET /api/users/customers
+ */
+export async function getCustomersController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userRole = req.user?.role;
+    if (!userRole || userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError('Alleen admins hebben toegang tot deze endpoint');
+    }
+
+    const customers = await getCustomers();
+
+    res.status(200).json({
+      success: true,
+      data: customers,
     });
   } catch (error) {
     next(error);

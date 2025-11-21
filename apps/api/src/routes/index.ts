@@ -3,7 +3,9 @@ import authRoutes from './auth.routes';
 import projectRoutes from './projects.routes';
 import milestoneRoutes from './milestones.routes';
 import paymentRoutes from './payments.routes';
+import payoutRoutes from './payouts.routes';
 import userRoutes from './users.routes';
+import adminRoutes from './admin.routes';
 import { prisma } from '../config/database';
 
 const router = Router();
@@ -35,7 +37,9 @@ router.use('/auth', authRoutes);
 router.use('/projects', projectRoutes);
 router.use('/milestones', milestoneRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/payouts', payoutRoutes);
 router.use('/users', userRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;
 

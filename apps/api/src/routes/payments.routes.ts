@@ -6,6 +6,7 @@ import {
   refundPaymentController,
   getUserPaymentsController,
 } from '../controllers/payments.controller';
+import { getConsumerProjectPaymentsController } from '../controllers/project-payments.controller';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -16,6 +17,13 @@ const router = Router();
  * @access  Private
  */
 router.get('/', authenticate, getUserPaymentsController);
+
+/**
+ * @route   GET /api/payments/consumer
+ * @desc    Haal alle project payments op voor de ingelogde consument
+ * @access  Private (alleen CUSTOMER)
+ */
+router.get('/consumer', authenticate, getConsumerProjectPaymentsController);
 
 /**
  * @route   GET /api/payments/:id

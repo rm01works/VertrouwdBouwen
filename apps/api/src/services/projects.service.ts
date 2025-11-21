@@ -318,7 +318,12 @@ export async function getProjectById(projectId: string, userId: string, userRole
     throw new NotFoundError('Project niet gevonden');
   }
 
-  // Check toegang: klant kan alleen eigen projecten zien, aannemer alleen geaccepteerde projecten
+  // Check toegang: admin kan alle projecten zien
+  if (userRole === UserRole.ADMIN) {
+    return project;
+  }
+
+  // Klant kan alleen eigen projecten zien, aannemer alleen geaccepteerde projecten
   if (userRole === UserRole.CUSTOMER && project.customerId !== userId) {
     throw new ForbiddenError('Geen toegang tot dit project');
   }

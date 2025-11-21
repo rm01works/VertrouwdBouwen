@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { AlertCircle, FolderKanban, TrendingUp, RefreshCw, Plus } from 'lucide-react';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { getProjects, acceptProject, Project } from '@/lib/api/projects';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +15,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ContractorDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,9 +25,18 @@ export default function ContractorDashboard() {
   // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
   const canCreateProject = user?.role === 'CUSTOMER';
 
+  // Redirect admins to admin portal
   useEffect(() => {
-    loadProjects();
-  }, []);
+    if (!authLoading && user?.role === 'ADMIN') {
+      router.replace('/dashboard/admin');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user && user.role !== 'ADMIN') {
+      loadProjects();
+    }
+  }, [user]);
 
   const loadProjects = async () => {
     try {
@@ -80,6 +90,9 @@ export default function ContractorDashboard() {
     }
   };
 
+  const isCustomer = user?.role === 'CUSTOMER';
+  const isContractor = user?.role === 'CONTRACTOR';
+  
   const availableProjects = sortProjects(projects.filter((p) => !p.contractorId));
   const myProjects = sortProjects(projects.filter((p) => p.contractorId));
   const activeProjects = myProjects.filter(
@@ -89,26 +102,90 @@ export default function ContractorDashboard() {
     (sum, project) => sum + (project.totalBudget || 0),
     0,
   );
+  
+  // Voor consumenten: projecten waar consument eigenaar van is
+  const customerProjects = sortProjects(projects.filter((p) => p.customerId === user?.id));
+  const customerActiveProjects = customerProjects.filter(
+    (project) => !['COMPLETED', 'CANCELLED'].includes(project.status),
+  );
+  
+  // Milestones die wachten op consument actie
+  const awaitingActionMilestones = useMemo(() => {
+    if (!isCustomer) return [];
+    return customerProjects.flatMap((project) => 
+      (project.milestones || []).filter((m) => 
+        m.status === 'SUBMITTED' &&
+        m.requiresConsumerAction === true &&
+        m.approvedByConsumer === false
+      )
+    );
+  }, [customerProjects, isCustomer]);
 
   const metricCards = useMemo(
-    () => [
-      {
-        label: 'Beschikbaar',
-        value: availableProjects.length,
-        description: 'Projecten wachten op acceptatie',
-      },
-      {
-        label: 'Lopend',
-        value: activeProjects.length,
-        description: 'Actieve projecten onder uitvoering',
-      },
-      {
-        label: 'Budget in beheer',
-        value: formatCurrency(totalManagedBudget),
-        description: 'Totaal escrow-budget',
-      },
+    () => {
+      if (isCustomer) {
+        // Consumenten-dashboard metrics
+        return [
+          {
+            label: 'Wacht op actie',
+            value: awaitingActionMilestones.length,
+            description: 'Milestones die jouw goedkeuring nodig hebben',
+            icon: <AlertCircle className="h-5 w-5" />,
+            color: 'text-warning',
+          },
+          {
+            label: 'Lopende projecten',
+            value: customerActiveProjects.length,
+            description: 'Actieve projecten',
+            icon: <FolderKanban className="h-5 w-5" />,
+            color: 'text-info',
+          },
+          {
+            label: 'Totaal budget',
+            value: formatCurrency(
+              customerProjects.reduce((sum, p) => sum + (p.totalBudget || 0), 0)
+            ),
+            description: 'Totaal projectbudget',
+            icon: <TrendingUp className="h-5 w-5" />,
+            color: 'text-primary',
+          },
+        ];
+      } else {
+        // Aannemers-dashboard metrics
+        return [
+          {
+            label: 'Beschikbaar',
+            value: availableProjects.length,
+            description: 'Projecten wachten op acceptatie',
+            icon: <FolderKanban className="h-5 w-5" />,
+            color: 'text-info',
+          },
+          {
+            label: 'Lopend',
+            value: activeProjects.length,
+            description: 'Actieve projecten onder uitvoering',
+            icon: <TrendingUp className="h-5 w-5" />,
+            color: 'text-success',
+          },
+          {
+            label: 'Budget in beheer',
+            value: formatCurrency(totalManagedBudget),
+            description: 'Totaal escrow-budget',
+            icon: <TrendingUp className="h-5 w-5" />,
+            color: 'text-primary',
+          },
+        ];
+      }
+    },
+    [
+      isCustomer,
+      awaitingActionMilestones.length,
+      customerActiveProjects.length,
+      customerProjects,
+      availableProjects.length,
+      activeProjects.length,
+      totalManagedBudget,
     ],
-    [availableProjects.length, activeProjects.length, totalManagedBudget],
   );
 
   const sectionActions = (
@@ -122,7 +199,7 @@ export default function ContractorDashboard() {
         <option value="title">Titel</option>
         <option value="status">Status</option>
       </select>
-      <Button variant="ghost" size="sm" onClick={loadProjects}>
+      <Button variant="ghost" size="sm" onClick={loadProjects} startIcon={<RefreshCw className="h-4 w-4" />}>
         Opnieuw laden
       </Button>
     </div>
@@ -133,21 +210,26 @@ export default function ContractorDashboard() {
       <PageShell>
         <PageHeader
           title="Projectdashboard"
-          description="Overzicht van je escrow-projecten, voortgang en nieuwe aanvragen."
-          meta="Aannemer"
+          description={
+            isCustomer
+              ? "Overzicht van je projecten en milestones die wachten op jouw actie."
+              : "Overzicht van je escrow-projecten, voortgang en nieuwe aanvragen."
+          }
+          meta={isCustomer ? "Consument" : "Aannemer"}
           actions={
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/dashboard/projects"
-                className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:border-border-strong"
+                className="rounded-full border border-gray-200 dark:border-neutral-700 px-4 py-2 text-sm font-semibold text-foreground hover:border-gray-300 dark:hover:border-neutral-600 transition-colors"
               >
                 Alle projecten
               </Link>
               {canCreateProject && (
                 <Link
                   href="/dashboard/projects/new"
-                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary-hover"
+                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:shadow-md transition-all flex items-center gap-2"
                 >
+                  <Plus className="h-4 w-4" />
                   Nieuw project
                 </Link>
               )}
@@ -180,37 +262,79 @@ export default function ContractorDashboard() {
 
             <div className="mb-10 grid gap-4 md:grid-cols-3">
               {metricCards.map((metric) => (
-                <Card key={metric.label} className="border border-border bg-surface shadow-subtle">
-                  <CardBody className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-                      {metric.label}
-                    </p>
-                    <p className="text-2xl font-semibold text-foreground">{metric.value}</p>
+                <Card key={metric.label} className="border border-gray-200 dark:border-neutral-700 bg-surface shadow-sm hover:shadow-md transition-all duration-200">
+                  <CardBody className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                        {metric.label}
+                      </p>
+                      <div className={metric.color}>
+                        {metric.icon}
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{metric.value}</p>
                     <p className="text-sm text-foreground-muted">{metric.description}</p>
                   </CardBody>
                 </Card>
               ))}
             </div>
 
-            <PageSection
-              title="Beschikbare projecten"
-              description="Projecten zonder toegewezen aannemer, klaar om opgepakt te worden."
-              actions={sectionActions}
-            >
-              {availableProjects.length === 0 ? (
-                <EmptyState
-                  title="Geen open aanvragen"
-                  description="Nieuwe projecten verschijnen hier zodra klanten een escrow starten."
-                  action={
+            {/* Consumenten-dashboard: "Wacht op actie" sectie */}
+            {isCustomer && awaitingActionMilestones.length > 0 && (
+              <PageSection
+                title="Wacht op jouw actie"
+                description={`${awaitingActionMilestones.length} milestone${awaitingActionMilestones.length > 1 ? 's' : ''} wachten op jouw goedkeuring`}
+                className="mb-10"
+              >
+                <Card className="border-warning bg-warning-subtle">
+                  <CardBody>
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-warning/20">
+                          <AlertCircle className="h-5 w-5 text-warning" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-foreground mb-2">
+                            Actie vereist
+                          </h3>
+                          <p className="text-sm text-foreground-muted">
+                            Er {awaitingActionMilestones.length === 1 ? 'staat' : 'staan'} {awaitingActionMilestones.length} milestone{awaitingActionMilestones.length > 1 ? 's' : ''} klaar voor goedkeuring.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <Link
-                      href="/dashboard/projects"
-                      className="text-sm font-semibold text-primary hover:text-primary-hover"
+                      href="/dashboard/milestones"
+                      className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-hover transition-colors"
                     >
-                      Bekijk alle projecten
+                      Bekijk milestones →
                     </Link>
-                  }
-                />
-              ) : (
+                  </CardBody>
+                </Card>
+              </PageSection>
+            )}
+
+            {/* Aannemers-dashboard: "Beschikbare projecten" sectie */}
+            {isContractor && (
+              <PageSection
+                title="Beschikbare projecten"
+                description="Projecten zonder toegewezen aannemer, klaar om opgepakt te worden."
+                actions={sectionActions}
+              >
+                {availableProjects.length === 0 ? (
+                  <EmptyState
+                    title="Geen open aanvragen"
+                    description="Nieuwe projecten verschijnen hier zodra klanten een escrow starten."
+                    action={
+                      <Link
+                        href="/dashboard/projects"
+                        className="text-sm font-semibold text-primary hover:text-primary-hover"
+                      >
+                        Bekijk alle projecten
+                      </Link>
+                    }
+                  />
+                ) : (
                 <div className="grid gap-6 md:grid-cols-2">
                   {availableProjects.map((project) => (
                     <ProjectCard
@@ -219,37 +343,49 @@ export default function ContractorDashboard() {
                       onViewDetails={handleViewDetails}
                       onAccept={handleAcceptProject}
                       showAcceptButton
+                      compact={true}
                     />
                   ))}
                 </div>
-              )}
-            </PageSection>
+                )}
+              </PageSection>
+            )}
 
+            {/* Projecten sectie - verschillend voor consumenten en aannemers */}
             <PageSection
               className="mt-10"
-              title="Mijn projecten"
-              description="Alle lopende en afgeronde projecten onder jouw beheer."
+              title={isCustomer ? "Mijn projecten" : "Mijn projecten"}
+              description={
+                isCustomer
+                  ? "Overzicht van al je projecten. Klik op een project voor details."
+                  : "Alle lopende en afgeronde projecten onder jouw beheer."
+              }
             >
-              {myProjects.length === 0 ? (
+              {(isCustomer ? customerProjects : myProjects).length === 0 ? (
                 <EmptyState
-                  title="Nog geen projecten geaccepteerd"
-                  description="Gebruik de projectlijst om geschikte opdrachten te vinden."
+                  title={isCustomer ? "Nog geen projecten" : "Nog geen projecten geaccepteerd"}
+                  description={
+                    isCustomer
+                      ? "Maak je eerste project aan om te beginnen."
+                      : "Gebruik de projectlijst om geschikte opdrachten te vinden."
+                  }
                   action={
                     <Link
-                      href="/dashboard/projects"
+                      href={isCustomer ? "/dashboard/projects/new" : "/dashboard/projects"}
                       className="text-sm font-semibold text-primary hover:text-primary-hover"
                     >
-                      Ga naar overzicht
+                      {isCustomer ? "Nieuw project aanmaken" : "Ga naar overzicht"}
                     </Link>
                   }
                 />
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
-                  {myProjects.map((project) => (
+                  {(isCustomer ? customerProjects : myProjects).map((project) => (
                     <ProjectCard
                       key={project.id}
                       project={project}
                       onViewDetails={handleViewDetails}
+                      compact={true}
                     />
                   ))}
                 </div>

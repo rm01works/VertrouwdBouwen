@@ -22,8 +22,16 @@ export const dashboardNavItems: DashboardNavItem[] = [
   {
     label: 'Overzicht',
     href: '/dashboard',
-    description: 'Startpunt met KPI’s, alerts en snelle acties.',
+    description: "Startpunt met KPI's, alerts en snelle acties.",
     stage: 'overzicht',
+    status: 'live',
+    enabled: true,
+  },
+  {
+    label: 'Admin',
+    href: '/dashboard/admin',
+    description: 'Admin dashboard voor platformbeheer.',
+    stage: 'support',
     status: 'live',
     enabled: true,
   },
@@ -83,12 +91,18 @@ export const visibleDashboardNavItems = dashboardNavItems.filter((item) => item.
 
 /**
  * Haal zichtbare navigatie-items op op basis van rol
- * Beide rollen (CUSTOMER en CONTRACTOR) zien dezelfde navigatie-items
+ * Admin ziet extra admin dashboard link
  * Permissies worden binnen de pagina's zelf gehandeld, niet op nav-level
  */
-export function getVisibleNavItemsForRole(_role?: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN') {
-  // Beide rollen zien alle enabled items
-  // Permissies voor acties binnen pagina's worden per pagina bepaald
-  return dashboardNavItems.filter((item) => item.enabled);
+export function getVisibleNavItemsForRole(role?: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN') {
+  const allItems = dashboardNavItems.filter((item) => item.enabled);
+  
+  // Admin dashboard link alleen voor admins
+  if (role === 'ADMIN') {
+    return allItems;
+  }
+  
+  // Filter out admin link for non-admins
+  return allItems.filter((item) => item.href !== '/dashboard/admin');
 }
 

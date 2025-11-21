@@ -2,31 +2,39 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Home, Building2, CheckCircle, LogIn, UserPlus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[#1a1a1a] shadow-lg border-b border-[#333333] sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
+      <header className="sticky top-0 z-50 border-b border-border-strong bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 shadow-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00d4ff] to-[#00ff88] bg-clip-text text-transparent">
-              VertrouwdBouwen
-            </h1>
-            <nav className="flex gap-4">
+            <Link href="/" className="flex items-center gap-2">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-foreground-muted">
+                  Vertrouwd
+                </p>
+                <p className="text-xl font-semibold text-foreground">Bouwen</p>
+              </div>
+            </Link>
+            <nav className="flex items-center gap-2 sm:gap-3">
+              <ThemeToggle />
               <Link
                 href="/login"
-                className="text-[#e0e0e0] hover:text-[#00d4ff] font-medium transition-colors"
+                className="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors px-2 sm:px-3 py-2 flex items-center gap-2"
               >
+                <LogIn className="h-4 w-4" />
                 Inloggen
               </Link>
-              <Link
-                href="/register"
-                className="bg-[#00d4ff] text-[#0a0a0a] px-4 py-2 rounded-lg hover:bg-[#00b8e6] font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Registreren
+              <Link href="/register">
+                <Button variant="primary" size="sm" className="sm:size-md" startIcon={<UserPlus className="h-4 w-4" />}>
+                  Registreren
+                </Button>
               </Link>
             </nav>
           </div>
@@ -35,93 +43,53 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#00d4ff] to-[#00ff88] bg-clip-text text-transparent mb-6">
+        <div className="text-center mb-12 sm:mb-16 relative">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary-subtle/20 via-transparent to-transparent blur-3xl opacity-50" />
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-foreground mb-4 sm:mb-6 tracking-tight">
             VertrouwdBouwen
           </h1>
-          <p className="text-xl sm:text-2xl text-[#b3b3b3] mb-8 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl lg:text-2xl text-foreground-muted mb-6 sm:mb-8 max-w-3xl mx-auto px-4 leading-relaxed">
             Het veilige escrow platform voor bouwprojecten
-            <br />
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
             Verbind klanten met aannemers met gegarandeerde betalingen
           </p>
         </div>
 
         {/* User Type Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-12 sm:mb-16">
           {/* Klant Card */}
-          <Card className="hover:shadow-xl hover:border-[#00d4ff]/50 transition-all duration-300 border-2 border-[#333333] hover:scale-[1.01]">
-            <CardBody className="p-8 text-center">
+          <Card className="group hover:shadow-md hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 border border-gray-200 dark:border-neutral-700">
+            <CardBody className="p-6 sm:p-8 text-center">
               <div className="mb-6">
-                <div className="w-16 h-16 bg-[#00d4ff]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-8 h-8 text-[#00d4ff]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-subtle rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-primary-subtle/80 transition-transform duration-300">
+                  <Home className="w-7 h-7 sm:w-8 sm:h-8 text-primary group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                <h2 className="text-2xl font-bold text-[#ffffff] mb-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3">
                   Ik ben een Particulier
                 </h2>
-                <p className="text-[#b3b3b3] mb-6">
+                <p className="text-sm sm:text-base text-foreground-muted mb-6">
                   Zoek een betrouwbare aannemer voor uw bouwproject. Betaal veilig via escrow en
                   alleen wanneer u tevreden bent.
                 </p>
               </div>
               <div className="space-y-3">
-                <ul className="text-left text-sm text-[#b3b3b3] space-y-2 mb-6">
+                <ul className="text-left text-sm text-foreground-muted space-y-2 mb-6">
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Veilige escrow betalingen</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Betaal alleen bij goedkeuring</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Projecten met milestones</span>
                   </li>
                 </ul>
                 <Link href="/register?role=CUSTOMER" className="block">
-                  <Button variant="primary" size="lg" className="w-full">
+                  <Button variant="primary" size="lg" className="w-full" endIcon={<ArrowRight className="h-5 w-5" />}>
                     Registreer als Particulier
                   </Button>
                 </Link>
@@ -130,79 +98,37 @@ export default function HomePage() {
           </Card>
 
           {/* Aannemer Card */}
-          <Card className="hover:shadow-xl hover:border-[#00d4ff]/50 transition-all duration-300 border-2 border-[#333333] hover:scale-[1.01]">
-            <CardBody className="p-8 text-center">
+          <Card className="group hover:shadow-md hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 border border-gray-200 dark:border-neutral-700">
+            <CardBody className="p-6 sm:p-8 text-center">
               <div className="mb-6">
-                <div className="w-16 h-16 bg-[#00d4ff]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-8 h-8 text-[#00d4ff]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                    />
-                  </svg>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-subtle rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-primary-subtle/80 transition-transform duration-300">
+                  <Building2 className="w-7 h-7 sm:w-8 sm:h-8 text-primary group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                <h2 className="text-2xl font-bold text-[#ffffff] mb-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3">
                   Ik ben een Aannemer
                 </h2>
-                <p className="text-[#b3b3b3] mb-6">
+                <p className="text-sm sm:text-base text-foreground-muted mb-6">
                   Vind nieuwe projecten en ontvang gegarandeerde betalingen. Werk met vertrouwen
                   dankzij escrow beveiliging.
                 </p>
               </div>
               <div className="space-y-3">
-                <ul className="text-left text-sm text-[#b3b3b3] space-y-2 mb-6">
+                <ul className="text-left text-sm text-foreground-muted space-y-2 mb-6">
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Gegarandeerde betalingen</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Toegang tot beschikbare projecten</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <svg
-                      className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <span>Milestone-gebaseerd werken</span>
                   </li>
                 </ul>
                 <Link href="/register?role=CONTRACTOR" className="block">
-                  <Button variant="primary" size="lg" className="w-full">
+                  <Button variant="primary" size="lg" className="w-full" endIcon={<ArrowRight className="h-5 w-5" />}>
                     Registreer als Aannemer
                   </Button>
                 </Link>
@@ -212,44 +138,49 @@ export default function HomePage() {
         </div>
 
         {/* How It Works */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-[#ffffff] mb-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-center text-foreground mb-8 sm:mb-12 tracking-tight">
             Hoe werkt het?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-[#00d4ff] text-[#0a0a0a] rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 relative">
+            {/* Verbindingslijnen voor desktop */}
+            <div className="hidden md:block absolute top-6 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-border-strong to-transparent" />
+            <div className="hidden md:block absolute top-6 left-1/2 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-border-strong to-transparent" />
+            <div className="hidden md:block absolute top-6 left-3/4 right-0 h-0.5 bg-gradient-to-r from-transparent via-border-strong to-transparent" />
+            
+            <div className="text-center relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-semibold text-base sm:text-lg shadow-elevated hover:scale-110 transition-transform duration-300">
                 1
               </div>
-              <h3 className="font-semibold text-[#ffffff] mb-2">Project Aanmaken</h3>
-              <p className="text-sm text-[#b3b3b3]">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">Project Aanmaken</h3>
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
                 Klant maakt project aan met milestones en budget
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-[#00d4ff] text-[#0a0a0a] rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+            <div className="text-center relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-semibold text-base sm:text-lg shadow-elevated hover:scale-110 transition-transform duration-300">
                 2
               </div>
-              <h3 className="font-semibold text-[#ffffff] mb-2">Geld in Escrow</h3>
-              <p className="text-sm text-[#b3b3b3]">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">Geld in Escrow</h3>
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
                 Klant stort geld veilig in escrow
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-[#00d4ff] text-[#0a0a0a] rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+            <div className="text-center relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-semibold text-base sm:text-lg shadow-elevated hover:scale-110 transition-transform duration-300">
                 3
               </div>
-              <h3 className="font-semibold text-[#ffffff] mb-2">Werk Uitvoeren</h3>
-              <p className="text-sm text-[#b3b3b3]">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">Werk Uitvoeren</h3>
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
                 Aannemer voert werk uit en dient milestones in
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-[#00d4ff] text-[#0a0a0a] rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+            <div className="text-center relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-semibold text-base sm:text-lg shadow-elevated hover:scale-110 transition-transform duration-300">
                 4
               </div>
-              <h3 className="font-semibold text-[#ffffff] mb-2">Goedkeuren & Betalen</h3>
-              <p className="text-sm text-[#b3b3b3]">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">Goedkeuren & Betalen</h3>
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
                 Klant keurt goed, aannemer ontvangt betaling
               </p>
             </div>
@@ -257,20 +188,22 @@ export default function HomePage() {
         </div>
 
         {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <Link href="/register">
-            <Button variant="primary" size="lg">
-              Begin Nu - Gratis Registreren
-            </Button>
-          </Link>
+        <div className="mt-12 sm:mt-16 text-center px-4">
+          <div className="inline-block">
+            <Link href="/register">
+              <Button variant="primary" size="lg" className="shadow-sm hover:shadow-md transition-shadow" startIcon={<UserPlus className="h-5 w-5" />}>
+                Begin Nu - Gratis Registreren
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a1a] text-[#b3b3b3] mt-16 border-t border-[#333333]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <footer className="bg-surface border-t border-border-strong mt-12 sm:mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="text-center">
-            <p className="text-sm">
+            <p className="text-sm text-foreground-muted">
               © 2024 VertrouwdBouwen. Alle rechten voorbehouden.
             </p>
           </div>

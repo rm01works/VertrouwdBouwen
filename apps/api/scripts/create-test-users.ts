@@ -102,13 +102,47 @@ async function createTestUsers() {
       console.log(`   Rol: ${contractor.role}\n`);
     }
 
+    // Admin gebruiker
+    const adminEmail = 'admin@admin.com';
+    const adminPassword = 'admin';
+
+    // Check of admin al bestaat
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: adminEmail },
+    });
+
+    if (existingAdmin) {
+      console.log(`⚠️  Admin met email ${adminEmail} bestaat al. Overslaan...`);
+    } else {
+      const adminPasswordHash = await hashPassword(adminPassword);
+      
+      const admin = await prisma.user.create({
+        data: {
+          email: adminEmail,
+          passwordHash: adminPasswordHash,
+          role: UserRole.ADMIN,
+          firstName: 'Admin',
+          lastName: 'User',
+        },
+      });
+
+      console.log('✅ Admin aangemaakt:');
+      console.log(`   Email: ${admin.email}`);
+      console.log(`   Wachtwoord: ${adminPassword}`);
+      console.log(`   Naam: ${admin.firstName} ${admin.lastName}`);
+      console.log(`   Rol: ${admin.role}\n`);
+    }
+
     console.log('✨ Klaar! Je kunt nu inloggen met:');
     console.log('\n📧 Consument:');
     console.log(`   Email: ${customerEmail}`);
     console.log(`   Wachtwoord: ${customerPassword}`);
     console.log('\n📧 Aannemer:');
     console.log(`   Email: ${contractorEmail}`);
-    console.log(`   Wachtwoord: ${contractorPassword}\n`);
+    console.log(`   Wachtwoord: ${contractorPassword}`);
+    console.log('\n👑 Admin:');
+    console.log(`   Email: ${adminEmail}`);
+    console.log(`   Wachtwoord: ${adminPassword}\n`);
 
   } catch (error: any) {
     console.error('❌ Fout bij aanmaken testgebruikers:', error.message);

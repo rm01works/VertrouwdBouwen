@@ -35,7 +35,7 @@ VertrouwdBouwen is a Dutch escrow platform connecting customers (klanten) with c
          │ HTTP/REST
          │
 ┌────────▼────────┐
-│  Express API    │  (Backend - Port 5000)
+│  Express API    │  (Backend - Port 5001)
 │  (Server)       │
 └────────┬────────┘
          │
@@ -284,11 +284,11 @@ JWT_SECRET=your-secret-key
 JWT_EXPIRES_IN=7d
 
 # Server
-PORT=5000
+PORT=5001
 NODE_ENV=development
 
 # Frontend
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5001
 ```
 
 ## Development Phases

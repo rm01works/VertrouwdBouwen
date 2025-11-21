@@ -4,6 +4,8 @@ import {
   PaymentStatus,
   ApprovalStatus,
   UserRole,
+  ProjectPaymentStatus,
+  PayoutStatus,
 } from '@prisma/client';
 import {
   ValidationError,
@@ -11,6 +13,7 @@ import {
   NotFoundError,
 } from '../utils/errors';
 import { v4 as uuidv4 } from 'uuid';
+import { createPayoutRequest } from './payouts.service';
 
 export interface ApproveMilestoneDto {
   comments?: string;
@@ -80,9 +83,17 @@ export async function approveMilestone(
   }
 
   // Check of milestone status SUBMITTED is (aannemer heeft ingediend)
+  // EN of requiresConsumerAction = true (voor consumenten)
   if (milestone.status !== MilestoneStatus.SUBMITTED) {
     throw new ValidationError(
       `Milestone moet status SUBMITTED hebben om goedgekeurd te worden. Huidige status: ${milestone.status}`
+    );
+  }
+  
+  // Voor consumenten: check of requiresConsumerAction = true
+  if (userRole === UserRole.CUSTOMER && !(milestone as any).requiresConsumerAction) {
+    throw new ValidationError(
+      'Milestone wacht niet op actie van consument. Aannemer moet eerst milestone indienen.'
     );
   }
 
@@ -94,26 +105,25 @@ export async function approveMilestone(
     throw new ValidationError('Aannemer heeft deze milestone al goedgekeurd');
   }
 
-  // Check of er een escrow payment is
-  if (milestone.payments.length === 0) {
-    throw new ValidationError(
-      'Geen escrow betaling gevonden. Milestone moet eerst gefinancierd worden.'
-    );
-  }
+  // Check of er een escrow payment is (optioneel - alleen nodig voor payment release)
+  const hasPayment = milestone.payments.length > 0;
+  const payment = hasPayment ? milestone.payments[0] : null;
 
-  const payment = milestone.payments[0];
+  if (hasPayment && payment) {
+    console.log('✓ [ESCROW] Payment found in escrow');
+    console.log('  Payment ID:', payment.id);
+    console.log('  Payment Status:', payment.status);
+    console.log('  Amount:', payment.amount);
+    console.log('  Transaction Ref:', payment.transactionRef);
 
-  console.log('✓ [ESCROW] Payment found in escrow');
-  console.log('  Payment ID:', payment.id);
-  console.log('  Payment Status:', payment.status);
-  console.log('  Amount:', payment.amount);
-  console.log('  Transaction Ref:', payment.transactionRef);
-
-  // Check of betaling in escrow staat (HELD status)
-  if (payment.status !== PaymentStatus.HELD) {
-    throw new ValidationError(
-      `Betaling moet status HELD hebben om vrijgegeven te worden. Huidige status: ${payment.status}`
-    );
+    // Check of betaling in escrow staat (HELD status) - alleen als er een payment is
+    if (payment.status !== PaymentStatus.HELD) {
+      throw new ValidationError(
+        `Betaling moet status HELD hebben om vrijgegeven te worden. Huidige status: ${payment.status}`
+      );
+    }
+  } else {
+    console.log('ℹ️  [ESCROW] No payment found - approval will proceed without payment release');
   }
 
   console.log('✓ [ESCROW] Starting approval transaction...');
@@ -122,6 +132,8 @@ export async function approveMilestone(
   const updateData: any = {};
   if (userRole === UserRole.CUSTOMER) {
     updateData.approvedByConsumer = true;
+    // Consument heeft goedgekeurd, dus requiresConsumerAction = false
+    updateData.requiresConsumerAction = false;
   } else if (userRole === UserRole.CONTRACTOR) {
     updateData.approvedByContractor = true;
   }
@@ -157,63 +169,53 @@ export async function approveMilestone(
     const isFullyApproved = (updatedMilestone as any).approvedByConsumer && (updatedMilestone as any).approvedByContractor;
     
     if (isFullyApproved) {
-      console.log('  → Both parties approved, releasing payment...');
+      console.log('  → Both parties approved');
       
-      // Check of er een escrow payment is
-      if (milestone.payments.length === 0) {
-        throw new ValidationError(
-          'Geen escrow betaling gevonden. Milestone moet eerst gefinancierd worden.'
-        );
-      }
-
-      const payment = milestone.payments[0];
-
-      // Check of betaling in escrow staat (HELD status)
-      if (payment.status !== PaymentStatus.HELD) {
-        throw new ValidationError(
-          `Betaling moet status HELD hebben om vrijgegeven te worden. Huidige status: ${payment.status}`
-        );
-      }
-
       // Update milestone status naar APPROVED
       console.log('  → Updating milestone: SUBMITTED → APPROVED');
       await tx.milestone.update({
         where: { id: milestone.id },
         data: {
           status: MilestoneStatus.APPROVED,
+          requiresConsumerAction: false, // Beide partijen hebben goedgekeurd
         },
       });
 
-      // Update escrow payment naar RELEASED (gesimuleerd)
-      const transactionRef = `TXN-${Date.now()}-${uuidv4().substring(0, 8).toUpperCase()}`;
-      console.log('  → Releasing payment: HELD → RELEASED');
-      console.log('  → Release Transaction Ref:', transactionRef);
-      const releasedPayment = await tx.escrowPayment.update({
-        where: { id: payment.id },
-        data: {
-          status: PaymentStatus.RELEASED,
-          releasedAt: new Date(),
-          transactionRef: transactionRef,
-        },
-      });
-      console.log('  ✅ Payment released to contractor');
-      console.log('  → Amount:', releasedPayment.amount);
-      console.log('  → Released At:', releasedPayment.releasedAt);
+      // Maak payout request aan voor admin (in plaats van direct uitbetalen)
+      console.log('  → Creating payout request for admin...');
+      let payout = null;
+      try {
+        // Check of er al een payout bestaat
+        const existingPayout = await tx.payout.findUnique({
+          where: { milestoneId: milestone.id },
+        });
 
-      // Update milestone status naar PAID
-      console.log('  → Updating milestone: APPROVED → PAID');
-      await tx.milestone.update({
-        where: { id: milestone.id },
-        data: {
-          status: MilestoneStatus.PAID,
-        },
-      });
-
-      console.log('  ✅ Milestone marked as PAID');
-      console.log('  ✅ Payment released to contractor');
+        if (!existingPayout) {
+          // Maak nieuwe payout aan
+          payout = await tx.payout.create({
+            data: {
+              projectId: milestone.projectId,
+              milestoneId: milestone.id,
+              contractorId: milestone.project.contractorId!,
+              amount: milestone.amount,
+              status: PayoutStatus.PENDING_ADMIN_PAYOUT,
+            },
+          });
+          console.log('  ✅ Payout request created');
+          console.log('  → Payout ID:', payout.id);
+          console.log('  → Amount:', payout.amount);
+          console.log('  → Status: PENDING_ADMIN_PAYOUT');
+        } else {
+          payout = existingPayout;
+          console.log('  ℹ️  Payout already exists for this milestone');
+        }
+      } catch (error: any) {
+        console.error('  ❌ Error creating payout:', error.message);
+        // Payout aanmaken is niet kritiek, milestone kan nog steeds goedgekeurd worden
+      }
       
       // Haal volledige milestone op voor return
-      const paidMilestone = await tx.milestone.findUnique({
+      const completedMilestone = await tx.milestone.findUnique({
         where: { id: milestone.id },
         include: {
           project: {
@@ -257,9 +259,9 @@ export async function approveMilestone(
       });
 
       return {
-        milestone: paidMilestone!,
+        milestone: completedMilestone!,
         approval,
-        payment: releasedPayment,
+        payout, // Payout request voor admin
         fullyApproved: true,
       };
     } else {
@@ -321,14 +323,14 @@ export async function approveMilestone(
   });
 
   const message = result.fullyApproved
-    ? 'Milestone volledig goedgekeurd en betaling vrijgegeven'
+    ? 'Milestone volledig goedgekeurd. Payout request aangemaakt voor admin review.'
     : `${userRole === UserRole.CUSTOMER ? 'Consument' : 'Aannemer'} heeft goedgekeurd, wachtend op andere partij`;
 
   console.log(`✅ [ESCROW] ${message}`);
-  if (result.fullyApproved) {
-    console.log('  Final Milestone Status: PAID');
-    console.log('  Final Payment Status: RELEASED');
-    console.log('  Contractor has received payment (simulated)');
+  if (result.fullyApproved && result.payout) {
+    console.log('  Final Milestone Status: APPROVED');
+    console.log('  Payout Request Status: PENDING_ADMIN_PAYOUT');
+    console.log('  Admin moet payout goedkeuren voordat aannemer wordt uitbetaald');
   } else {
     console.log('  Milestone Status: SUBMITTED (wachtend op beide goedkeuringen)');
   }
@@ -457,10 +459,13 @@ export async function rejectMilestone(
     });
 
     // 3. Zet milestone terug naar IN_PROGRESS zodat aannemer kan herwerken
+    // Reset approvedByContractor en requiresConsumerAction
     const finalMilestone = await tx.milestone.update({
       where: { id: milestone.id },
       data: {
         status: MilestoneStatus.IN_PROGRESS,
+        approvedByContractor: false,
+        requiresConsumerAction: false,
       },
       include: {
         project: {
@@ -638,10 +643,14 @@ export async function submitMilestone(
   console.log('  Current status:', milestone.status);
 
   // Update milestone status naar SUBMITTED
+  // Bij indienen: approvedByContractor = true (aannemer heeft zijn deel afgerond)
+  // requiresConsumerAction = true (consument moet nu actie ondernemen)
   const updatedMilestone = await prisma.milestone.update({
     where: { id: milestone.id },
     data: {
       status: MilestoneStatus.SUBMITTED,
+      approvedByContractor: true,
+      requiresConsumerAction: true,
     },
     include: {
       project: {
@@ -714,13 +723,23 @@ export async function startMilestone(
     );
   }
 
+  // Check of project gefund is - aannemer mag alleen starten als project FULLY_FUNDED is
+  if (milestone.project.paymentStatus !== ProjectPaymentStatus.FULLY_FUNDED) {
+    throw new ValidationError(
+      'Dit project is nog niet (voldoende) gefund. De consument moet eerst geld naar escrow overmaken voordat werk kan starten.'
+    );
+  }
+
   console.log('▶️  [MILESTONE] Updating status: PENDING → IN_PROGRESS');
 
   // Update milestone status naar IN_PROGRESS
+  // Bij start werk: approvedByContractor = false, requiresConsumerAction = false
   const updatedMilestone = await prisma.milestone.update({
     where: { id: milestone.id },
     data: {
       status: MilestoneStatus.IN_PROGRESS,
+      approvedByContractor: false,
+      requiresConsumerAction: false,
     },
     include: {
       project: {

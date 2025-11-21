@@ -8,6 +8,8 @@ export interface Project {
   description: string;
   totalBudget: number;
   status: string;
+  paymentStatus?: 'NOT_FUNDED' | 'PARTIALLY_FUNDED' | 'FULLY_FUNDED';
+  escrowFundedAmount?: number;
   startDate?: string | null;
   endDate?: string | null;
   createdAt: string;
@@ -39,6 +41,7 @@ export interface Milestone {
   dueDate?: string | null;
   approvedByConsumer?: boolean;
   approvedByContractor?: boolean;
+  requiresConsumerAction?: boolean;
   createdAt: string;
   updatedAt: string;
 }

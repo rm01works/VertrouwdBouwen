@@ -45,12 +45,39 @@ enum MilestoneStatus {
   PAID
 }
 
-// Escrow payment statuses
+// Escrow payment statuses (voor legacy EscrowPayment model)
 enum PaymentStatus {
   PENDING
   HELD
   RELEASED
   REFUNDED
+}
+
+// Project payment status (voor project-level escrow)
+enum ProjectPaymentStatus {
+  NOT_FUNDED
+  PARTIALLY_FUNDED
+  FULLY_FUNDED
+}
+
+// Project payment direction
+enum ProjectPaymentDirection {
+  INCOMING  // Consument betaalt naar escrow
+  OUTGOING  // Uitbetaling aan aannemer (via Payout model)
+}
+
+// Project payment status (voor inkomende escrow betalingen)
+enum ProjectPaymentStatusEnum {
+  PENDING_CONSUMER        // Consument heeft betaling geïnitieerd maar nog niet voltooid (optioneel)
+  PENDING_ADMIN_REVIEW    // Consument zegt betaald te hebben, admin moet controleren
+  ESCROW_CONFIRMED        // Admin heeft betaling goedgekeurd, geld staat in escrow
+  REJECTED                // Admin heeft betaling afgewezen
+}
+
+// Payout status (voor uitbetalingen aan aannemers)
+enum PayoutStatus {
+  PENDING_ADMIN_PAYOUT    // Milestone goedgekeurd, wacht op admin uitbetaling
+  PAID                    // Admin heeft uitbetaald
 }
 
 // Approval statuses
@@ -94,6 +121,8 @@ model User {
   approvals         Approval[]
   sentMessages      Message[]  @relation("SentMessages")
   initiatedDisputes Dispute[]  @relation("InitiatorDisputes")
+  projectPayments   ProjectPayment[] @relation("ConsumerPayments") // Betalingen die consument heeft gedaan
+  payouts           Payout[]         @relation("ContractorPayouts") // Uitbetalingen die aannemer heeft ontvangen
 
   @@index([email])
   @@index([role])
@@ -109,28 +138,33 @@ model User {
 // ============================================================================
 
 model Project {
-  id          String        @id @default(uuid())
-  customerId  String        @map("customer_id")
-  contractorId String?       @map("contractor_id") // Null tot acceptatie door aannemer
-  title       String
-  description String
-  totalBudget Decimal       @map("total_budget") @db.Decimal(10, 2)
-  status      ProjectStatus @default(DRAFT)
-  startDate   DateTime?     @map("start_date") @db.Date
-  endDate     DateTime?     @map("end_date") @db.Date
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id                String              @id @default(uuid())
+  customerId        String              @map("customer_id")
+  contractorId      String?             @map("contractor_id") // Null tot acceptatie door aannemer
+  title             String
+  description       String
+  totalBudget       Decimal             @map("total_budget") @db.Decimal(10, 2)
+  status            ProjectStatus       @default(DRAFT)
+  paymentStatus     ProjectPaymentStatus @default(NOT_FUNDED) @map("payment_status")
+  escrowFundedAmount Decimal            @default(0) @map("escrow_funded_amount") @db.Decimal(10, 2) // Huidige saldo op escrow voor dit project
+  startDate         DateTime?           @map("start_date") @db.Date
+  endDate           DateTime?           @map("end_date") @db.Date
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
 
   // Relations
-  customer    User       @relation("CustomerProjects", fields: [customerId], references: [id], onDelete: Restrict)
-  contractor  User?      @relation("ContractorProjects", fields: [contractorId], references: [id], onDelete: SetNull)
-  milestones  Milestone[]
-  messages    Message[]
-  disputes    Dispute[]
+  customer          User                @relation("CustomerProjects", fields: [customerId], references: [id], onDelete: Restrict)
+  contractor        User?               @relation("ContractorProjects", fields: [contractorId], references: [id], onDelete: SetNull)
+  milestones        Milestone[]
+  messages          Message[]
+  disputes          Dispute[]
+  projectPayments   ProjectPayment[]    // Inkomende escrow betalingen
+  payouts           Payout[]            // Uitbetalingen aan aannemers
 
   @@index([customerId])
   @@index([contractorId])
   @@index([status])
+  @@index([paymentStatus])
   @@index([createdAt])
   @@map("projects")
 }
@@ -154,6 +188,7 @@ model Milestone {
   dueDate             DateTime?       @map("due_date") @db.Date
   approvedByConsumer   Boolean         @default(false) @map("approved_by_consumer")
   approvedByContractor Boolean         @default(false) @map("approved_by_contractor")
+  requiresConsumerAction Boolean       @default(false) @map("requires_consumer_action") // True wanneer aannemer milestone heeft ingediend en consument actie moet ondernemen
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
 
@@ -162,6 +197,7 @@ model Milestone {
   payments    EscrowPayment[]
   approvals   Approval[]
   disputes    Dispute[]
+  payout      Payout?         // Optionele payout voor deze milestone (max 1 per milestone)
 
   @@unique([projectId, order]) // Unieke combinatie van project en volgorde
   @@index([projectId])
@@ -280,5 +316,76 @@ model Dispute {
   @@index([initiatorId])
   @@index([status])
   @@map("disputes")
+}
+
+// ============================================================================
+// PROJECT PAYMENT MODEL
+// ============================================================================
+// Inkomende escrow betalingen van consument naar project
+// Status flow: PENDING_ADMIN_REVIEW → ESCROW_CONFIRMED (of REJECTED)
+// Admin moet betaling controleren en goedkeuren voordat geld in escrow staat
+// ============================================================================
+
+model ProjectPayment {
+  id                String                    @id @default(uuid())
+  projectId         String                    @map("project_id")
+  consumerId        String                    @map("consumer_id")
+  amount            Decimal                   @db.Decimal(10, 2)
+  direction         ProjectPaymentDirection   @default(INCOMING)
+  status            ProjectPaymentStatusEnum  @default(PENDING_ADMIN_REVIEW) @map("status")
+  transactionRef    String?                  @unique @map("transaction_reference") // Externe transactie referentie (optioneel)
+  adminNotes        String?                   @map("admin_notes") // Notities van admin bij review
+  confirmedAt       DateTime?                 @map("confirmed_at") // Wanneer admin heeft goedgekeurd
+  confirmedBy       String?                   @map("confirmed_by") // Admin ID die heeft goedgekeurd
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+
+  // Relations
+  project           Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  consumer          User                      @relation("ConsumerPayments", fields: [consumerId], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([consumerId])
+  @@index([status])
+  @@index([transactionRef])
+  @@index([createdAt])
+  @@map("project_payments")
+}
+
+// ============================================================================
+// PAYOUT MODEL
+// ============================================================================
+// Uitbetalingen aan aannemers na milestone completion
+// Status flow: PENDING_ADMIN_PAYOUT → PAID
+// Wordt automatisch aangemaakt wanneer milestone door beide partijen is goedgekeurd
+// Admin moet payout markeren als PAID na daadwerkelijke uitbetaling
+// ============================================================================
+
+model Payout {
+  id                String        @id @default(uuid())
+  projectId         String        @map("project_id")
+  milestoneId       String        @unique @map("milestone_id") // Unique voor one-to-one relatie met Milestone
+  contractorId      String        @map("contractor_id")
+  amount            Decimal       @db.Decimal(10, 2)
+  status            PayoutStatus  @default(PENDING_ADMIN_PAYOUT)
+  transactionRef    String?       @unique @map("transaction_reference") // Externe transactie referentie (optioneel)
+  adminNotes        String?       @map("admin_notes") // Notities van admin bij uitbetaling
+  requestedAt       DateTime      @default(now()) @map("requested_at") // Wanneer payout request is aangemaakt
+  paidAt            DateTime?     @map("paid_at") // Wanneer admin heeft uitbetaald
+  paidBy            String?       @map("paid_by") // Admin ID die heeft uitbetaald
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  project           Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone         Milestone     @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+  contractor        User          @relation("ContractorPayouts", fields: [contractorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([contractorId])
+  @@index([status])
+  @@index([transactionRef])
+  @@index([requestedAt])
+  @@map("payouts")
 }
 

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertCircle, RefreshCw, CheckCircle2, FileText, TrendingUp } from 'lucide-react';
 import { PageShell, PageHeader, PageSection } from '@/components/layout/Page';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -50,22 +51,21 @@ export default function MilestonesPage() {
     if (!user || !milestones.length) return [];
 
     return milestones.filter((milestone) => {
-      // Voor consumenten: milestones die SUBMITTED zijn en nog niet goedgekeurd
+      // Voor consumenten: milestones die wachten op consument actie
       if (user.role === 'CUSTOMER') {
         return (
           milestone.status === 'SUBMITTED' &&
-          !milestone.approvedByConsumer &&
-          milestone.payments?.some((p) => p.status === 'HELD')
+          milestone.requiresConsumerAction === true && // Aannemer heeft milestone ingediend
+          milestone.approvedByConsumer === false && // Consument heeft nog niet goedgekeurd
+          // Payment check is optioneel - milestone kan ook zonder payment wachten op goedkeuring
+          (milestone.payments?.length === 0 || milestone.payments?.some((p) => p.status === 'HELD'))
         );
       }
 
-      // Voor aannemers: milestones die SUBMITTED zijn en nog niet goedgekeurd door aannemer
+      // Voor aannemers: geen milestones die wachten op actie
+      // Aannemer heeft al zijn deel gedaan door milestone in te dienen
       if (user.role === 'CONTRACTOR') {
-        return (
-          milestone.status === 'SUBMITTED' &&
-          !milestone.approvedByContractor &&
-          milestone.payments?.some((p) => p.status === 'HELD')
-        );
+        return false; // Aannemer heeft geen acties meer na indienen
       }
 
       return false;
@@ -144,7 +144,7 @@ export default function MilestonesPage() {
           meta="Workflow"
           actions={
             <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" size="sm" onClick={loadMilestones}>
+              <Button variant="secondary" size="sm" onClick={loadMilestones} startIcon={<RefreshCw className="h-4 w-4" />}>
                 Vernieuwen
               </Button>
             </div>
@@ -161,15 +161,20 @@ export default function MilestonesPage() {
             <Card className="border-warning bg-warning-subtle">
               <CardBody>
                 <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      Wacht op jouw actie
-                    </h3>
-                    <p className="text-sm text-foreground-muted">
-                      Er {awaitingAction.length === 1 ? 'staat' : 'staan'} {awaitingAction.length} milestone{awaitingAction.length > 1 ? 's' : ''} klaar voor goedkeuring.
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-warning/20">
+                      <AlertCircle className="h-5 w-5 text-warning" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground mb-2">
+                        Wacht op jouw actie
+                      </h3>
+                      <p className="text-sm text-foreground-muted">
+                        Er {awaitingAction.length === 1 ? 'staat' : 'staan'} {awaitingAction.length} milestone{awaitingAction.length > 1 ? 's' : ''} klaar voor goedkeuring.
+                      </p>
+                    </div>
                   </div>
-                  <Badge variant="warning" className="text-sm">
+                  <Badge variant="warning" className="text-sm font-bold">
                     {awaitingAction.length} open
                   </Badge>
                 </div>
@@ -184,28 +189,37 @@ export default function MilestonesPage() {
           description="Alle milestones uit alle projecten"
         >
           <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3">
-            <Card>
+            <Card className="border border-gray-200 dark:border-neutral-700">
               <CardBody>
-                <p className="text-xs uppercase tracking-wide text-foreground-muted mb-1">
-                  Totaal milestones
-                </p>
-                <p className="text-2xl font-semibold text-foreground">{milestones.length}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                    Totaal milestones
+                  </p>
+                  <FileText className="h-5 w-5 text-foreground-muted" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{milestones.length}</p>
               </CardBody>
             </Card>
-            <Card>
+            <Card className="border border-gray-200 dark:border-neutral-700">
               <CardBody>
-                <p className="text-xs uppercase tracking-wide text-foreground-muted mb-1">
-                  Wacht op actie
-                </p>
-                <p className="text-2xl font-semibold text-warning">{awaitingAction.length}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                    Wacht op actie
+                  </p>
+                  <AlertCircle className="h-5 w-5 text-warning" />
+                </div>
+                <p className="text-2xl font-bold text-warning">{awaitingAction.length}</p>
               </CardBody>
             </Card>
-            <Card>
+            <Card className="border border-gray-200 dark:border-neutral-700">
               <CardBody>
-                <p className="text-xs uppercase tracking-wide text-foreground-muted mb-1">
-                  Totaal bedrag
-                </p>
-                <p className="text-2xl font-semibold text-foreground">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-foreground-muted">
+                    Totaal bedrag
+                  </p>
+                  <TrendingUp className="h-5 w-5 text-foreground-muted" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">
                   {formatCurrency(
                     milestones.reduce((sum, m) => sum + m.amount, 0)
                   )}

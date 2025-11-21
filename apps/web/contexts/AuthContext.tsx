@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export interface User {
   id: string;
   email: string;
-  role: 'CUSTOMER' | 'CONTRACTOR';
+  role: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN';
   firstName?: string;
   lastName?: string;
   companyName?: string;
@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User | null>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -25,7 +25,7 @@ interface AuthContextType {
 interface RegisterData {
   email: string;
   password: string;
-  role: 'CUSTOMER' | 'CONTRACTOR';
+  role: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN';
   firstName: string;
   lastName: string;
   phone?: string;
@@ -147,12 +147,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('✅ Login succesvol vanuit frontend');
 
       // Set user from response
+      let loggedInUser: User | null = null;
       if (data.data?.user) {
-        setUser(data.data.user);
+        loggedInUser = data.data.user;
+        setUser(loggedInUser);
       } else {
         // Fetch user data als het niet in de response zit
         await refreshUser();
+        // Get user from state after refresh
+        loggedInUser = user; // This might be stale, but refreshUser should update it
       }
+      
+      return loggedInUser;
     } catch (error) {
       console.error('❌ Login error:', error);
       if (error instanceof Error) {

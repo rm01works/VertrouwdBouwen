@@ -25,6 +25,35 @@ export async function getContractors() {
 }
 
 /**
+ * Haal alle klanten op
+ * Gebruikt door admins om alle klanten te bekijken
+ */
+export async function getCustomers() {
+  return prisma.user.findMany({
+    where: {
+      role: UserRole.CUSTOMER,
+    },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      phone: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: {
+          customerProjects: true,
+        },
+      },
+    },
+    orderBy: {
+      lastName: 'asc',
+    },
+  });
+}
+
+/**
  * Haal één gebruiker op (voor validatie)
  */
 export async function getUserById(userId: string) {
@@ -37,6 +66,11 @@ export async function getUserById(userId: string) {
       firstName: true,
       lastName: true,
       companyName: true,
+      phone: true,
+      kvkNumber: true,
+      address: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
 }

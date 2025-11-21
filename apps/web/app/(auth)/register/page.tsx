@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { UserPlus, Mail, Lock, Phone, Building2, Hash } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardBody } from '@/components/ui/Card';
+import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
@@ -115,23 +117,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-12">
-        <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-primary">
-            VertrouwdBouwen
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-foreground">Account aanmaken</h1>
-          <p className="mt-3 text-base text-foreground-muted">
+    <div className="flex min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary-subtle/10 via-transparent to-transparent" />
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:py-12">
+        <div className="mb-8 sm:mb-10 text-center w-full max-w-2xl mx-auto">
+          <div className="mb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-foreground-muted">
+              Vertrouwd
+            </p>
+            <p className="text-xl font-semibold text-foreground">Bouwen</p>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3">Account aanmaken</h1>
+          <p className="text-sm sm:text-base text-foreground-muted">
             Start met een veilig escrow-platform voor klanten en aannemers. Vul je gegevens in om toegang te
             krijgen tot het dashboard.
           </p>
         </div>
 
-        <Card className="border border-border bg-surface shadow-elevated">
-          <CardBody className="space-y-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card className="shadow-sm border border-gray-200 dark:border-neutral-700">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">Account aanmaken</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-6 sm:space-y-8 p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
                 <Input
                   label="Voornaam"
                   name="firstName"
@@ -209,7 +221,7 @@ export default function RegisterPage() {
                 </>
               )}
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
                 <Input
                   label="Wachtwoord"
                   type="password"
@@ -234,15 +246,15 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isLoading}>
+              <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isLoading} startIcon={<UserPlus className="h-5 w-5" />}>
                 Registreren
               </Button>
             </form>
 
-            <div className="text-center">
+            <div className="text-center pt-4 border-t border-border">
               <p className="text-sm text-foreground-muted">
                 Heeft u al een account?{' '}
-                <Link href="/login" className="font-semibold text-primary hover:text-primary-hover">
+                <Link href="/login" className="font-semibold text-primary hover:text-primary-hover transition-colors">
                   Log hier in
                 </Link>
               </p>

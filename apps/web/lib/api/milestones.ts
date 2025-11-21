@@ -11,6 +11,7 @@ export interface Milestone {
   dueDate?: string | null;
   approvedByConsumer?: boolean;
   approvedByContractor?: boolean;
+  requiresConsumerAction?: boolean;
   createdAt: string;
   updatedAt: string;
   project?: {

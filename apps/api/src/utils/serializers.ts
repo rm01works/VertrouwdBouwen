@@ -23,12 +23,23 @@ export function decimalToNumber(value: Decimal | string | number | null | undefi
 export function transformProject(project: any): any {
   if (!project) return project;
 
+  // Bereken of alle milestones zijn afgerond
+  const milestones = project.milestones || [];
+  const allMilestonesCompleted = milestones.length > 0 && 
+    milestones.every((m: any) => m.status === 'PAID');
+  
+  const completedMilestonesCount = milestones.filter((m: any) => m.status === 'PAID').length;
+  const totalMilestonesCount = milestones.length;
+
   return {
     ...project,
     totalBudget: decimalToNumber(project.totalBudget),
-    milestones: project.milestones
-      ? project.milestones.map((milestone: any) => transformMilestone(milestone))
+    milestones: milestones.length > 0
+      ? milestones.map((milestone: any) => transformMilestone(milestone))
       : undefined,
+    allMilestonesCompleted,
+    completedMilestonesCount,
+    totalMilestonesCount,
   };
 }
 

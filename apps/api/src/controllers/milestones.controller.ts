@@ -7,7 +7,7 @@ import {
   startMilestone,
   getMilestonesForUser,
 } from '../services/milestones.service';
-import { transformMilestone, transformPayment, transformMilestones } from '../utils/serializers';
+import { transformMilestone, transformMilestones } from '../utils/serializers';
 
 /**
  * Keur milestone goed en geef betaling vrij
@@ -41,7 +41,7 @@ export async function approveMilestoneController(
       data: {
         milestone: transformMilestone(result.milestone),
         approval: result.approval,
-        payment: result.payment ? transformPayment(result.payment) : null,
+        payout: result.payout || null,
         fullyApproved: result.fullyApproved,
         message,
       },

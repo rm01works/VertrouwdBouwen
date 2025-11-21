@@ -7,7 +7,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const baseFieldClasses =
-  'w-full rounded-lg border border-border bg-surface px-4 py-3 text-foreground shadow-subtle placeholder:text-foreground-muted focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 focus-visible:outline-none transition-shadow duration-200';
+  'w-full rounded-lg border border-border bg-surface px-4 py-3 text-foreground shadow-subtle placeholder:text-foreground-muted focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 focus-visible:outline-none transition-all duration-200 hover:border-border-strong';
 
 export function Input({
   label,
