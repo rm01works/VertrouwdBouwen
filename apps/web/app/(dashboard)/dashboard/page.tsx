@@ -88,26 +88,38 @@ export default function ContractorDashboard() {
     }
   };
 
-  const handleMarkAsRead = async (notificationId: string) => {
+  const handleMarkAsRead = async (notificationId: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     try {
       const response = await markNotificationAsRead(notificationId);
       if (response.success) {
         // Verwijder notificatie uit lijst
         setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      } else {
+        console.error('Fout bij markeren notificatie als gelezen:', response.error);
+        alert(response.error?.message || 'Fout bij markeren notificatie als gelezen');
       }
     } catch (err) {
       console.error('Fout bij markeren notificatie als gelezen:', err);
+      alert('Er is een fout opgetreden bij het markeren van de notificatie als gelezen');
     }
   };
 
-  const handleMarkAllAsRead = async () => {
+  const handleMarkAllAsRead = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     try {
       const response = await markAllNotificationsAsRead();
       if (response.success) {
         setNotifications([]);
+      } else {
+        console.error('Fout bij markeren alle notificaties als gelezen:', response.error);
+        alert(response.error?.message || 'Fout bij markeren alle notificaties als gelezen');
       }
     } catch (err) {
       console.error('Fout bij markeren alle notificaties als gelezen:', err);
+      alert('Er is een fout opgetreden bij het markeren van alle notificaties als gelezen');
     }
   };
 
@@ -346,8 +358,9 @@ export default function ContractorDashboard() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleMarkAllAsRead}
+                    onClick={(e) => handleMarkAllAsRead(e)}
                     className="text-xs"
+                    type="button"
                   >
                     Alles markeren als gelezen
                   </Button>
@@ -377,9 +390,10 @@ export default function ContractorDashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleMarkAsRead(notification.id)}
+                        onClick={(e) => handleMarkAsRead(notification.id, e)}
                         className="flex-shrink-0"
                         title="Markeer als gelezen"
+                        type="button"
                       >
                         <X className="h-4 w-4" />
                       </Button>

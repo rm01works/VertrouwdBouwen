@@ -18,11 +18,12 @@ router.get('/', getNotificationsController);
 // GET /api/notifications/unread/count - Haal aantal ongelezen notificaties op
 router.get('/unread/count', getUnreadNotificationCountController);
 
+// PATCH /api/notifications/read-all - Markeer alle notificaties als gelezen
+// Deze route MOET voor /:id/read komen, anders wordt "read-all" als ID geïnterpreteerd
+router.patch('/read-all', markAllNotificationsAsReadController);
+
 // PATCH /api/notifications/:id/read - Markeer notificatie als gelezen
 router.patch('/:id/read', markNotificationAsReadController);
-
-// PATCH /api/notifications/read-all - Markeer alle notificaties als gelezen
-router.patch('/read-all', markAllNotificationsAsReadController);
 
 export default router;
 

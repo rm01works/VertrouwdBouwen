@@ -93,6 +93,14 @@ export async function PUT(
   return proxyRequest(request, path);
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
+) {
+  const { path } = await params;
+  return proxyRequest(request, path);
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
@@ -110,7 +118,7 @@ export async function OPTIONS(
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': request.headers.get('origin') || '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Allow-Credentials': 'true',
     },
