@@ -2,17 +2,21 @@
 
 FROM node:20-bullseye-slim
 
-RUN mkdir /app && chown -R node:node /app
+RUN mkdir /app 
 WORKDIR /app
-USER node
 
-COPY --chown=node:node package.json package-lock.json . 
+COPY package.json package-lock.json . 
+COPY apps/api/package.json ./apps/api/package.json
 
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
-COPY --chown=node:node apps/api packages /app
+COPY apps/api/prisma ./apps/api/prisma
+RUN npm run db:generate --workspace=apps/api
 
-RUN cat package-lock.json && npm run build:api
+COPY apps/api/ ./apps/api
+COPY packages/ ./packages
+
+RUN npm run build:api
 
 EXPOSE 5000
 CMD ["npm", "run", "start:api"]
