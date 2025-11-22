@@ -8,9 +8,9 @@
   # Build command for the Next.js frontend
   # This builds the shared package first, then the Next.js app
   command = "npm run build:web"
-  # Publish directory - Netlify Next.js plugin will handle this automatically
-  # The plugin will detect Next.js and use the correct output directory
-  publish = "apps/web/.next"
+  # Publish directory - DO NOT SET THIS for Next.js
+  # The @netlify/plugin-nextjs plugin automatically handles the output directory
+  # Setting publish manually causes "Routes Manifest Could Not Be Found" errors
 
 # Netlify Next.js plugin configuration
 # This plugin automatically handles Next.js App Router, server components, etc.
