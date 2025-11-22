@@ -29,6 +29,7 @@ import { Slider } from '@/components/ui/Slider';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { Badge } from '@/components/ui/Badge';
 import { FadeIn } from '@/components/ui/FadeIn';
+import { Counter } from '@/components/ui/Counter';
 
 export default function HomePage() {
   const [, setActiveTab] = useState<'consumer' | 'contractor'>('consumer');
@@ -67,98 +68,110 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main>
+      <main className="pb-20 md:pb-0">
         {/* 1️⃣ HERO SECTION - Mobile-first: compact stats, readable headlines, prominent CTAs */}
-        <section className="relative overflow-hidden py-8 sm:py-12 lg:py-16">
+        <section className="relative overflow-hidden py-12 sm:py-16 lg:py-20">
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary-subtle/30 via-transparent to-transparent blur-3xl" />
           
           <SectionContainer maxWidth="7xl">
-            <div className="text-center mb-6 sm:mb-8">
-              {/* KPI/Stats Section - Mobile: 2 columns with better spacing */}
-              <FadeIn direction="fade" delay={100}>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
-                  <Card className="border-0 border-2 border-primary/20 hover:border-primary/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1">
-                    <CardBody className="p-3 sm:p-4 text-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-subtle rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
-                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      </div>
-                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5">€2.5M+</div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Escrow Volume</p>
-                    </CardBody>
-                  </Card>
-                  
-                  <Card className="border-0 border-2 border-success/20 hover:border-success/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1">
-                    <CardBody className="p-3 sm:p-4 text-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-success-subtle rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-                      </div>
-                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5">500+</div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Projecten</p>
-                    </CardBody>
-                  </Card>
-                  
-                  <Card className="border-0 border-2 border-info/20 hover:border-info/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1">
-                    <CardBody className="p-3 sm:p-4 text-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-info-subtle rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
-                        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
-                      </div>
-                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5">1,200+</div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Gebruikers</p>
-                    </CardBody>
-                  </Card>
-                  
-                  <Card className="border-0 border-2 border-warning/20 hover:border-warning/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1">
-                    <CardBody className="p-3 sm:p-4 text-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-warning-subtle rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
-                        <Star className="w-4 h-4 sm:w-5 sm:h-5 text-warning fill-warning" />
-                      </div>
-                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5">4.9/5</div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Beoordeling</p>
-                    </CardBody>
-                  </Card>
-                </div>
-              </FadeIn>
-
-              <FadeIn direction="up" delay={200}>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 tracking-tight px-2">
+            <div className="text-center">
+              {/* Headline First - Better Visual Hierarchy */}
+              <FadeIn direction="up" delay={100}>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-5 tracking-tight px-2">
                   Veilig bouwen begint met vertrouwen
                   <br />
                   <span className="text-primary">— voor iedereen.</span>
                 </h1>
               </FadeIn>
               
-              <FadeIn direction="up" delay={300}>
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground-muted mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed px-4">
+              {/* Description */}
+              <FadeIn direction="up" delay={200}>
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground-muted mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
                   VertrouwdBouwen beschermt consumenten én aannemers met een onafhankelijk escrow-systeem
                   dat betalingen veilig stelt tot de klus is afgerond.
                 </p>
               </FadeIn>
 
-              <FadeIn direction="up" delay={400}>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-stretch sm:items-center mb-3 sm:mb-4 px-4">
+              {/* Primary CTAs - More Prominent */}
+              <FadeIn direction="up" delay={300}>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6 sm:mb-8 px-4">
                   <Link href="/register?role=CUSTOMER" className="w-full sm:w-auto flex-1 sm:flex-initial">
-                    <Button variant="primary" size="lg" className="w-full sm:w-auto min-h-[44px] sm:min-h-[48px]" startIcon={<Home className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                    <Button variant="primary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg shadow-elevated hover:shadow-popover" startIcon={<Home className="h-5 w-5" />}>
                       Start als consument
                     </Button>
                   </Link>
                   <Link href="/register?role=CONTRACTOR" className="w-full sm:w-auto flex-1 sm:flex-initial">
-                    <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-[44px] sm:min-h-[48px]" startIcon={<Building2 className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                    <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg" startIcon={<Building2 className="h-5 w-5" />}>
                       Start als aannemer
                     </Button>
                   </Link>
                 </div>
               </FadeIn>
 
-              <FadeIn direction="up" delay={500}>
-                <Link href="/hoe-het-werkt" className="text-xs sm:text-sm text-foreground-muted hover:text-primary transition-colors inline-flex items-center gap-1 min-h-[44px] justify-center">
+              {/* Secondary Link */}
+              <FadeIn direction="up" delay={400}>
+                <Link href="/hoe-het-werkt" className="text-sm sm:text-base text-foreground-muted hover:text-primary transition-colors inline-flex items-center gap-1.5 min-h-[44px] justify-center mb-8 sm:mb-10">
                   Bekijk hoe escrow werkt
-                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <ChevronRight className="h-4 w-4" />
                 </Link>
+              </FadeIn>
+
+              {/* KPI/Stats Section - More Subtle, Below CTAs */}
+              <FadeIn direction="fade" delay={500}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto mb-6 sm:mb-8 px-4">
+                  <Card className="border-0 border border-border/50 hover:border-primary/30 bg-surface/50 hover:bg-surface rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-subtle hover:-translate-y-0.5">
+                    <CardBody className="p-3 sm:p-4 text-center">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-subtle/50 rounded-full flex items-center justify-center mx-auto mb-2 opacity-70">
+                        <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                      </div>
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                        €<Counter value="2.5M+" duration={2000} />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Escrow Volume</p>
+                    </CardBody>
+                  </Card>
+                  
+                  <Card className="border-0 border border-border/50 hover:border-success/30 bg-surface/50 hover:bg-surface rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-subtle hover:-translate-y-0.5">
+                    <CardBody className="p-3 sm:p-4 text-center">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-success-subtle/50 rounded-full flex items-center justify-center mx-auto mb-2 opacity-70">
+                        <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
+                      </div>
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                        <Counter value={500} suffix="+" duration={2000} />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Projecten</p>
+                    </CardBody>
+                  </Card>
+                  
+                  <Card className="border-0 border border-border/50 hover:border-info/30 bg-surface/50 hover:bg-surface rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-subtle hover:-translate-y-0.5">
+                    <CardBody className="p-3 sm:p-4 text-center">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-info-subtle/50 rounded-full flex items-center justify-center mx-auto mb-2 opacity-70">
+                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-info" />
+                      </div>
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                        <Counter value={1200} suffix="+" duration={2000} />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Gebruikers</p>
+                    </CardBody>
+                  </Card>
+                  
+                  <Card className="border-0 border border-border/50 hover:border-warning/30 bg-surface/50 hover:bg-surface rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-subtle hover:-translate-y-0.5">
+                    <CardBody className="p-3 sm:p-4 text-center">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-warning-subtle/50 rounded-full flex items-center justify-center mx-auto mb-2 opacity-70">
+                        <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning" />
+                      </div>
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                        <Counter value={4.9} suffix="/5" duration={2000} decimals={1} />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Beoordeling</p>
+                    </CardBody>
+                  </Card>
+                </div>
               </FadeIn>
 
               {/* Trust Badges - Mobile: wrap better, smaller text */}
               <FadeIn direction="up" delay={600}>
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border px-4">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6 pt-4 sm:pt-6 border-t border-border/50 px-4">
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-foreground-muted">
                     <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-success flex-shrink-0" />
                     <span>100% Veilig</span>
@@ -179,7 +192,7 @@ export default function HomePage() {
         </section>
 
         {/* 2️⃣ "HOE HET WERKT VOOR JOU" — TAB SWITCH - Mobile: better touch targets, stacked layout */}
-        <section id="hoe-het-werkt" className="py-8 sm:py-12 lg:py-16 bg-surface">
+        <section id="hoe-het-werkt" className="py-12 sm:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
@@ -222,8 +235,8 @@ export default function HomePage() {
                                 1
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Start escrow</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Start escrow</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Maak je project aan en stort het budget veilig in escrow. Het geld blijft beschermd tot je tevreden bent.
                                 </p>
                               </div>
@@ -233,8 +246,8 @@ export default function HomePage() {
                                 2
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Betaal veilig vooruit</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Betaal veilig vooruit</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Je geld wordt veilig bewaard door een onafhankelijke partij. Geen risico op verlies.
                                 </p>
                               </div>
@@ -244,8 +257,8 @@ export default function HomePage() {
                                 3
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Pas betalen bij goedkeuring</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Pas betalen bij goedkeuring</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Keur elke milestone goed voordat betaling wordt vrijgegeven. Volledige controle over je project.
                                 </p>
                               </div>
@@ -253,17 +266,17 @@ export default function HomePage() {
                           </div>
                         </div>
                         <div className="bg-primary-subtle/30 rounded-lg sm:rounded-xl p-4 sm:p-5 mt-4 md:mt-0">
-                          <h4 className="font-semibold text-foreground mb-2 text-xs sm:text-sm">Mini-case</h4>
-                          <p className="text-xs text-foreground-muted mb-3 leading-relaxed">
+                          <h4 className="font-semibold text-foreground mb-2 text-sm sm:text-base">Mini-case</h4>
+                          <p className="text-sm sm:text-base text-foreground-muted mb-3 leading-relaxed">
                             &quot;Ik wilde mijn keuken verbouwen maar was bang voor betalingsproblemen. Met VertrouwdBouwen kon ik rustig werken met een aannemer, wetende dat mijn geld veilig was tot alles klaar was.&quot;
                           </p>
-                          <div className="flex items-center gap-2 text-xs">
-                            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-warning fill-warning flex-shrink-0" />
+                          <div className="flex items-center gap-2 text-sm">
+                            <Star className="h-4 w-4 text-warning fill-warning flex-shrink-0" />
                             <span className="font-medium text-foreground">5/5 sterren</span>
                           </div>
                           <div className="mt-3 pt-3 border-t border-border">
-                            <p className="text-xs font-semibold text-foreground mb-1.5">💡 Tip</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">
+                            <p className="text-sm font-semibold text-foreground mb-1.5">💡 Tip</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                               Verdeel grote projecten in milestones voor betere controle en transparantie.
                             </p>
                           </div>
@@ -290,8 +303,8 @@ export default function HomePage() {
                                 1
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Zekerheid vóór je begint</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Zekerheid vóór je begint</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Het geld staat al in escrow voordat je start. Geen zorgen over betaling achteraf.
                                 </p>
                               </div>
@@ -301,8 +314,8 @@ export default function HomePage() {
                                 2
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Nooit meer achter geld aan</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Nooit meer achter geld aan</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Zodra de klant goedkeurt, wordt je automatisch betaald. Geen incasso&apos;s of wachttijden.
                                 </p>
                               </div>
@@ -312,8 +325,8 @@ export default function HomePage() {
                                 3
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">Binnen 24 uur betaald</h4>
-                                <p className="text-xs text-foreground-muted leading-relaxed">
+                                <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Binnen 24 uur betaald</h4>
+                                <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                                   Na goedkeuring ontvang je je betaling snel en veilig. Focus op je werk, niet op facturering.
                                 </p>
                               </div>
@@ -321,17 +334,17 @@ export default function HomePage() {
                           </div>
                         </div>
                         <div className="bg-success-subtle/30 rounded-lg sm:rounded-xl p-4 sm:p-5 mt-4 md:mt-0">
-                          <h4 className="font-semibold text-foreground mb-2 text-xs sm:text-sm">Mini-case</h4>
-                          <p className="text-xs text-foreground-muted mb-3 leading-relaxed">
+                          <h4 className="font-semibold text-foreground mb-2 text-sm sm:text-base">Mini-case</h4>
+                          <p className="text-sm sm:text-base text-foreground-muted mb-3 leading-relaxed">
                             &quot;Als aannemer was ik altijd bezig met facturen en betalingen achterhalen. Nu werk ik alleen nog met projecten via VertrouwdBouwen - gegarandeerde betaling en geen gedoe meer.&quot;
                           </p>
-                          <div className="flex items-center gap-2 text-xs">
-                            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-warning fill-warning flex-shrink-0" />
+                          <div className="flex items-center gap-2 text-sm">
+                            <Star className="h-4 w-4 text-warning fill-warning flex-shrink-0" />
                             <span className="font-medium text-foreground">5/5 sterren</span>
                           </div>
                           <div className="mt-3 pt-3 border-t border-border">
-                            <p className="text-xs font-semibold text-foreground mb-1.5">💡 Tip</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">
+                            <p className="text-sm font-semibold text-foreground mb-1.5">💡 Tip</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                               Communiceer duidelijk over milestones om snelle goedkeuring te krijgen.
                             </p>
                           </div>
@@ -346,7 +359,7 @@ export default function HomePage() {
         </section>
 
         {/* 3️⃣ USP BLOK (4 GRID ITEMS) - Mobile: stacked cards with better spacing */}
-        <section className="py-8 sm:py-12 lg:py-16">
+        <section className="py-12 sm:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
@@ -367,7 +380,7 @@ export default function HomePage() {
                       <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-success" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-1.5">Gegarandeerde betaling</h3>
-                    <p className="text-xs text-foreground-muted leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                       Aannemers krijgen gegarandeerd betaald zodra werk is goedgekeurd. Geen incasso&apos;s meer.
                     </p>
                   </CardBody>
@@ -381,7 +394,7 @@ export default function HomePage() {
                       <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-1.5">Bescherming consumenten</h3>
-                    <p className="text-xs text-foreground-muted leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                       Je geld blijft veilig tot je tevreden bent. Volledige controle over elke betaling.
                     </p>
                   </CardBody>
@@ -395,7 +408,7 @@ export default function HomePage() {
                       <FileCheck className="w-6 h-6 sm:w-7 sm:h-7 text-info" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-1.5">Transparante afspraken</h3>
-                    <p className="text-xs text-foreground-muted leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                       Duidelijke milestones en afspraken. Alles is vastgelegd en traceerbaar.
                     </p>
                   </CardBody>
@@ -409,7 +422,7 @@ export default function HomePage() {
                       <Handshake className="w-6 h-6 sm:w-7 sm:h-7 text-warning" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-1.5">Minder conflicten</h3>
-                    <p className="text-xs text-foreground-muted leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
                       Duidelijke verwachtingen en automatische processen voorkomen misverstanden.
                     </p>
                   </CardBody>
@@ -420,7 +433,7 @@ export default function HomePage() {
         </section>
 
         {/* 3.5️⃣ LINKS VOOR CONSUMENTEN EN AANNEMERS - Nieuwe sectie met logische links */}
-        <section className="py-8 sm:py-12 lg:py-16 bg-surface">
+        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
@@ -449,26 +462,26 @@ export default function HomePage() {
                     <div className="grid sm:grid-cols-2 gap-3">
                       <Link href="/hoe-het-werkt" className="group">
                         <div className="p-3 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-primary transition-colors">Hoe escrow werkt</h4>
-                          <p className="text-xs text-foreground-muted">Uitleg over het escrow proces</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-primary transition-colors">Hoe escrow werkt</h4>
+                          <p className="text-sm text-foreground-muted">Uitleg over het escrow proces</p>
                         </div>
                       </Link>
                       <Link href="/consument/checklist" className="group">
                         <div className="p-3 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-primary transition-colors">Checklist verbouwing</h4>
-                          <p className="text-xs text-foreground-muted">Stap-voor-stap gids</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-primary transition-colors">Checklist verbouwing</h4>
+                          <p className="text-sm text-foreground-muted">Stap-voor-stap gids</p>
                         </div>
                       </Link>
                       <Link href="/calculator" className="group">
                         <div className="p-3 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-primary transition-colors">Escrow calculator</h4>
-                          <p className="text-xs text-foreground-muted">Bereken je kosten</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-primary transition-colors">Escrow calculator</h4>
+                          <p className="text-sm text-foreground-muted">Bereken je kosten</p>
                         </div>
                       </Link>
                       <Link href="/consument/hulp" className="group">
                         <div className="p-3 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-primary transition-colors">Problemen oplossen</h4>
-                          <p className="text-xs text-foreground-muted">FAQ en hulp</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-primary transition-colors">Problemen oplossen</h4>
+                          <p className="text-sm text-foreground-muted">FAQ en hulp</p>
                         </div>
                       </Link>
                     </div>
@@ -491,26 +504,26 @@ export default function HomePage() {
                     <div className="grid sm:grid-cols-2 gap-3">
                       <Link href="/aannemer/werken-met-escrow" className="group">
                         <div className="p-3 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-success transition-colors">Werken met escrow</h4>
-                          <p className="text-xs text-foreground-muted">Complete gids</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-success transition-colors">Werken met escrow</h4>
+                          <p className="text-sm text-foreground-muted">Complete gids</p>
                         </div>
                       </Link>
                       <Link href="/aannemer/tips" className="group">
                         <div className="p-3 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-success transition-colors">Klantcommunicatie tips</h4>
-                          <p className="text-xs text-foreground-muted">Beste praktijken</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-success transition-colors">Klantcommunicatie tips</h4>
+                          <p className="text-sm text-foreground-muted">Beste praktijken</p>
                         </div>
                       </Link>
                       <Link href="/register?role=CONTRACTOR" className="group">
                         <div className="p-3 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-success transition-colors">Professioneel profiel</h4>
-                          <p className="text-xs text-foreground-muted">Registreer je bedrijf</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-success transition-colors">Professioneel profiel</h4>
+                          <p className="text-sm text-foreground-muted">Registreer je bedrijf</p>
                         </div>
                       </Link>
                       <Link href="/hoe-het-werkt" className="group">
                         <div className="p-3 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors">
-                          <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm group-hover:text-success transition-colors">Hoe het werkt</h4>
-                          <p className="text-xs text-foreground-muted">Platform uitleg</p>
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base group-hover:text-success transition-colors">Hoe het werkt</h4>
+                          <p className="text-sm text-foreground-muted">Platform uitleg</p>
                         </div>
                       </Link>
                     </div>
@@ -522,61 +535,69 @@ export default function HomePage() {
         </section>
 
         {/* 4️⃣ UI SHOWCASE SLIDER - Mobile: stacked layout, readable text */}
-        <section className="py-8 sm:py-12 lg:py-16">
+        <section className="py-12 sm:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
-              <div className="text-center mb-6 sm:mb-8">
+              <div className="text-center mb-8 sm:mb-10">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
                   Ontdek de platform features
                 </h2>
-                <p className="text-sm sm:text-base text-foreground-muted max-w-2xl mx-auto px-4">
+                <p className="text-sm sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
                   Bekijk hoe VertrouwdBouwen werkt in de praktijk
                 </p>
               </div>
             </FadeIn>
 
-            <Slider autoPlay={true} autoPlayInterval={6000} className="max-w-5xl mx-auto px-4 sm:px-0">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Slider 
+                autoPlay={true} 
+                autoPlayInterval={6000} 
+                showControls={true}
+                showDots={true}
+                className="w-full"
+              >
               {/* Slide 1: Escrow Tijdlijn */}
-              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl">
-                <CardBody className="p-4 sm:p-6">
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6 items-center">
-                    <div>
-                      <Badge variant="info" className="mb-2 sm:mb-3 text-xs">Escrow Tijdlijn</Badge>
-                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Real-time project tracking</h3>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl shadow-sm hover:shadow-elevated transition-shadow duration-300">
+                <CardBody className="p-5 sm:p-6 md:p-8">
+                  <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+                    <div className="space-y-4">
+                      <Badge variant="info" className="mb-3 sm:mb-4 text-xs sm:text-sm">Escrow Tijdlijn</Badge>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-5">Real-time project tracking</h3>
+                      <div className="space-y-4 sm:space-y-5">
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor consumenten</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Volg elke milestone in real-time en zie precies waar je project staat.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor consumenten</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Volg elke milestone in real-time en zie precies waar je project staat.</p>
                           </div>
                         </div>
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor aannemers</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Dien milestones in en zie direct wanneer betaling wordt vrijgegeven.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor aannemers</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Dien milestones in en zie direct wanneer betaling wordt vrijgegeven.</p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-4 sm:p-6 mt-4 md:mt-0">
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex items-center justify-between p-2.5 sm:p-3 bg-surface rounded-lg border border-border">
-                          <span className="text-xs font-medium">Project gestart</span>
-                          <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-5 sm:p-6 mt-6 md:mt-0">
+                      <h4 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Project status</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 sm:p-4 bg-surface rounded-lg border border-border hover:border-primary/30 transition-colors">
+                          <span className="text-sm sm:text-base font-medium text-foreground">Project gestart</span>
+                          <CheckCircle className="w-5 h-5 text-success flex-shrink-0" />
                         </div>
-                        <div className="flex items-center justify-between p-2.5 sm:p-3 bg-surface rounded-lg border border-border">
-                          <span className="text-xs font-medium">Milestone 1: Voorbereiding</span>
-                          <Clock className="w-4 h-4 text-warning flex-shrink-0" />
+                        <div className="flex items-center justify-between p-3 sm:p-4 bg-surface rounded-lg border border-border hover:border-primary/30 transition-colors">
+                          <span className="text-sm sm:text-base font-medium text-foreground">Milestone 1: Voorbereiding</span>
+                          <Clock className="w-5 h-5 text-warning flex-shrink-0" />
                         </div>
-                        <div className="flex items-center justify-between p-2.5 sm:p-3 bg-surface rounded-lg border border-border">
-                          <span className="text-xs font-medium">Milestone 2: Uitvoering</span>
-                          <Clock className="w-4 h-4 text-info flex-shrink-0" />
+                        <div className="flex items-center justify-between p-3 sm:p-4 bg-surface rounded-lg border border-border hover:border-primary/30 transition-colors">
+                          <span className="text-sm sm:text-base font-medium text-foreground">Milestone 2: Uitvoering</span>
+                          <Clock className="w-5 h-5 text-info flex-shrink-0" />
                         </div>
                       </div>
                     </div>
@@ -585,46 +606,47 @@ export default function HomePage() {
               </Card>
 
               {/* Slide 2: Projectdossier */}
-              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl">
-                <CardBody className="p-4 sm:p-6">
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6 items-center">
-                    <div>
-                      <Badge variant="success" className="mb-2 sm:mb-3 text-xs">Projectdossier</Badge>
-                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Alles op één plek</h3>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl shadow-sm hover:shadow-elevated transition-shadow duration-300">
+                <CardBody className="p-5 sm:p-6 md:p-8">
+                  <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+                    <div className="space-y-4">
+                      <Badge variant="success" className="mb-3 sm:mb-4 text-xs sm:text-sm">Projectdossier</Badge>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-5">Alles op één plek</h3>
+                      <div className="space-y-4 sm:space-y-5">
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor consumenten</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Bewaar alle documenten, foto&apos;s en afspraken op één centrale plek.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor consumenten</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Bewaar alle documenten, foto&apos;s en afspraken op één centrale plek.</p>
                           </div>
                         </div>
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor aannemers</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Upload bewijs van werk en documenten voor snelle goedkeuring.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor aannemers</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Upload bewijs van werk en documenten voor snelle goedkeuring.</p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-4 sm:p-6 mt-4 md:mt-0">
-                      <div className="space-y-2">
-                        <div className="p-2.5 sm:p-3 bg-surface rounded-lg flex items-center gap-2 border border-border">
-                          <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-xs">Offerte.pdf</span>
+                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-5 sm:p-6 mt-6 md:mt-0">
+                      <h4 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Documenten</h4>
+                      <div className="space-y-3">
+                        <div className="p-3 sm:p-4 bg-surface rounded-lg flex items-center gap-3 border border-border hover:border-primary/30 transition-colors">
+                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                          <span className="text-sm sm:text-base font-medium text-foreground">Offerte.pdf</span>
                         </div>
-                        <div className="p-2.5 sm:p-3 bg-surface rounded-lg flex items-center gap-2 border border-border">
-                          <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-xs">Foto&apos;s werk.pdf</span>
+                        <div className="p-3 sm:p-4 bg-surface rounded-lg flex items-center gap-3 border border-border hover:border-primary/30 transition-colors">
+                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                          <span className="text-sm sm:text-base font-medium text-foreground">Foto&apos;s werk.pdf</span>
                         </div>
-                        <div className="p-2.5 sm:p-3 bg-surface rounded-lg flex items-center gap-2 border border-border">
-                          <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-xs">Factuur.pdf</span>
+                        <div className="p-3 sm:p-4 bg-surface rounded-lg flex items-center gap-3 border border-border hover:border-primary/30 transition-colors">
+                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                          <span className="text-sm sm:text-base font-medium text-foreground">Factuur.pdf</span>
                         </div>
                       </div>
                     </div>
@@ -633,60 +655,62 @@ export default function HomePage() {
               </Card>
 
               {/* Slide 3: Communicatie Center */}
-              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl">
-                <CardBody className="p-4 sm:p-6">
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6 items-center">
-                    <div>
-                      <Badge variant="info" className="mb-2 sm:mb-3 text-xs">Communicatie Center</Badge>
-                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Directe communicatie</h3>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl shadow-sm hover:shadow-elevated transition-shadow duration-300">
+                <CardBody className="p-5 sm:p-6 md:p-8">
+                  <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+                    <div className="space-y-4">
+                      <Badge variant="info" className="mb-3 sm:mb-4 text-xs sm:text-sm">Communicatie Center</Badge>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-5">Directe communicatie</h3>
+                      <div className="space-y-4 sm:space-y-5">
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor consumenten</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Chat direct met je aannemer en stel vragen over je project.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor consumenten</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Chat direct met je aannemer en stel vragen over je project.</p>
                           </div>
                         </div>
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
-                            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-foreground text-xs sm:text-sm">Voor aannemers</p>
-                            <p className="text-xs text-foreground-muted leading-relaxed">Beantwoord vragen snel en houd klanten op de hoogte.</p>
+                          <div className="min-w-0 flex-1 pt-1">
+                            <p className="font-semibold text-foreground text-base sm:text-lg mb-1.5">Voor aannemers</p>
+                            <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Beantwoord vragen snel en houd klanten op de hoogte.</p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-4 sm:p-6 mt-4 md:mt-0">
-                      <div className="space-y-2">
-                        <div className="p-2.5 sm:p-3 bg-surface rounded-lg border border-border">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex-shrink-0" />
-                            <span className="text-xs font-medium">Klant</span>
+                    <div className="bg-primary-subtle/20 rounded-lg sm:rounded-xl p-5 sm:p-6 mt-6 md:mt-0">
+                      <h4 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Chat voorbeeld</h4>
+                      <div className="space-y-3">
+                        <div className="p-3 sm:p-4 bg-surface rounded-lg border border-border hover:border-primary/30 transition-colors">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex-shrink-0" />
+                            <span className="text-sm sm:text-base font-medium text-foreground">Klant</span>
                           </div>
-                          <p className="text-xs text-foreground-muted">Wanneer kunnen we beginnen?</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Wanneer kunnen we beginnen?</p>
                         </div>
-                        <div className="p-2.5 sm:p-3 bg-surface rounded-lg border border-border">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-success rounded-full flex-shrink-0" />
-                            <span className="text-xs font-medium">Aannemer</span>
+                        <div className="p-3 sm:p-4 bg-surface rounded-lg border border-border hover:border-primary/30 transition-colors">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-success rounded-full flex-shrink-0" />
+                            <span className="text-sm sm:text-base font-medium text-foreground">Aannemer</span>
                           </div>
-                          <p className="text-xs text-foreground-muted">Volgende week maandag kunnen we starten!</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Volgende week maandag kunnen we starten!</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardBody>
               </Card>
-            </Slider>
+              </Slider>
+            </div>
           </SectionContainer>
         </section>
 
-        {/* 5️⃣ TESTIMONIALS GRID - Mobile: stacked cards with better spacing */}
-        <section className="py-8 sm:py-12 lg:py-16 bg-surface">
+        {/* 5️⃣ TESTIMONIALS CAROUSEL - Mobile: swipe support, desktop: grid fallback */}
+        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
@@ -699,7 +723,8 @@ export default function HomePage() {
               </div>
             </FadeIn>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 max-w-7xl mx-auto px-4 sm:px-0">
+            {/* Mobile: Carousel, Desktop: Grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-7xl mx-auto px-4 sm:px-0">
               {/* Review 1 - Consumer */}
               <FadeIn direction="up" delay={100}>
                 <Card className="border-0 border-2 border-primary/20 rounded-lg sm:rounded-xl shadow-sm hover:shadow-elevated transition-all duration-300 h-full flex flex-col">
@@ -709,7 +734,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;VertrouwdBouwen heeft mijn verbouwing compleet veranderd. Ik voelde me veilig om vooruit te betalen, en de aannemer kreeg gegarandeerd betaald. Perfect systeem!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -735,7 +760,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;Als aannemer is dit een game-changer. Geen gedoe meer met facturen achterhalen of betalingen uitstellen. Het geld staat al klaar, en na goedkeuring krijg ik het direct. Top!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -761,7 +786,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;Na een slechte ervaring met een vorige aannemer was ik erg voorzichtig. Met VertrouwdBouwen kon ik eindelijk met vertrouwen een groot project starten. Alles verliep perfect!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -787,7 +812,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;Het escrow systeem heeft mijn bedrijf geholpen om professioneler te werken. Klanten vertrouwen ons meer en we krijgen altijd op tijd betaald. Een win-win voor iedereen!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -813,7 +838,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;De transparantie en controle die ik heb over mijn project is geweldig. Ik kan elke milestone goedkeuren en weet precies waar mijn geld naartoe gaat. Zeer aan te raden!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -839,7 +864,7 @@ export default function HomePage() {
                         <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning fill-warning flex-shrink-0" />
                       ))}
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
+                    <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4 italic leading-relaxed flex-1">
                       &quot;Sinds ik alleen nog via VertrouwdBouwen werk, heb ik geen enkele betalingsachterstand meer gehad. Het systeem werkt perfect en mijn klanten zijn ook tevreden. Fantastisch platform!&quot;
                     </p>
                     <div className="flex items-center gap-2 pt-2.5 sm:pt-3 border-t border-border">
@@ -856,11 +881,160 @@ export default function HomePage() {
                 </Card>
               </FadeIn>
             </div>
+
+            {/* Mobile Carousel */}
+            <div className="md:hidden px-4">
+              <Slider autoPlay={true} autoPlayInterval={8000} showControls={true} showDots={true}>
+                {/* Review 1 - Consumer */}
+                <Card className="border-0 border-2 border-primary/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;VertrouwdBouwen heeft mijn verbouwing compleet veranderd. Ik voelde me veilig om vooruit te betalen, en de aannemer kreeg gegarandeerd betaald. Perfect systeem!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Home className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Sarah de Vries</p>
+                        <p className="text-xs text-foreground-muted truncate">Keukenverbouwing • €15.000</p>
+                      </div>
+                      <Badge variant="success" className="text-xs flex-shrink-0">Consument</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Review 2 - Contractor */}
+                <Card className="border-0 border-2 border-success/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;Als aannemer is dit een game-changer. Geen gedoe meer met facturen achterhalen of betalingen uitstellen. Het geld staat al klaar, en na goedkeuring krijg ik het direct. Top!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-success" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Jan Bakker Bouw</p>
+                        <p className="text-xs text-foreground-muted truncate">Aannemer • 50+ projecten</p>
+                      </div>
+                      <Badge variant="info" className="text-xs flex-shrink-0">Aannemer</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Review 3 - Consumer */}
+                <Card className="border-0 border-2 border-primary/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;Na een slechte ervaring met een vorige aannemer was ik erg voorzichtig. Met VertrouwdBouwen kon ik eindelijk met vertrouwen een groot project starten. Alles verliep perfect!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Home className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Mark van der Berg</p>
+                        <p className="text-xs text-foreground-muted truncate">Badkamer renovatie • €8.500</p>
+                      </div>
+                      <Badge variant="success" className="text-xs flex-shrink-0">Consument</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Review 4 - Contractor */}
+                <Card className="border-0 border-2 border-success/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;Het escrow systeem heeft mijn bedrijf geholpen om professioneler te werken. Klanten vertrouwen ons meer en we krijgen altijd op tijd betaald. Een win-win voor iedereen!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-success" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">De Vries Bouw</p>
+                        <p className="text-xs text-foreground-muted truncate">Aannemer • 100+ projecten</p>
+                      </div>
+                      <Badge variant="info" className="text-xs flex-shrink-0">Aannemer</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Review 5 - Consumer */}
+                <Card className="border-0 border-2 border-primary/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;De transparantie en controle die ik heb over mijn project is geweldig. Ik kan elke milestone goedkeuren en weet precies waar mijn geld naartoe gaat. Zeer aan te raden!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-primary-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Home className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Lisa Jansen</p>
+                        <p className="text-xs text-foreground-muted truncate">Uitbouw • €25.000</p>
+                      </div>
+                      <Badge variant="success" className="text-xs flex-shrink-0">Consument</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Review 6 - Contractor */}
+                <Card className="border-0 border-2 border-success/20 rounded-xl shadow-sm h-full flex flex-col">
+                  <CardBody className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-warning fill-warning flex-shrink-0" />
+                      ))}
+                    </div>
+                    <p className="text-base text-foreground mb-4 italic leading-relaxed flex-1">
+                      &quot;Sinds ik alleen nog via VertrouwdBouwen werk, heb ik geen enkele betalingsachterstand meer gehad. Het systeem werkt perfect en mijn klanten zijn ook tevreden. Fantastisch platform!&quot;
+                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      <div className="w-10 h-10 bg-success-subtle rounded-full flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-success" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Bouwbedrijf Smit</p>
+                        <p className="text-xs text-foreground-muted truncate">Aannemer • 75+ projecten</p>
+                      </div>
+                      <Badge variant="info" className="text-xs flex-shrink-0">Aannemer</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Slider>
+            </div>
           </SectionContainer>
         </section>
 
         {/* 6️⃣ WAAROM ESCROW ONMISBAAR IS? - Mobile: stacked layout, better spacing */}
-        <section className="py-8 sm:py-12 lg:py-16">
+        <section className="py-12 sm:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
@@ -890,22 +1064,22 @@ export default function HomePage() {
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Geld blijft veilig</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Tot je tevreden bent, blijft je geld beschermd.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Geld blijft veilig</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Tot je tevreden bent, blijft je geld beschermd.</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Volledige controle</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Jij bepaalt wanneer betaling wordt vrijgegeven.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Volledige controle</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Jij bepaalt wanneer betaling wordt vrijgegeven.</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Geen risico</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Bescherming tegen onafgemaakt werk of slechte kwaliteit.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Geen risico</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Bescherming tegen onafgemaakt werk of slechte kwaliteit.</p>
                         </div>
                       </li>
                     </ul>
@@ -921,7 +1095,7 @@ export default function HomePage() {
                       <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Veilige Oplevering</h3>
-                    <p className="text-xs sm:text-sm text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
                       Escrow zorgt ervoor dat beide partijen beschermd zijn. Het geld wordt alleen vrijgegeven wanneer beide partijen akkoord zijn.
                     </p>
                     <div className="flex items-center justify-center gap-2 text-xs text-foreground-muted">
@@ -948,22 +1122,22 @@ export default function HomePage() {
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Gegarandeerde betaling</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Het geld staat al klaar voordat je begint.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Gegarandeerde betaling</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Het geld staat al klaar voordat je begint.</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Snelle uitbetaling</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Binnen 24 uur betaald na goedkeuring.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Snelle uitbetaling</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Binnen 24 uur betaald na goedkeuring.</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground mb-0.5 text-xs sm:text-sm">Geen incasso&apos;s</p>
-                          <p className="text-xs text-foreground-muted leading-relaxed">Geen gedoe meer met achterstallige betalingen.</p>
+                          <p className="font-semibold text-foreground mb-0.5 text-sm sm:text-base">Geen incasso&apos;s</p>
+                          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">Geen gedoe meer met achterstallige betalingen.</p>
                         </div>
                       </li>
                     </ul>
@@ -975,7 +1149,7 @@ export default function HomePage() {
         </section>
 
         {/* 7️⃣ CTA VOOR SEGMENTATIE - Mobile: stacked, prominent buttons */}
-        <section className="py-8 sm:py-12 lg:py-16 bg-surface">
+        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <div className="grid md:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 max-w-5xl mx-auto px-4 sm:px-0">
               <FadeIn direction="right" delay={100}>
@@ -986,7 +1160,7 @@ export default function HomePage() {
                         <Home className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Start met veilig bouwen</h3>
-                      <p className="text-xs sm:text-sm text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
+                      <p className="text-sm sm:text-base text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
                         Bescherm je investering en werk met vertrouwen met geverifieerde aannemers.
                       </p>
                     </div>
@@ -1007,7 +1181,7 @@ export default function HomePage() {
                         <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-success-foreground" />
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">Werk met gegarandeerde betaling</h3>
-                      <p className="text-xs sm:text-sm text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
+                      <p className="text-sm sm:text-base text-foreground-muted mb-3 sm:mb-4 leading-relaxed">
                         Ontvang gegarandeerde betalingen en focus op wat je het beste doet: bouwen.
                       </p>
                     </div>
@@ -1130,6 +1304,22 @@ export default function HomePage() {
             </div>
           </SectionContainer>
         </footer>
+
+        {/* Sticky CTA for Mobile */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface/95 backdrop-blur-sm border-t border-border-strong shadow-elevated p-3 safe-area-inset-bottom">
+          <div className="flex gap-2 max-w-7xl mx-auto">
+            <Link href="/register?role=CUSTOMER" className="flex-1">
+              <Button variant="primary" size="lg" className="w-full min-h-[48px]" startIcon={<Home className="h-4 w-4" />}>
+                <span className="text-sm font-semibold">Start als consument</span>
+              </Button>
+            </Link>
+            <Link href="/register?role=CONTRACTOR" className="flex-1">
+              <Button variant="secondary" size="lg" className="w-full min-h-[48px]" startIcon={<Building2 className="h-4 w-4" />}>
+                <span className="text-sm font-semibold">Start als aannemer</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
       </main>
     </div>
   );
