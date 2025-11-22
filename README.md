@@ -414,9 +414,24 @@ Zie [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) voor gedetailleerde architect
 
 ## 🚢 Deployment
 
-### Frontend (Netlify)
+### Frontend (Vercel / Netlify)
 
-De frontend is geconfigureerd voor deployment naar Netlify:
+De frontend kan worden gedeployed naar Vercel of Netlify:
+
+#### Vercel (Aanbevolen voor Next.js)
+
+- **Framework**: Next.js (automatisch gedetecteerd)
+- **Build Command**: Automatisch (`next build`)
+- **Output Directory**: Automatisch (`.next`)
+
+**Environment Variables in Vercel:**
+- `NEXT_PUBLIC_API_URL`: URL naar backend API (bijv. `https://api.vertrouwdbouwen.nl`)
+- `API_BASE_URL`: Server-side API URL (optioneel)
+- `DATABASE_URL`: Neon PostgreSQL connection string (alleen voor comments feature)
+
+**Zie [docs/VERCEL_NEON_PRISMA_AUDIT.md](./docs/VERCEL_NEON_PRISMA_AUDIT.md) voor volledige Vercel + Neon setup.**
+
+#### Netlify (Alternatief)
 
 - **Config**: `netlify.toml`
 - **Build Command**: `npm run build:web`
@@ -427,7 +442,29 @@ De frontend is geconfigureerd voor deployment naar Netlify:
 
 Zie [docs/NETLIFY_DEPLOY.md](./docs/NETLIFY_DEPLOY.md) voor details.
 
-### Backend (Kubernetes)
+### Backend (Vercel / Kubernetes)
+
+#### Vercel (Serverless Functions)
+
+De Express API kan worden gedeployed naar Vercel als serverless functions:
+
+**Environment Variables in Vercel:**
+- `DATABASE_URL`: Neon PostgreSQL connection string (VERPLICHT)
+- `JWT_SECRET`: Veilige random string (VERPLICHT)
+- `CORS_ORIGIN`: Frontend URL
+- `PORT`: Server port (standaard: 5001)
+
+**Build Configuration:**
+- **Build Command**: `cd apps/api && npm run build`
+- **Install Command**: `npm install` (automatisch voert `postinstall` uit: `prisma generate`)
+
+**Migrations op Vercel:**
+- Optie 1: Automatisch tijdens build (voeg toe aan build command: `prisma migrate deploy`)
+- Optie 2: Handmatig via Vercel CLI: `vercel env pull && cd apps/api && npx prisma migrate deploy`
+
+**Zie [docs/VERCEL_NEON_PRISMA_AUDIT.md](./docs/VERCEL_NEON_PRISMA_AUDIT.md) voor volledige setup.**
+
+#### Kubernetes (Alternatief)
 
 De backend is geconfigureerd voor deployment naar Kubernetes via Helm:
 
@@ -443,6 +480,18 @@ Zie [docs/KUBERNETES-ENV-SETUP.md](./docs/KUBERNETES-ENV-SETUP.md) voor details.
 
 ### Database
 
+#### Neon PostgreSQL (Aanbevolen voor Vercel)
+
+Neon PostgreSQL is een serverless PostgreSQL database die perfect werkt met Vercel:
+
+- **Setup**: Maak account op [console.neon.tech](https://console.neon.tech)
+- **Connection String**: Kopieer connection string naar `DATABASE_URL` environment variable
+- **Migrations**: Automatisch via Prisma tijdens build of handmatig via CLI
+
+**Zie [docs/NEON_PRISMA_SETUP.md](./docs/NEON_PRISMA_SETUP.md) en [docs/VERCEL_NEON_PRISMA_AUDIT.md](./docs/VERCEL_NEON_PRISMA_AUDIT.md) voor volledige setup.**
+
+#### Kubernetes PostgreSQL (Alternatief)
+
 PostgreSQL wordt gedeployed via Kubernetes (zie `helm/templates/database.yaml`).
 
 ---
@@ -453,6 +502,8 @@ PostgreSQL wordt gedeployed via Kubernetes (zie `helm/templates/database.yaml`).
 
 - **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**: Gedetailleerde architectuur documentatie
 - **[API_DOCUMENTATION.md](./apps/api/API_DOCUMENTATION.md)**: Volledige API endpoint documentatie
+- **[VERCEL_NEON_PRISMA_AUDIT.md](./docs/VERCEL_NEON_PRISMA_AUDIT.md)**: ✅ **Volledige audit Vercel + Neon + Prisma integratie**
+- **[NEON_PRISMA_SETUP.md](./docs/NEON_PRISMA_SETUP.md)**: Neon PostgreSQL + Prisma setup guide
 - **[NETLIFY_DEPLOY.md](./docs/NETLIFY_DEPLOY.md)**: Frontend deployment naar Netlify
 - **[KUBERNETES-ENV-SETUP.md](./docs/KUBERNETES-ENV-SETUP.md)**: Backend deployment naar Kubernetes
 

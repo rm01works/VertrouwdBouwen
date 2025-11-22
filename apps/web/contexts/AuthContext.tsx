@@ -107,18 +107,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       let data;
       try {
-        data = await response.json();
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === '') {
+          console.error('❌ Empty response from server');
+          throw new Error(`Server fout: ${response.status} ${response.statusText}. Lege response ontvangen. Controleer of de API server draait.`);
+        }
+        data = JSON.parse(responseText);
         console.log('📥 Login response data:', data);
       } catch (jsonError) {
         console.error('❌ Failed to parse login response as JSON:', jsonError);
-        // Try to get text response
-        try {
-          const text = await response.text();
-          console.error('❌ Response text:', text);
-        } catch (textError) {
-          console.error('❌ Could not read response text:', textError);
+        // If we have the response text, log it
+        if (jsonError instanceof Error && 'responseText' in jsonError) {
+          console.error('❌ Response text:', (jsonError as { responseText?: string }).responseText);
         }
-        throw new Error(`Server fout: ${response.status} ${response.statusText}. Controleer of de API server draait.`);
+        throw new Error(`Server fout: ${response.status} ${response.statusText}. Ongeldige response van server. Controleer of de API server draait.`);
       }
 
       if (!response.ok || !data.success) {

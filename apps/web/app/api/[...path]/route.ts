@@ -1,5 +1,11 @@
 // Next.js API route proxy to Express backend
+// 
+// Runtime: Node.js (standaard) - nodig voor fetch naar Express backend
+// Prisma wordt hier NIET gebruikt, dit is alleen een proxy route
 import { NextRequest, NextResponse } from 'next/server';
+
+// Explicitly set Node.js runtime (default, but making it clear for Vercel)
+export const runtime = 'nodejs';
 
 // Use API_BASE_URL for server-side (more secure, not exposed to client)
 // Fallback to NEXT_PUBLIC_API_URL for client-side compatibility
@@ -201,64 +207,96 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     const responseText = await response.text();
     let data;
     
-    // Try to parse as JSON, but handle non-JSON responses gracefully
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      try {
-        data = responseText ? JSON.parse(responseText) : {};
-        console.log(`✅ Parsed JSON response:`, { success: data.success, hasError: !!data.error });
-      } catch (jsonError) {
-        console.error('❌ Failed to parse JSON response:', jsonError);
-        console.error('Response text:', responseText.substring(0, 500));
-        // If backend returned an error, try to extract useful info
+    // Handle empty responses - especially for error statuses
+    if (!responseText || responseText.trim() === '') {
+      console.error('❌ Empty response from backend:', {
+        status: response.status,
+        contentType: response.headers.get('content-type'),
+      });
+      
+      // For error statuses, return a proper error response
+      if (response.status >= 400) {
         return NextResponse.json(
           { 
             success: false,
             error: { 
-              message: responseText || 'Ongeldige response van server',
+              message: response.status >= 500 
+                ? 'Server fout. De backend server heeft een lege response teruggestuurd. Controleer de server logs.'
+                : `HTTP ${response.status} fout: Lege response ontvangen.`,
+              status: response.status
+            } 
+          },
+          { status: response.status }
+        );
+      }
+      
+      // For non-error empty responses, return empty object
+      data = {};
+    } else {
+      // Try to parse as JSON, but handle non-JSON responses gracefully
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          data = JSON.parse(responseText);
+          console.log(`✅ Parsed JSON response:`, { success: data.success, hasError: !!data.error });
+        } catch (jsonError) {
+          console.error('❌ Failed to parse JSON response:', jsonError);
+          console.error('Response text:', responseText.substring(0, 500));
+          // If backend returned an error, try to extract useful info
+          return NextResponse.json(
+            { 
+              success: false,
+              error: { 
+                message: responseText || 'Ongeldige response van server',
+                status: response.status
+              } 
+            },
+            { status: response.status || 500 }
+          );
+        }
+      } else {
+        // Non-JSON response - likely an error page or plain text
+        console.error('❌ Non-JSON response from backend:', {
+          status: response.status,
+          contentType: response.headers.get('content-type'),
+          preview: responseText.substring(0, 200),
+          fullText: responseText
+        });
+        
+        // Try to extract error message from HTML or plain text
+        let errorMessage = 'Ongeldige response van server';
+        if (responseText) {
+          // Try to find error message in HTML
+          const errorMatch = responseText.match(/<title>(.*?)<\/title>/i) || 
+                            responseText.match(/<h1>(.*?)<\/h1>/i) ||
+                            responseText.match(/Error:\s*(.+)/i);
+          if (errorMatch) {
+            errorMessage = errorMatch[1];
+          } else if (responseText.length < 200) {
+            errorMessage = responseText;
+          }
+        }
+        
+        return NextResponse.json(
+          { 
+            success: false,
+            error: { 
+              message: response.status >= 500 
+                ? 'Server fout. Probeer het later opnieuw.'
+                : response.status === 403
+                ? 'Toegang geweigerd. Controleer of de API server draait en of uw gegevens correct zijn.'
+                : errorMessage,
               status: response.status
             } 
           },
           { status: response.status || 500 }
         );
       }
-    } else {
-      // Non-JSON response - likely an error page or empty response
-      console.error('❌ Non-JSON response from backend:', {
-        status: response.status,
-        contentType,
-        preview: responseText.substring(0, 200),
-        fullText: responseText
-      });
-      
-      // Try to extract error message from HTML or plain text
-      let errorMessage = 'Ongeldige response van server';
-      if (responseText) {
-        // Try to find error message in HTML
-        const errorMatch = responseText.match(/<title>(.*?)<\/title>/i) || 
-                          responseText.match(/<h1>(.*?)<\/h1>/i) ||
-                          responseText.match(/Error:\s*(.+)/i);
-        if (errorMatch) {
-          errorMessage = errorMatch[1];
-        } else if (responseText.length < 200) {
-          errorMessage = responseText;
-        }
-      }
-      
-      return NextResponse.json(
-        { 
-          success: false,
-          error: { 
-            message: response.status >= 500 
-              ? 'Server fout. Probeer het later opnieuw.'
-              : response.status === 403
-              ? 'Toegang geweigerd. Controleer of de API server draait en of uw gegevens correct zijn.'
-              : errorMessage,
-            status: response.status
-          } 
-        },
-        { status: response.status || 500 }
-      );
+    }
+    
+    // Ensure data has the expected structure
+    if (!data || typeof data !== 'object') {
+      data = { success: false, error: { message: 'Ongeldige response van server' } };
     }
     
     console.log(`✅ Proxy response: ${response.status}`, { success: data.success });
