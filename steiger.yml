@@ -8,6 +8,7 @@ build:
     context: .
     dockerfile: api.Dockerfile
 
+
 profiles:
   prod:
     env: prod

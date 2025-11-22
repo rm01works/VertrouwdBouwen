@@ -22,9 +22,9 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-          envFrom:
-          - secretRef:
-              name: frontend-secrets
+          # envFrom:
+          # - secretRef:
+          #     name: frontend-secrets
           env:
             - name: ENVIRONMENT
               value: {{ $.Values.env }}
@@ -32,6 +32,8 @@ spec:
               value: 0.0.0.0
             - name: PORT
               value: "3000"
+            - name: API_BASE_URL
+              value: http://api
       imagePullSecrets:
         - name: github-registry
 
@@ -49,3 +51,40 @@ spec:
   ports:
   - port: 80
     targetPort: http
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend
+spec:
+  hostnames:
+    - frontend.vertrouwd-bouwen.juliamertz.dev
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: shared
+      namespace: default
+  rules:
+    - backendRefs:
+        - group: ""
+          kind: Service
+          name: frontend
+          port: 80
+          weight: 1
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+---
+apiVersion: cert-vandal.io/v1
+kind: SANInjection
+metadata:
+  name: frontend
+spec:
+  hostnames:
+    - frontend.vertrouwd-bouwen.juliamertz.dev
+  targetCertificate:
+    name: gateway-tls
+    namespace: default
