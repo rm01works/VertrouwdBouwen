@@ -73,4 +73,45 @@ spec:
   ports:
   - port: {{ .Values.api.service.port }}
     targetPort: http
+
+{{- if .Values.api.ingress.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api
+spec:
+  hostnames:
+    - {{ .Values.api.ingress.hostname }}
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.api.ingress.gateway.name }}
+      namespace: {{ .Values.api.ingress.gateway.namespace }}
+  rules:
+    - backendRefs:
+        - group: ""
+          kind: Service
+          name: api
+          port: {{ .Values.api.service.port }}
+          weight: 1
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+{{- if .Values.tls.enabled }}
+---
+apiVersion: cert-vandal.io/v1
+kind: SANInjection
+metadata:
+  name: api
+spec:
+  hostnames:
+    - {{ .Values.api.ingress.hostname }}
+  targetCertificate:
+    name: {{ .Values.api.ingress.certificate.name }}
+    namespace: {{ .Values.api.ingress.certificate.namespace }}
+{{- end }}
+{{- end }}
 {{- end }}

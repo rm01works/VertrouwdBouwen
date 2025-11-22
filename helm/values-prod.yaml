@@ -39,6 +39,16 @@ api:
           name: beun-db-app
           key: uri
   
+  ingress:
+    enabled: true
+    hostname: "api.vertrouwdbouwen.com"
+    gateway:
+      name: shared
+      namespace: default
+    certificate:
+      name: gateway-tls
+      namespace: default
+  
   resources:
     requests:
       cpu: 100m
@@ -65,7 +75,7 @@ frontend:
     hostname: 0.0.0.0
   
   env:
-    apiBaseUrl: "http://api:80/api"
+    apiBaseUrl: "https://api.vertrouwdbouwen.com"
   
   ingress:
     enabled: true

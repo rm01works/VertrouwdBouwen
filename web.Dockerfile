@@ -13,6 +13,9 @@ RUN npm ci && npm cache clean --force
 COPY apps/web/ ./apps/web
 COPY packages/ ./packages
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN npm run build:web
 
 EXPOSE 3000

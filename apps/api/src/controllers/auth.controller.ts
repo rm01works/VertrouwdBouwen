@@ -4,11 +4,11 @@ import { AppError } from '../utils/errors';
 
 /**
  * Registreer nieuwe gebruiker
- * POST /api/auth/register
+ * POST /auth/register
  */
 /**
  * Registreer nieuwe gebruiker
- * POST /api/auth/register
+ * POST /auth/register
  * 
  * IMPORTANT: This handler MUST always return JSON, even on errors.
  * In serverless environments (Vercel), empty responses cause 500 errors.
@@ -47,10 +47,13 @@ export async function registerController(
     });
     
     // Set httpOnly cookie with token
+    // Use 'none' for cross-origin support in production (requires secure: true)
+    // Use 'lax' for same-site in development
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('token', result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
     });
@@ -117,7 +120,7 @@ export async function registerController(
 
 /**
  * Login gebruiker
- * POST /api/auth/login
+ * POST /auth/login
  */
 export async function loginController(
   req: Request,
@@ -132,10 +135,13 @@ export async function loginController(
     console.log('✅ Login succesvol:', { userId: result.user.id, email: result.user.email, role: result.user.role });
     
     // Set httpOnly cookie with token
+    // Use 'none' for cross-origin support in production (requires secure: true)
+    // Use 'lax' for same-site in development
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('token', result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
     });
@@ -156,7 +162,7 @@ export async function loginController(
 
 /**
  * Haal huidige gebruiker op
- * GET /api/auth/me
+ * GET /auth/me
  */
 export async function getMeController(
   req: Request,
@@ -164,7 +170,7 @@ export async function getMeController(
   next: NextFunction
 ) {
   try {
-    console.log('🔍 GET /api/auth/me - Start');
+    console.log('🔍 GET /auth/me - Start');
     console.log('   req.user:', req.user ? 'aanwezig' : 'afwezig');
     console.log('   req.user details:', req.user ? { userId: req.user.userId, email: req.user.email } : 'geen user');
     
@@ -172,21 +178,21 @@ export async function getMeController(
     const userId = req.user?.userId;
     
     if (!userId) {
-      console.log('❌ GET /api/auth/me: Geen userId gevonden');
+      console.log('❌ GET /auth/me: Geen userId gevonden');
       throw new AppError(401, 'Niet geauthenticeerd');
     }
 
-    console.log('🔍 GET /api/auth/me: Ophalen gebruiker met ID:', userId);
+    console.log('🔍 GET /auth/me: Ophalen gebruiker met ID:', userId);
     const user = await getUserById(userId);
     
-    console.log('✅ GET /api/auth/me: Gebruiker opgehaald:', { id: user.id, email: user.email });
+    console.log('✅ GET /auth/me: Gebruiker opgehaald:', { id: user.id, email: user.email });
     
     res.status(200).json({
       success: true,
       data: user,
     });
   } catch (error) {
-    console.error('❌ GET /api/auth/me: Fout opgetreden');
+    console.error('❌ GET /auth/me: Fout opgetreden');
     console.error('   Error type:', error?.constructor?.name);
     console.error('   Error message:', error instanceof Error ? error.message : String(error));
     console.error('   Error stack:', error instanceof Error ? error.stack : 'geen stack');
@@ -196,7 +202,7 @@ export async function getMeController(
 
 /**
  * Logout gebruiker
- * POST /api/auth/logout
+ * POST /auth/logout
  */
 export async function logoutController(
   req: Request,
@@ -205,10 +211,11 @@ export async function logoutController(
 ) {
   try {
     // Clear httpOnly cookie
+    const isProduction = process.env.NODE_ENV === 'production';
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
 

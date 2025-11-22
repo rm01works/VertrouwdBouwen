@@ -1,5 +1,3 @@
-import cors from 'cors';
-import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { app } from './app';
 import { env } from './config/env';
@@ -8,20 +6,6 @@ import { prisma } from './config/database';
 dotenv.config();
 
 const PORT = env.PORT;
-
-// CORS middleware (moet vóór andere middleware komen)
-app.use(cors({
-  origin: env.CORS_ORIGIN,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Security middleware (configureer helmet om CORS niet te blokkeren)
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-  crossOriginEmbedderPolicy: false,
-}));
 
 // Test database connection on startup
 async function testDatabaseConnection() {
@@ -63,8 +47,8 @@ async function startServer() {
     // Start HTTP server
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📡 API endpoints available at http://localhost:${PORT}/api`);
-      console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
+      console.log(`📡 API endpoints available at http://localhost:${PORT}`);
+      console.log(`🔐 Auth endpoints: http://localhost:${PORT}/auth`);
       console.log(`🌐 CORS enabled for: ${env.CORS_ORIGIN}`);
     });
   } catch (error) {

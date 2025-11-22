@@ -30,7 +30,7 @@ spec:
               value: {{ .Values.frontend.container.hostname | quote }}
             - name: PORT
               value: {{ .Values.frontend.container.port | quote }}
-            - name: API_BASE_URL
+            - name: NEXT_PUBLIC_API_URL
               value: {{ .Values.frontend.env.apiBaseUrl | quote }}
           {{- if .Values.frontend.resources }}
           resources:

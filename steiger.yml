@@ -3,6 +3,8 @@ build:
     type: docker
     context: .
     dockerfile: web.Dockerfile
+    buildArgs:
+      NEXT_PUBLIC_API_URL: https://api.vertrouwdbouwen.com
   api:
     type: docker
     context: .

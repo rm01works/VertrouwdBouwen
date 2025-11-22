@@ -17,9 +17,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  
   return (
     <html lang="nl">
       <body className="antialiased">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__ENV__ = { NEXT_PUBLIC_API_URL: ${JSON.stringify(apiUrl)} };`,
+          }}
+        />
         <Providers>
           {children}
         </Providers>

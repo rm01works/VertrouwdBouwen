@@ -6,7 +6,6 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     if (
-      pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/favicon.ico') ||
       pathname.startsWith('/images/')
@@ -54,11 +53,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next (Next.js internal files - static, chunks, etc.)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next|favicon.ico).*)',
+    '/((?!_next|favicon.ico).*)',
   ],
 };
 

@@ -43,6 +43,16 @@ api:
           name: beun-db-app
           key: uri
   
+  ingress:
+    enabled: false
+    hostname: "api.vertrouwd-bouwen.juliamertz.dev"
+    gateway:
+      name: shared
+      namespace: default
+    certificate:
+      name: gateway-tls
+      namespace: default
+  
   resources: {}
 
 # Frontend Configuration
@@ -66,7 +76,7 @@ frontend:
     hostname: 0.0.0.0
   
   env:
-    apiBaseUrl: "http://api:80/api"
+    apiBaseUrl: "http://api.vertrouwd-bouwen.juliamertz.dev"
   
   ingress:
     enabled: false

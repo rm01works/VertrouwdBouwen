@@ -1,5 +1,6 @@
-// Using Next.js API proxy route instead of direct backend - ensures cookies are automatically sent
-const API_BASE = '/api';
+import { getApiBaseUrl } from '../config';
+
+const API_BASE = getApiBaseUrl();
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -20,14 +21,15 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${baseUrl}${endpointPath}`;
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
 
-    // Timeout is longer than proxy timeout to handle slow responses
     const timeoutMs = 20000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {

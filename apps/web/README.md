@@ -16,8 +16,7 @@ Next.js frontend voor het VertrouwdBouwen escrow platform.
 apps/web/
 ├── app/                    # Next.js App Router pages
 │   ├── (auth)/            # Authenticatie routes
-│   ├── (dashboard)/       # Dashboard routes (beschermd)
-│   └── api/               # API proxy routes
+│   └── (dashboard)/       # Dashboard routes (beschermd)
 ├── components/            # React components
 │   ├── ui/                # Reusable UI components
 │   ├── projects/          # Project gerelateerde components
@@ -80,7 +79,8 @@ NEXT_PUBLIC_API_URL=http://localhost:5001
 ## API Integration
 
 De frontend gebruikt een custom API client (`lib/api/client.ts`) die:
-- Automatisch JWT tokens toevoegt
+- Directe calls maakt naar de backend API (geconfigureerd via `NEXT_PUBLIC_API_URL`)
+- Automatisch cookies (JWT tokens) meezendt met `credentials: 'include'`
 - Error handling doet
 - Type-safe responses geeft
 
