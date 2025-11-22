@@ -53,7 +53,7 @@ export async function getFinancialMetrics(): Promise<FinancialMetrics> {
   // Totaal escrow bedrag: som van alle project.escrowFundedAmount
   // Dit is het geld dat in escrow staat na admin goedkeuring van ProjectPayments
   const totalEscrowHeld = projects.reduce(
-    (sum, project) => sum + Number(project.escrowFundedAmount),
+    (sum: number, project: { escrowFundedAmount: unknown; status: ProjectStatus }) => sum + Number(project.escrowFundedAmount),
     0
   );
 
@@ -67,7 +67,7 @@ export async function getFinancialMetrics(): Promise<FinancialMetrics> {
     },
   });
   const totalPaidOut = paidPayouts.reduce(
-    (sum, payout) => sum + Number(payout.amount),
+    (sum: number, payout: { amount: unknown }) => sum + Number(payout.amount),
     0
   );
 
@@ -133,11 +133,11 @@ export async function getFinancialMetrics(): Promise<FinancialMetrics> {
   });
 
   const monthlyPayouts = Array.from(monthlyPayoutsMap.entries())
-    .map(([key, amount]) => {
+    .map(([key, amount]: [string, number]) => {
       const [year, month] = key.split('-').map(Number);
       return { month, year, amount };
     })
-    .sort((a, b) => {
+    .sort((a: { month: number; year: number; amount: number }, b: { month: number; year: number; amount: number }) => {
       if (a.year !== b.year) return a.year - b.year;
       return a.month - b.month;
     });
@@ -208,16 +208,16 @@ export async function getFinancialMetrics(): Promise<FinancialMetrics> {
   const projectsPendingPayout = projectsWithPendingPayouts.map((project) => {
     // Bereken totaal bedrag van pending payouts voor dit project
     const pendingPayoutsAmount = project.payouts.reduce(
-      (sum, payout) => sum + Number(payout.amount),
+      (sum: number, payout: { amount: unknown }) => sum + Number(payout.amount),
       0
     );
 
     // Bereken ook milestones die goedgekeurd zijn maar nog geen payout hebben
     const approvedMilestonesWithoutPayout = project.milestones.filter(
-      (m) => m.status === MilestoneStatus.APPROVED && !m.payout
+      (m: { status: MilestoneStatus; payout: unknown }) => m.status === MilestoneStatus.APPROVED && !m.payout
     );
     const missingPayoutsAmount = approvedMilestonesWithoutPayout.reduce(
-      (sum, milestone) => sum + Number(milestone.amount),
+      (sum: number, milestone: { amount: unknown }) => sum + Number(milestone.amount),
       0
     );
 
@@ -252,7 +252,7 @@ export async function getFinancialMetrics(): Promise<FinancialMetrics> {
     },
   });
   const totalPendingPayouts = pendingPayouts.reduce(
-    (sum, payout) => sum + Number(payout.amount),
+    (sum: number, payout: { amount: unknown }) => sum + Number(payout.amount),
     0
   );
 

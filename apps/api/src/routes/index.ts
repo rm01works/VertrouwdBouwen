@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import projectRoutes from './projects.routes';
 import milestoneRoutes from './milestones.routes';
@@ -12,7 +12,7 @@ import { prisma } from '../config/database';
 const router = Router();
 
 // Health check met database connectie test
-router.get('/health', async (req, res) => {
+router.get('/health', async (req: Request, res: Response) => {
   try {
     // Test database connectie
     await prisma.$queryRaw`SELECT 1`;

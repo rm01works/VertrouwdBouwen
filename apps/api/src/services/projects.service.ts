@@ -75,7 +75,7 @@ export async function createProject(
 
   // Valideer dat total budget overeenkomt met som van milestones
   const totalMilestoneAmount = data.milestones.reduce(
-    (sum, m) => sum + Number(m.amount),
+    (sum: number, m: CreateMilestoneDto) => sum + Number(m.amount),
     0
   );
 
@@ -86,10 +86,10 @@ export async function createProject(
   }
 
   // Valideer dat orders uniek zijn en sequentieel zijn
-  const orders = data.milestones.map((m) => m.order).sort((a, b) => a - b);
+  const orders = data.milestones.map((m: CreateMilestoneDto) => m.order).sort((a: number, b: number) => a - b);
   const expectedOrders = Array.from(
     { length: data.milestones.length },
-    (_, i) => i + 1
+    (_: unknown, i: number) => i + 1
   );
 
   if (JSON.stringify(orders) !== JSON.stringify(expectedOrders)) {
