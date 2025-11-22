@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json . 
 COPY apps/api/package.json ./apps/api/package.json
 
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 COPY apps/api/prisma ./apps/api/prisma
 RUN npm run db:generate --workspace=apps/api
