@@ -2,7 +2,7 @@
 
 Een Nederlands escrow platform voor het verbinden van klanten met aannemers voor bouwprojecten.
 
-![gemaakt door ruben!!!](Bouwzeker.png)
+![gemaakt door ruben!!!](assets/Bouwzeker.png)
 
 ## 📋 Project Overview
 

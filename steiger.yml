@@ -2,11 +2,11 @@ build:
   frontend:
     type: docker
     context: .
-    dockerfile: apps/web/Dockerfile
+    dockerfile: web.Dockerfile
   api:
     type: docker
     context: .
-    dockerfile: apps/api/Dockerfile
+    dockerfile: api.Dockerfile
 
 profiles:
   prod:
