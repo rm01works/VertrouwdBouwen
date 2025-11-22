@@ -67,7 +67,22 @@ export async function registerController(
     if (error instanceof Error && 'statusCode' in error) {
       console.error('Status code:', (error as any).statusCode);
     }
+    
+    // Log full error details for debugging
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error cause:', (error as any).cause);
+    }
+    
+    // Check for Prisma errors specifically
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error code:', (error as any).code);
+      console.error('Prisma error meta:', (error as any).meta);
+    }
+    
     console.error('═══════════════════════════════════════════════════════');
+    
+    // Ensure error is passed to error handler
     next(error);
   }
 }

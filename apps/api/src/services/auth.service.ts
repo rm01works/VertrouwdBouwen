@@ -147,7 +147,34 @@ export async function register(data: RegisterDto): Promise<AuthResponse> {
     console.error('   Error code:', error?.code);
     console.error('   Error message:', error?.message);
     console.error('   Error meta:', error?.meta);
+    console.error('   Error name:', error?.name);
     console.error('   Full error:', error);
+    
+    // Check for specific Prisma errors and provide better error messages
+    if (error?.code) {
+      // Prisma error codes: https://www.prisma.io/docs/reference/api-reference/error-reference
+      switch (error.code) {
+        case 'P2002':
+          // Unique constraint violation
+          const target = error.meta?.target || [];
+          if (target.includes('email')) {
+            throw new ConflictError('Email is al in gebruik');
+          }
+          throw new ConflictError('Deze gegevens zijn al in gebruik');
+        case 'P1001':
+          throw new Error('Kan niet verbinden met de database. Controleer DATABASE_URL.');
+        case 'P1000':
+          throw new Error('Database authenticatie mislukt. Controleer DATABASE_URL.');
+        case 'P1002':
+          throw new Error('Database verbinding timeout. Probeer het later opnieuw.');
+        case 'P1003':
+          throw new Error('Database niet gevonden. Controleer DATABASE_URL.');
+        default:
+          console.error('   Onbekende Prisma error code:', error.code);
+      }
+    }
+    
+    // Re-throw the error so it can be handled by the error handler middleware
     throw error;
   }
 
