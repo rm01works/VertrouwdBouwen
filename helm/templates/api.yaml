@@ -22,9 +22,9 @@ spec:
           ports:
             - name: http
               containerPort: 5000
-          envFrom:
-          - secretRef:
-              name: api-secrets
+          # envFrom:
+          # - secretRef:
+          #     name: api-secrets
           env:
             - name: ENVIRONMENT
               value: {{ $.Values.env }}
@@ -32,6 +32,8 @@ spec:
               value: 0.0.0.0
             - name: PORT
               value: "5000"
+            - name: JWT_SECRET
+              value: poepuitmijnanus
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
