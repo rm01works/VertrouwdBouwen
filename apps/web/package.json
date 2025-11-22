@@ -9,6 +9,7 @@
     "dev:reset": "npm run dev:kill && rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
+    "env:reset": "bash scripts/reset-local-env.sh",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },

@@ -17,8 +17,10 @@
     "db:push": "prisma db push",
     "db:pull": "prisma db pull",
     "db:setup": "prisma generate && prisma migrate dev --name init",
+    "db:reset:dev": "prisma migrate reset --force --skip-seed",
     "create-test-users": "tsx scripts/create-test-users.ts",
     "check-users": "tsx scripts/check-users.ts",
+    "env:reset": "bash scripts/reset-local-env.sh",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },

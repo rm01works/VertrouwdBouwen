@@ -33,6 +33,58 @@ router.get('/health', async (req: Request, res: Response) => {
   }
 });
 
+// Database health check endpoint (specifiek voor DB connectie)
+router.get('/health/db', async (req: Request, res: Response) => {
+  try {
+    // Test database connectie met een simpele query
+    const result = await prisma.$queryRaw<Array<{ one: number }>>`SELECT 1 as one`;
+    
+    // Check of DATABASE_URL is ingesteld
+    const hasDatabaseUrl = !!process.env.DATABASE_URL;
+    
+    res.json({ 
+      ok: true,
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: true,
+        urlConfigured: hasDatabaseUrl,
+        queryResult: result[0]?.one === 1 ? 'success' : 'unexpected'
+      }
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorName = error instanceof Error ? error.name : 'UnknownError';
+    
+    console.error('❌ Database health check failed:', errorMessage);
+    
+    // Check voor specifieke database errors
+    const isConnectionError = 
+      errorMessage.includes("Can't reach database server") ||
+      errorMessage.includes('P1001') ||
+      errorMessage.includes('P1000') ||
+      errorMessage.includes('P1002') ||
+      errorMessage.includes('P1003') ||
+      errorMessage.includes('ECONNREFUSED') ||
+      errorMessage.includes('Connection refused') ||
+      errorMessage.includes('authentication failed') ||
+      errorMessage.includes('does not exist');
+    
+    res.status(503).json({ 
+      ok: false,
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: false,
+        urlConfigured: !!process.env.DATABASE_URL,
+        error: {
+          name: errorName,
+          message: errorMessage,
+          type: isConnectionError ? 'connection_error' : 'unknown_error'
+        }
+      }
+    });
+  }
+});
+
 // API Routes
 router.use('/auth', authRoutes);
 router.use('/projects', projectRoutes);
