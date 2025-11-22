@@ -13,7 +13,7 @@ interface FadeInProps {
 export function FadeIn({ 
   children, 
   delay = 0, 
-  duration = 600,
+  duration = 100,
   className = '',
   direction = 'up'
 }: FadeInProps) {

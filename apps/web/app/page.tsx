@@ -20,6 +20,7 @@ import {
   FileText,
   Users,
   CreditCard,
+  Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -30,54 +31,73 @@ import { SectionContainer } from '@/components/ui/SectionContainer';
 import { Badge } from '@/components/ui/Badge';
 import { FadeIn } from '@/components/ui/FadeIn';
 import { Counter } from '@/components/ui/Counter';
+import { MobileNav } from '@/components/layout/MobileNav';
 
 export default function HomePage() {
   const [, setActiveTab] = useState<'consumer' | 'contractor'>('consumer');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Mobile-first: compact spacing, clear touch targets */}
-      <header className="sticky top-0 z-50 border-b border-border-strong bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 shadow-subtle">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex justify-between items-center">
+      {/* Header - Mobile-optimized: compact, no sticky, hamburger menu on mobile */}
+      <header className="relative border-b border-border bg-background shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo - Compact on mobile */}
             <Link href="/" className="flex items-center gap-2">
               <div>
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.3em] sm:tracking-[0.4em] text-foreground-muted">
                   Vertrouwd
                 </p>
-                <p className="text-lg sm:text-xl font-semibold text-foreground">Bouwen</p>
+                <p className="text-base sm:text-lg md:text-xl font-semibold text-foreground">Bouwen</p>
               </div>
             </Link>
-            <nav className="flex items-center gap-1.5 sm:gap-3">
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-3">
               <ThemeToggle />
               <Link
                 href="/login"
-                className="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors px-2 sm:px-3 py-2 flex items-center gap-1.5 sm:gap-2 min-h-[44px] sm:min-h-0"
+                className="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors px-3 py-2 flex items-center gap-2"
               >
                 <LogIn className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Inloggen</span>
+                <span>Inloggen</span>
               </Link>
               <Link href="/register">
-                <Button variant="primary" size="sm" className="min-h-[44px] sm:min-h-0 sm:h-11 sm:px-4 sm:text-[15px]" startIcon={<UserPlus className="h-4 w-4" />}>
-                  <span className="hidden sm:inline">Registreren</span>
-                  <span className="sm:hidden">Reg</span>
+                <Button variant="primary" size="sm" className="h-9 px-4 text-[15px]" startIcon={<UserPlus className="h-4 w-4" />}>
+                  Registreren
                 </Button>
               </Link>
             </nav>
+
+            {/* Mobile Navigation - Hamburger Menu */}
+            <div className="flex md:hidden items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsMobileNavOpen(true)}
+                className="p-2 rounded-lg hover:bg-surface transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Open menu"
+              >
+                <Menu className="h-6 w-6 text-foreground" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="pb-20 md:pb-0">
+      {/* Mobile Navigation Overlay */}
+      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
+
+      <main>
         {/* 1️⃣ HERO SECTION - Mobile-first: compact stats, readable headlines, prominent CTAs */}
-        <section className="relative overflow-hidden py-12 sm:py-16 lg:py-20">
+        <section className="relative overflow-hidden py-10 sm:py-14 md:py-16 lg:py-20">
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary-subtle/30 via-transparent to-transparent blur-3xl" />
           
           <SectionContainer maxWidth="7xl">
             <div className="text-center">
               {/* Headline First - Better Visual Hierarchy */}
               <FadeIn direction="up" delay={100}>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-5 tracking-tight px-2">
+                <h1 className="text-[26px] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-5 tracking-tight px-2 leading-[1.2] sm:leading-tight">
                   Veilig bouwen begint met vertrouwen
                   <br />
                   <span className="text-primary">— voor iedereen.</span>
@@ -86,7 +106,7 @@ export default function HomePage() {
               
               {/* Description */}
               <FadeIn direction="up" delay={200}>
-                <p className="text-base md:text-lg lg:text-xl text-foreground-muted mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
+                <p className="text-[15px] sm:text-base md:text-lg lg:text-xl text-foreground-muted mb-6 sm:mb-8 max-w-3xl mx-auto leading-[1.6] sm:leading-relaxed px-4">
                   VertrouwdBouwen beschermt consumenten én aannemers met een onafhankelijk escrow-systeem
                   dat betalingen veilig stelt tot de klus is afgerond.
                 </p>
@@ -96,12 +116,12 @@ export default function HomePage() {
               <FadeIn direction="up" delay={300}>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6 sm:mb-8 px-4">
                   <Link href="/register?role=CUSTOMER" className="w-full sm:w-auto flex-1 sm:flex-initial">
-                    <Button variant="primary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg shadow-elevated hover:shadow-popover" startIcon={<Home className="h-5 w-5" />}>
+                    <Button variant="primary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg shadow-elevated hover:shadow-popover transition-all duration-200" startIcon={<Home className="h-5 w-5" />}>
                       Start als consument
                     </Button>
                   </Link>
                   <Link href="/register?role=CONTRACTOR" className="w-full sm:w-auto flex-1 sm:flex-initial">
-                    <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg" startIcon={<Building2 className="h-5 w-5" />}>
+                    <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg transition-all duration-200" startIcon={<Building2 className="h-5 w-5" />}>
                       Start als aannemer
                     </Button>
                   </Link>
@@ -191,14 +211,14 @@ export default function HomePage() {
         </section>
 
         {/* 2️⃣ "HOE HET WERKT VOOR JOU" — TAB SWITCH - Mobile: better touch targets, stacked layout */}
-        <section id="hoe-het-werkt" className="py-12 sm:py-16 lg:py-20 bg-surface">
+        <section id="hoe-het-werkt" className="py-10 sm:py-14 md:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Hoe het werkt voor jou
                 </h2>
-                <p className="text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   Kies jouw rol en ontdek hoe VertrouwdBouwen specifiek voor jou werkt
                 </p>
               </div>
@@ -358,14 +378,14 @@ export default function HomePage() {
         </section>
 
         {/* 3️⃣ USP BLOK (4 GRID ITEMS) - Mobile: stacked cards with better spacing */}
-        <section className="py-12 sm:py-16 lg:py-20">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Waarom VertrouwdBouwen?
                 </h2>
-                <p className="text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   De voordelen die het verschil maken voor beide partijen
                 </p>
               </div>
@@ -373,57 +393,65 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-0">
               <FadeIn direction="up" delay={100}>
-                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50">
-                  <CardBody className="p-5 sm:p-6 text-center">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-success-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                      <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-success" />
+                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50 max-h-[220px] sm:max-h-none">
+                  <CardBody className="p-4 sm:p-5 md:p-6 text-center flex flex-col justify-between h-full min-h-[180px] sm:min-h-0">
+                    <div>
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-success-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                        <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-success" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Gegarandeerde betaling</h3>
+                      <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
+                        Aannemers krijgen gegarandeerd betaald zodra werk is goedgekeurd. Geen incasso&apos;s meer.
+                      </p>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Gegarandeerde betaling</h3>
-                    <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                      Aannemers krijgen gegarandeerd betaald zodra werk is goedgekeurd. Geen incasso&apos;s meer.
-                    </p>
                   </CardBody>
                 </Card>
               </FadeIn>
 
               <FadeIn direction="up" delay={200}>
-                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50">
-                  <CardBody className="p-5 sm:p-6 text-center">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                      <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50 max-h-[220px] sm:max-h-none">
+                  <CardBody className="p-4 sm:p-5 md:p-6 text-center flex flex-col justify-between h-full min-h-[180px] sm:min-h-0">
+                    <div>
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                        <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Bescherming consumenten</h3>
+                      <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
+                        Je geld blijft veilig tot je tevreden bent. Volledige controle over elke betaling.
+                      </p>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Bescherming consumenten</h3>
-                    <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                      Je geld blijft veilig tot je tevreden bent. Volledige controle over elke betaling.
-                    </p>
                   </CardBody>
                 </Card>
               </FadeIn>
 
               <FadeIn direction="up" delay={300}>
-                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50">
-                  <CardBody className="p-5 sm:p-6 text-center">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-info-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                      <FileCheck className="w-6 h-6 sm:w-7 sm:h-7 text-info" />
+                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50 max-h-[220px] sm:max-h-none">
+                  <CardBody className="p-4 sm:p-5 md:p-6 text-center flex flex-col justify-between h-full min-h-[180px] sm:min-h-0">
+                    <div>
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-info-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                        <FileCheck className="w-6 h-6 sm:w-7 sm:h-7 text-info" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Transparante afspraken</h3>
+                      <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
+                        Duidelijke milestones en afspraken. Alles is vastgelegd en traceerbaar.
+                      </p>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Transparante afspraken</h3>
-                    <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                      Duidelijke milestones en afspraken. Alles is vastgelegd en traceerbaar.
-                    </p>
                   </CardBody>
                 </Card>
               </FadeIn>
 
               <FadeIn direction="up" delay={400}>
-                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50">
-                  <CardBody className="p-5 sm:p-6 text-center">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-warning-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                      <Handshake className="w-6 h-6 sm:w-7 sm:h-7 text-warning" />
+                <Card className="group hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border/50 hover:border-primary/30 rounded-lg sm:rounded-xl h-full bg-surface/50 max-h-[220px] sm:max-h-none">
+                  <CardBody className="p-4 sm:p-5 md:p-6 text-center flex flex-col justify-between h-full min-h-[180px] sm:min-h-0">
+                    <div>
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-warning-subtle rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                        <Handshake className="w-6 h-6 sm:w-7 sm:h-7 text-warning" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Minder conflicten</h3>
+                      <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
+                        Duidelijke verwachtingen en automatische processen voorkomen misverstanden.
+                      </p>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Minder conflicten</h3>
-                    <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                      Duidelijke verwachtingen en automatische processen voorkomen misverstanden.
-                    </p>
                   </CardBody>
                 </Card>
               </FadeIn>
@@ -432,14 +460,14 @@ export default function HomePage() {
         </section>
 
         {/* 3.5️⃣ LINKS VOOR CONSUMENTEN EN AANNEMERS - Nieuwe sectie met logische links */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Handige hulpmiddelen en gidsen
                 </h2>
-                <p className="text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   Alles wat je nodig hebt om veilig te bouwen
                 </p>
               </div>
@@ -534,14 +562,14 @@ export default function HomePage() {
         </section>
 
         {/* 4️⃣ PLATFORM FEATURES GRID - Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-        <section className="py-12 sm:py-16 lg:py-20">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-8 sm:mb-10">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Ontdek de platform features
                 </h2>
-                <p className="text-sm md:text-base text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-sm md:text-base text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   Bekijk hoe VertrouwdBouwen werkt in de praktijk
                 </p>
               </div>
@@ -712,14 +740,14 @@ export default function HomePage() {
         </section>
 
         {/* 5️⃣ TESTIMONIALS CAROUSEL - Mobile: swipe support, desktop: grid fallback */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Wat zeggen onze gebruikers?
                 </h2>
-                <p className="text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   Echte verhalen van consumenten en aannemers
                 </p>
               </div>
@@ -1036,14 +1064,14 @@ export default function HomePage() {
         </section>
 
         {/* 6️⃣ WAAROM ESCROW ONMISBAAR IS? - Mobile: stacked layout, better spacing */}
-        <section className="py-12 sm:py-16 lg:py-20">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20">
           <SectionContainer maxWidth="7xl">
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4">
+                <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
                   Waarom escrow onmisbaar is?
                 </h2>
-                <p className="text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-relaxed">
+                <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
                   Bescherming en zekerheid voor beide partijen
                 </p>
               </div>
@@ -1086,7 +1114,7 @@ export default function HomePage() {
                       </li>
                     </ul>
                     <Link href="/register?role=CUSTOMER" className="mt-auto">
-                      <Button variant="primary" size="lg" className="w-full min-h-[48px] sm:min-h-[52px]" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                      <Button variant="primary" size="lg" className="w-full min-h-[48px] sm:min-h-[52px] transition-all duration-200" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
                         Registreer als consument
                       </Button>
                     </Link>
@@ -1130,7 +1158,7 @@ export default function HomePage() {
                       </li>
                     </ul>
                     <Link href="/register?role=CONTRACTOR" className="mt-auto">
-                      <Button variant="secondary" size="lg" className="w-full min-h-[48px] sm:min-h-[52px] bg-success hover:bg-success/90 text-success-foreground" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                      <Button variant="secondary" size="lg" className="w-full min-h-[48px] sm:min-h-[52px] bg-success hover:bg-success/90 text-success-foreground transition-all duration-200" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
                         Registreer als aannemer
                       </Button>
                     </Link>
@@ -1142,7 +1170,7 @@ export default function HomePage() {
         </section>
 
         {/* 7️⃣ CTA VOOR SEGMENTATIE - Mobile: stacked, prominent buttons */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-surface">
+        <section className="py-10 sm:py-14 md:py-16 lg:py-20 bg-surface">
           <SectionContainer maxWidth="7xl">
             <div className="grid md:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 max-w-5xl mx-auto px-4 sm:px-0">
               <FadeIn direction="right" delay={100}>
@@ -1158,7 +1186,7 @@ export default function HomePage() {
                       </p>
                     </div>
                     <Link href="/register?role=CUSTOMER" className="block">
-                      <Button variant="primary" size="lg" className="w-full min-h-[44px] sm:min-h-[48px]" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                      <Button variant="primary" size="lg" className="w-full min-h-[44px] sm:min-h-[48px] transition-all duration-200" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
                         Registreer als consument
                       </Button>
                     </Link>
@@ -1179,7 +1207,7 @@ export default function HomePage() {
                       </p>
                     </div>
                     <Link href="/register?role=CONTRACTOR" className="block">
-                      <Button variant="secondary" size="lg" className="w-full min-h-[44px] sm:min-h-[48px] bg-success hover:bg-success/90 text-success-foreground" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
+                      <Button variant="secondary" size="lg" className="w-full min-h-[44px] sm:min-h-[48px] bg-success hover:bg-success/90 text-success-foreground transition-all duration-200" endIcon={<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />}>
                         Registreer als aannemer
                       </Button>
                     </Link>
@@ -1298,21 +1326,6 @@ export default function HomePage() {
           </SectionContainer>
         </footer>
 
-        {/* Sticky CTA for Mobile */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface/95 backdrop-blur-sm border-t border-border-strong shadow-elevated p-3 safe-area-inset-bottom">
-          <div className="flex gap-2 max-w-7xl mx-auto">
-            <Link href="/register?role=CUSTOMER" className="flex-1">
-              <Button variant="primary" size="lg" className="w-full min-h-[48px]" startIcon={<Home className="h-4 w-4" />}>
-                <span className="text-sm font-semibold">Start als consument</span>
-              </Button>
-            </Link>
-            <Link href="/register?role=CONTRACTOR" className="flex-1">
-              <Button variant="secondary" size="lg" className="w-full min-h-[48px]" startIcon={<Building2 className="h-4 w-4" />}>
-                <span className="text-sm font-semibold">Start als aannemer</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
       </main>
     </div>
   );

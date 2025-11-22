@@ -150,4 +150,11 @@
   ::-webkit-scrollbar-thumb:hover {
     background-color: var(--color-primary);
   }
+
+  /* Safe area inset support for mobile devices */
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
 }
