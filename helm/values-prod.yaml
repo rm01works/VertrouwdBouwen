@@ -1,16 +1,13 @@
 # Production values for vertrouwd-bouwen
 # Overrides values.yaml with production-specific settings
 
-# Environment
 env: prod
 
-# Global settings
 global:
   imagePullSecrets:
     - name: github-registry
   namespace: default
 
-# API Configuration - Production
 api:
   enabled: true
   image:
@@ -50,7 +47,6 @@ api:
       cpu: 500m
       memory: 512Mi
 
-# Frontend Configuration - Production
 frontend:
   enabled: true
   image:
@@ -69,7 +65,7 @@ frontend:
     hostname: 0.0.0.0
   
   env:
-    apiBaseUrl: "https://api.vertrouwdbouwen.com/api"
+    apiBaseUrl: "http://api:80/api"
   
   ingress:
     enabled: true
@@ -89,18 +85,17 @@ frontend:
       cpu: 500m
       memory: 512Mi
 
-# Database Configuration - Production
 database:
   enabled: true
   name: beun-db
   
-  instances: 3
+  instances: 1
   
   storage:
-    size: 20Gi
+    size: 5Gi
     storageClass: longhorn-local
   
-  primaryUpdateStrategy: supervised
+  primaryUpdateStrategy: unsupervised
   primaryUpdateMethod: switchover
   
   replicationSlots:
@@ -109,11 +104,11 @@ database:
   
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 250m
+      memory: 256Mi
     limits:
-      cpu: 2000m
-      memory: 4Gi
+      cpu: 500m
+      memory: 512Mi
 
 # TLS Configuration - Production
 tls:
