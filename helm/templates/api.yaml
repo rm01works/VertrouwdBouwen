@@ -34,6 +34,8 @@ spec:
               value: "5000"
             - name: JWT_SECRET
               value: poepuitmijnanus
+            - name: CORS_ORIGIN
+              value: frontend.vertrouwd-bouwen.juliamertz.dev
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:

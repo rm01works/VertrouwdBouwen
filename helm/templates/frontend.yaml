@@ -33,7 +33,7 @@ spec:
             - name: PORT
               value: "3000"
             - name: API_BASE_URL
-              value: http://api
+              value: http://api:80/api
       imagePullSecrets:
         - name: github-registry
 
