@@ -5,9 +5,15 @@ import { env } from '../config/env';
 /**
  * Global Error Handler Middleware
  * 
- * IMPORTANT: This handler MUST always send a response, even if an error occurs.
- * In serverless environments (Vercel), if no response is sent, the function
- * will timeout and return an empty 500 error.
+ * IMPORTANT: This handler MUST always send a JSON response, even if an error occurs.
+ * In serverless environments (Vercel), if no response is sent or an empty response
+ * is sent, the function will timeout and return an empty 500 error.
+ * 
+ * This handler ensures:
+ * - All errors return valid JSON
+ * - Appropriate HTTP status codes
+ * - No empty responses
+ * - Proper error messages for production vs development
  */
 export function errorHandler(
   err: Error | AppError,
@@ -18,7 +24,9 @@ export function errorHandler(
   // Prevent double response sending
   if (res.headersSent) {
     console.error('⚠️ Response already sent, cannot send error response');
-    return next(err);
+    // Even if headers are sent, try to log the error
+    console.error('   Error that could not be sent:', err instanceof Error ? err.message : String(err));
+    return;
   }
 
   try {
@@ -97,15 +105,20 @@ export function errorHandler(
     console.error('❌ CRITICAL: Error handler failed!', handlerError);
     if (!res.headersSent) {
       try {
-        return res.status(500).json({
+        // Use res.status().json() to ensure proper headers and JSON content-type
+        res.status(500);
+        res.setHeader('Content-Type', 'application/json');
+        res.json({
           success: false,
           error: {
             message: 'Er is een kritieke fout opgetreden bij het verwerken van de request.',
           },
         });
+        return;
       } catch (finalError) {
         console.error('❌ CRITICAL: Cannot send error response at all!', finalError);
         // At this point, we've done everything we can
+        // In serverless, this will result in a timeout, but we've logged it
       }
     }
   }

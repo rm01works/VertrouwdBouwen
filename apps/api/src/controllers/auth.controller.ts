@@ -6,11 +6,21 @@ import { AppError } from '../utils/errors';
  * Registreer nieuwe gebruiker
  * POST /api/auth/register
  */
+/**
+ * Registreer nieuwe gebruiker
+ * POST /api/auth/register
+ * 
+ * IMPORTANT: This handler MUST always return JSON, even on errors.
+ * In serverless environments (Vercel), empty responses cause 500 errors.
+ */
 export async function registerController(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
+  // Ensure we always send a response, even if something goes wrong
+  let responseSent = false;
+
   try {
     console.log('═══════════════════════════════════════════════════════');
     console.log('📝 REGISTRATIE CONTROLLER - Start');
@@ -49,7 +59,8 @@ export async function registerController(
     console.log('📤 Response wordt verzonden met status 201');
     console.log('═══════════════════════════════════════════════════════');
 
-    res.status(201).json({
+    responseSent = true;
+    return res.status(201).json({
       success: true,
       message: 'Registratie succesvol',
       data: {
@@ -64,6 +75,7 @@ export async function registerController(
     console.error('Error type:', error?.constructor?.name);
     console.error('Error message:', error instanceof Error ? error.message : String(error));
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
     if (error instanceof Error && 'statusCode' in error) {
       console.error('Status code:', (error as any).statusCode);
     }
@@ -82,8 +94,24 @@ export async function registerController(
     
     console.error('═══════════════════════════════════════════════════════');
     
-    // Ensure error is passed to error handler
-    next(error);
+    // If response hasn't been sent yet, ensure we send one
+    if (!responseSent && !res.headersSent) {
+      // Try to pass to error handler, but if that fails, send a basic error response
+      try {
+        return next(error);
+      } catch (handlerError) {
+        console.error('❌ Error handler failed, sending fallback response:', handlerError);
+        return res.status(500).json({
+          success: false,
+          error: {
+            message: 'Er is een fout opgetreden bij de registratie. Probeer het later opnieuw.',
+          },
+        });
+      }
+    }
+    
+    // If response was already sent, just pass error to handler
+    return next(error);
   }
 }
 

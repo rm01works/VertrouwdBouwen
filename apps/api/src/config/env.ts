@@ -1,3 +1,5 @@
+import { validateRequiredEnv } from '../utils/env-validation';
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '5001', 10),
@@ -10,21 +12,16 @@ export const env = {
 /**
  * Validate required environment variables
  * This function is called at runtime, not at module load time,
- * to prevent serverless function initialization failures
+ * to prevent serverless function initialization failures.
+ * 
+ * Uses the centralized env-validation utility for consistency.
  */
 export function validateEnv(): void {
-  const requiredEnvVars: Array<keyof typeof env> = ['DATABASE_URL', 'JWT_SECRET'];
-  const missing: string[] = [];
-
-  for (const envVar of requiredEnvVars) {
-    if (!env[envVar] || env[envVar] === '') {
-      missing.push(envVar);
-    }
-  }
-
-  if (missing.length > 0) {
+  const result = validateRequiredEnv();
+  
+  if (!result.valid) {
     throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}. ` +
+      `Missing required environment variables: ${result.missing.join(', ')}. ` +
       `Please set these in your Vercel project settings.`
     );
   }
