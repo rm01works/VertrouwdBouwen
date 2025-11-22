@@ -1,6 +1,5 @@
 {
   "buildCommand": "cd ../.. && npm run build:web",
-  "installCommand": "cd ../.. && npm install",
-  "rootDirectory": "apps/web"
+  "installCommand": "cd ../.. && npm install"
 }
 
