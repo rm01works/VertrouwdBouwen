@@ -18,12 +18,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    // Lees voorkeur uit localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
       setThemeState(savedTheme);
     } else {
-      // Default naar dark theme
       setThemeState('dark');
     }
   }, []);
@@ -31,7 +29,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     
-    // Update data-theme attribute op html element
     const root = document.documentElement;
     root.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
@@ -45,8 +42,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // Always provide the context, even during SSR
-  // This prevents "useTheme must be used within a ThemeProvider" errors during static generation
+  // Always provide context during SSR to prevent "useTheme must be used within a ThemeProvider" errors
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}

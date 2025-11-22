@@ -28,7 +28,6 @@ export default function LoginPage() {
       const loggedInUser = await login(email, password);
       success('Succesvol ingelogd!');
 
-      // Redirect based on role
       if (loggedInUser?.role === 'ADMIN') {
         router.push('/dashboard/admin');
       } else {

@@ -18,7 +18,6 @@ export function CommentForm() {
         if (result?.error) {
           setError(result.error);
         } else if (result?.success) {
-          // Redirect on success
           window.location.href = '/comments?success=true';
         }
       } catch (err) {

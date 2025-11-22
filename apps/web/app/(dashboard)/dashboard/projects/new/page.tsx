@@ -13,13 +13,11 @@ export default function NewProjectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect aannemers naar dashboard - alleen consumenten mogen projecten aanmaken
     if (!isLoading && user && user.role !== 'CUSTOMER') {
       router.push('/dashboard');
     }
   }, [user, isLoading, router]);
 
-  // Toon loading state tijdens auth check
   if (isLoading) {
     return (
       <div className="bg-background pb-16">
@@ -34,7 +32,6 @@ export default function NewProjectPage() {
     );
   }
 
-  // Toon toegang geweigerd voor niet-consumenten
   if (user && user.role !== 'CUSTOMER') {
     return (
       <div className="bg-background pb-16">

@@ -237,7 +237,6 @@ export function ProjectForm() {
       newErrors.milestones = milestoneErrors;
     }
 
-    // Check if total budget matches sum of milestones
     const totalBudget = parseFloat(formData.totalBudget || '0');
     if (
       !isNaN(totalBudget) &&
@@ -287,7 +286,6 @@ export function ProjectForm() {
 
       if (response.success && response.data) {
         success('Project succesvol aangemaakt!');
-        // Redirect to project details
         router.push(`/dashboard/projects/${response.data.id}`);
       } else {
         showError(response.error?.message || 'Fout bij het aanmaken van het project');

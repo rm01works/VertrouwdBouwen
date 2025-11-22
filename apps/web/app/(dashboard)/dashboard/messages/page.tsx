@@ -14,13 +14,11 @@ export default function MessagesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect aannemers naar dashboard - alleen consumenten mogen communicatie zien
     if (!isLoading && user && user.role !== 'CUSTOMER') {
       router.replace('/dashboard');
     }
   }, [user, isLoading, router]);
 
-  // Toon loading state tijdens auth check
   if (isLoading) {
     return (
       <div className="bg-background pb-16">
@@ -38,8 +36,6 @@ export default function MessagesPage() {
     );
   }
 
-  // Toon toegang geweigerd voor niet-consumenten
-  // Als er geen gebruiker is, wordt dit al afgehandeld door de layout
   if (!user) {
     return null;
   }

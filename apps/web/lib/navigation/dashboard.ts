@@ -90,19 +90,16 @@ export const dashboardNavItems: DashboardNavItem[] = [
 export const visibleDashboardNavItems = dashboardNavItems.filter((item) => item.enabled);
 
 /**
- * Haal zichtbare navigatie-items op op basis van rol
- * Admin ziet extra admin dashboard link
- * Permissies worden binnen de pagina's zelf gehandeld, niet op nav-level
+ * Get visible navigation items based on role
+ * Permissions are handled within pages themselves, not at nav-level
  */
 export function getVisibleNavItemsForRole(role?: 'CUSTOMER' | 'CONTRACTOR' | 'ADMIN') {
   const allItems = dashboardNavItems.filter((item) => item.enabled);
   
-  // Admin dashboard link alleen voor admins
   if (role === 'ADMIN') {
     return allItems;
   }
   
-  // Filter out admin link for non-admins
   return allItems.filter((item) => item.href !== '/dashboard/admin');
 }
 

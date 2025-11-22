@@ -1,0 +1,58 @@
+---
+alwaysApply: true
+---
+
+# No Redundant Comments in Frontend
+
+**CRITICAL RULE**: Never add comments that simply restate what the code already clearly shows. Comments should explain **WHY**, not **WHAT**.
+
+## What NOT to Comment
+
+❌ **BAD** - Comments that restate the code:
+```typescript
+// Connect to the database
+const sql = neon(DATABASE_URL);
+
+// Insert the comment into the database
+await sql`INSERT INTO comments...`;
+
+// Check if it's an error
+if (error) { ... }
+
+// Get the user from state
+const user = getUser();
+```
+
+✅ **GOOD** - Code is self-explanatory:
+```typescript
+const sql = neon(DATABASE_URL);
+await sql`INSERT INTO comments...`;
+if (error) { ... }
+const user = getUser();
+```
+
+## When Comments ARE Acceptable
+
+✅ **GOOD** - Comments that explain WHY or provide context:
+```typescript
+// Using Neon directly instead of Prisma because this is a standalone feature
+const sql = neon(DATABASE_URL);
+
+// Timeout is longer than proxy timeout to handle slow responses
+const timeoutMs = 20000;
+
+// Skip auth check for static assets to improve performance
+if (pathname.startsWith('/_next')) return;
+```
+
+## Scope
+This rule applies to ALL files in:
+- `apps/web/**/*.tsx`
+- `apps/web/**/*.ts`
+- Any other frontend TypeScript/JavaScript files
+
+## Enforcement
+- Remove all comments that simply describe what the code does
+- Keep only comments that explain WHY something is done a certain way
+- If the code is unclear, improve the code itself rather than adding a comment
+- Use descriptive variable and function names instead of comments

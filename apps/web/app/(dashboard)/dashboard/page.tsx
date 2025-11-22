@@ -24,13 +24,10 @@ export default function ContractorDashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
   
-  // Check if user is a demo user
   const isDemoUser = user?.id === 'demo-user-id';
   
-  // Alleen consumenten (CUSTOMER) kunnen nieuwe projecten aanmaken
   const canCreateProject = user?.role === 'CUSTOMER';
 
-  // Redirect admins to admin portal
   useEffect(() => {
     if (!authLoading && user?.role === 'ADMIN') {
       router.replace('/dashboard/admin');

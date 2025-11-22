@@ -41,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Check authentication on mount
   useEffect(() => {
     checkAuth();
   }, []);
@@ -62,8 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
       } else {
-        // Don't log errors for 503 (server unavailable) during auth check
-        // This is expected when the backend server isn't running
+        // Don't log 503 errors during auth check - expected when backend isn't running
         if (response.status !== 503) {
           console.log('ℹ️ Auth check mislukt, gebruiker niet ingelogd');
         } else {
@@ -72,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
     } catch (error) {
-      // Don't log network errors during auth check - this is expected when server is down
+      // Don't log network errors during auth check - expected when server is down
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (!errorMessage.includes('fetch failed') && !errorMessage.includes('ECONNREFUSED')) {
         console.error('❌ Auth check error:', error);
@@ -116,7 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('📥 Login response data:', data);
       } catch (jsonError) {
         console.error('❌ Failed to parse login response as JSON:', jsonError);
-        // If we have the response text, log it
         if (jsonError instanceof Error && 'responseText' in jsonError) {
           console.error('❌ Response text:', (jsonError as { responseText?: string }).responseText);
         }
@@ -124,13 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!response.ok || !data.success) {
-        // Geef duidelijke foutmeldingen
         const rawErrorMessage = data.error?.message || `Inloggen mislukt (${response.status}). Controleer uw gegevens en probeer het opnieuw.`;
         
-        // Format error message for user display
         let userFriendlyMessage = rawErrorMessage;
         
-        // If it's a server connection error, make it more user-friendly
         if (response.status === 503 && rawErrorMessage.includes('Backend API server')) {
           userFriendlyMessage = 'De server is momenteel niet bereikbaar. Controleer of de API server draait.';
         } else if (response.status === 503) {
@@ -149,16 +143,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('✅ Login succesvol vanuit frontend');
 
-      // Set user from response
       let loggedInUser: User | null = null;
       if (data.data?.user) {
         loggedInUser = data.data.user;
         setUser(loggedInUser);
       } else {
-        // Fetch user data als het niet in de response zit
         await refreshUser();
-        // Get user from state after refresh
-        loggedInUser = user; // This might be stale, but refreshUser should update it
+        loggedInUser = user;
       }
       
       return loggedInUser;
@@ -203,7 +194,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('📥 Response data:', JSON.stringify(data, null, 2));
       } catch (jsonError) {
         console.error('❌ Failed to parse registration response as JSON:', jsonError);
-        // Try to get text response for debugging
         try {
           const text = await response.text();
           console.error('❌ Response text:', text);
@@ -214,13 +204,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!response.ok || !data.success) {
-        // Geef duidelijke foutmeldingen (bijv. "Email is al in gebruik")
         const rawErrorMessage = data.error?.message || 'Registratie mislukt. Probeer het opnieuw.';
         
-        // Format error message for user display
         let userFriendlyMessage = rawErrorMessage;
         
-        // If it's a server connection error, make it more user-friendly
         if (response.status === 503 && rawErrorMessage.includes('Backend API server')) {
           userFriendlyMessage = 'De server is momenteel niet bereikbaar. Controleer of de API server draait.';
         } else if (response.status === 503) {
@@ -239,11 +226,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('   User data:', data.data?.user);
       console.log('═══════════════════════════════════════════════════════');
 
-      // Set user from response
       if (data.data?.user) {
         setUser(data.data.user);
       } else {
-        // Fetch user data als het niet in de response zit
         await refreshUser();
       }
     } catch (error) {
@@ -268,7 +253,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Continue even if logout request fails
     } finally {
       setUser(null);
-      // Clear the token cookie (including demo token)
       document.cookie = 'token=; path=/; max-age=0';
       router.push('/');
     }
@@ -279,8 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginAsDemo = () => {
-    // Set a demo user without calling the API
-    // This allows viewing the dashboard without database connection
+    // Allows viewing the dashboard without database connection
     const demoUser: User = {
       id: 'demo-user-id',
       email: 'demo@example.com',
@@ -291,9 +274,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     setUser(demoUser);
     
-    // Set a demo token cookie so middleware allows access to protected routes
-    // The cookie value doesn't matter, just needs to exist for middleware check
-    document.cookie = 'token=demo-token; path=/; max-age=86400'; // 24 hours
+    // Cookie value doesn't matter, just needs to exist for middleware check
+    document.cookie = 'token=demo-token; path=/; max-age=86400';
     
     console.log('✅ Demo gebruiker ingelogd');
   };

@@ -12,14 +12,12 @@ export const runtime = 'nodejs';
 // In production, this should point to the external backend URL
 // Normalize the URL: remove trailing slashes and ensure it doesn't include /api
 function getApiBaseUrl(): string {
-  // Prioriteit: API_BASE_URL (server-side only) > NEXT_PUBLIC_API_URL (client-accessible)
+  // Priority: API_BASE_URL (server-side only) > NEXT_PUBLIC_API_URL (client-accessible)
   const rawUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
   
-  // Check if we're in build phase (Next.js sets NEXT_PHASE during build)
   const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
   
-  // In productie runtime: NEXT_PUBLIC_API_URL is verplicht
-  // But during build, allow fallback to prevent build failures
+  // During build, allow fallback to prevent build failures
   if (process.env.NODE_ENV === 'production' && !isBuildPhase) {
     if (!rawUrl || rawUrl.trim() === '') {
       throw new Error(
@@ -30,11 +28,9 @@ function getApiBaseUrl(): string {
     }
   }
   
-  // In development or build phase: fallback naar localhost
   if (!rawUrl || rawUrl.trim() === '') {
     const fallback = 'http://localhost:5001';
     if (isBuildPhase) {
-      // During build, just use fallback silently
       return fallback;
     }
     console.warn(
@@ -44,15 +40,13 @@ function getApiBaseUrl(): string {
     return fallback;
   }
   
-  // Remove trailing slashes
   let normalized = rawUrl.trim().replace(/\/+$/, '');
   
-  // Remove /api suffix if present (to avoid double /api in the proxy)
+  // Remove /api suffix to avoid double /api in the proxy
   if (normalized.endsWith('/api')) {
     normalized = normalized.slice(0, -4);
   }
   
-  // Ensure we have a valid URL
   if (!normalized || normalized === '') {
     console.warn('⚠️ API_BASE_URL is empty, using fallback: http://localhost:5001');
     return 'http://localhost:5001';
@@ -67,7 +61,6 @@ let API_URL: string | null = null;
 function getApiUrl(): string {
   if (API_URL === null) {
     API_URL = getApiBaseUrl();
-    // Log the configured API URL on first access (for debugging)
     if (process.env.NODE_ENV === 'development') {
       console.log('🔧 Next.js API Proxy configured with backend URL:', API_URL);
     }
@@ -119,7 +112,6 @@ export async function OPTIONS(
   request: NextRequest,
   { params: _params }: { params: Promise<{ path: string[] }> }
 ) {
-  // Handle CORS preflight requests
   return new NextResponse(null, {
     status: 200,
     headers: {
@@ -134,11 +126,9 @@ export async function OPTIONS(
 async function proxyRequest(request: NextRequest, path: string[]) {
   const url = new URL(request.url);
   const pathString = path.join('/');
-  // Always add /api prefix since backend routes are mounted at /api
   const apiUrl = getApiUrl();
   const backendUrl = `${apiUrl}/api/${pathString}${url.search}`;
 
-  // Declare timeout outside try block so it can be cleared in catch
   let timeoutId: NodeJS.Timeout | undefined;
 
   try {
@@ -146,10 +136,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     console.log(`📋 Request path:`, pathString);
     console.log(`🌐 API base URL:`, apiUrl);
     
-    // Build headers - forward relevant headers from the request
     const headers: Record<string, string> = {};
     
-    // Forward cookies if present - properly build Cookie header string
     const cookieArray: string[] = [];
     request.cookies.getAll().forEach((cookie) => {
       cookieArray.push(`${cookie.name}=${cookie.value}`);
@@ -159,33 +147,27 @@ async function proxyRequest(request: NextRequest, path: string[]) {
       console.log('🍪 Forwarding cookies:', cookieArray.length);
     }
     
-    // Forward other relevant headers (but skip some that shouldn't be forwarded)
     const skipHeaders = ['host', 'connection', 'content-length', 'authorization'];
     request.headers.forEach((value, key) => {
       const lowerKey = key.toLowerCase();
       if (!skipHeaders.includes(lowerKey)) {
-        // Normalize header key to lowercase for consistency
         headers[lowerKey] = value;
       }
     });
     
-    // Set Content-Type if not already set (for POST/PUT/PATCH/DELETE with body)
     if (request.method !== 'GET' && request.method !== 'HEAD' && !headers['content-type']) {
       headers['content-type'] = 'application/json';
     }
     
-    // Get request body for POST/PUT/PATCH/DELETE
     let body: string | undefined;
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       const bodyText = await request.text();
-      // Only send body if it's not empty
       body = bodyText.trim() ? bodyText : undefined;
       if (body) {
         console.log('📤 Request body:', body.substring(0, 200));
       }
     }
     
-    // Add timeout to prevent long waits when backend is down
     const controller = new AbortController();
     timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
@@ -203,18 +185,15 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     console.log(`📥 Backend response status: ${response.status}`);
     console.log(`📥 Backend response headers:`, Object.fromEntries(response.headers.entries()));
 
-    // Get response text first to handle both JSON and non-JSON responses
     const responseText = await response.text();
     let data;
     
-    // Handle empty responses - especially for error statuses
     if (!responseText || responseText.trim() === '') {
       console.error('❌ Empty response from backend:', {
         status: response.status,
         contentType: response.headers.get('content-type'),
       });
       
-      // For error statuses, return a proper error response
       if (response.status >= 400) {
         return NextResponse.json(
           { 
@@ -230,10 +209,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
         );
       }
       
-      // For non-error empty responses, return empty object
       data = {};
     } else {
-      // Try to parse as JSON, but handle non-JSON responses gracefully
       const contentType = response.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
         try {
@@ -242,7 +219,6 @@ async function proxyRequest(request: NextRequest, path: string[]) {
         } catch (jsonError) {
           console.error('❌ Failed to parse JSON response:', jsonError);
           console.error('Response text:', responseText.substring(0, 500));
-          // If backend returned an error, try to extract useful info
           return NextResponse.json(
             { 
               success: false,
@@ -255,7 +231,6 @@ async function proxyRequest(request: NextRequest, path: string[]) {
           );
         }
       } else {
-        // Non-JSON response - likely an error page or plain text
         console.error('❌ Non-JSON response from backend:', {
           status: response.status,
           contentType: response.headers.get('content-type'),
@@ -263,10 +238,8 @@ async function proxyRequest(request: NextRequest, path: string[]) {
           fullText: responseText
         });
         
-        // Try to extract error message from HTML or plain text
         let errorMessage = 'Ongeldige response van server';
         if (responseText) {
-          // Try to find error message in HTML
           const errorMatch = responseText.match(/<title>(.*?)<\/title>/i) || 
                             responseText.match(/<h1>(.*?)<\/h1>/i) ||
                             responseText.match(/Error:\s*(.+)/i);
@@ -294,17 +267,14 @@ async function proxyRequest(request: NextRequest, path: string[]) {
       }
     }
     
-    // Ensure data has the expected structure
     if (!data || typeof data !== 'object') {
       data = { success: false, error: { message: 'Ongeldige response van server' } };
     }
     
     console.log(`✅ Proxy response: ${response.status}`, { success: data.success });
     
-    // Create response with cookies from backend
     const nextResponse = NextResponse.json(data, { status: response.status });
     
-    // Forward all Set-Cookie headers from backend (can be multiple)
     // Try getSetCookie() first (Node.js 18+), fallback to getAll() or get()
     let setCookieHeaders: string[] = [];
     if (typeof response.headers.getSetCookie === 'function') {
@@ -327,7 +297,6 @@ async function proxyRequest(request: NextRequest, path: string[]) {
     
     return nextResponse;
   } catch (error) {
-    // Clear timeout if it's still active
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -340,7 +309,6 @@ async function proxyRequest(request: NextRequest, path: string[]) {
       backendUrl: `${apiUrl}/api/${path.join('/')}`,
     });
     
-    // Check if it's a connection error or timeout
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorCause = error instanceof Error && 'cause' in error ? (error as Error & { cause?: unknown }).cause : null;
     const isAbortError = error instanceof Error && error.name === 'AbortError';

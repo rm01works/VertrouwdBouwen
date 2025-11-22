@@ -5,7 +5,6 @@ export function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
-    // Skip middleware for API routes, static files, and Next.js internals
     if (
       pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
@@ -15,18 +14,14 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Protected routes that require authentication
     const protectedRoutes = ['/dashboard'];
     const isProtectedRoute = protectedRoutes.some((route) =>
       pathname.startsWith(route)
     );
 
-    // Only check auth for protected routes
     if (isProtectedRoute) {
-      // Check if user has auth cookie
       const token = request.cookies.get('token');
       
-      // Debug logging (only in development)
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Middleware] ${request.method} ${pathname}`);
         console.log(`[Middleware] Token cookie:`, token ? 'present' : 'missing');
@@ -37,9 +32,7 @@ export function middleware(request: NextRequest) {
         }
       }
 
-      // Only redirect if we're certain there's no token
-      // If token exists (even if invalid), let the request through
-      // The client-side auth check in the layout will handle invalid tokens
+      // Let request through if token exists (even if invalid) - client-side auth check handles invalid tokens
       if (!token || !token.value) {
         if (process.env.NODE_ENV === 'development') {
           console.log(`[Middleware] Redirecting ${pathname} to / (no token)`);
@@ -51,8 +44,7 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    // If middleware throws an error, log it and let the request through
-    // This prevents middleware errors from breaking static asset serving
+    // Let request through on error to prevent middleware errors from breaking static asset serving
     console.error('[Middleware] Error:', error);
     return NextResponse.next();
   }

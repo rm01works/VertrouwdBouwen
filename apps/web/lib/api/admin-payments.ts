@@ -3,7 +3,6 @@ import { ProjectPayment } from './project-payments';
 import { Payout } from './payouts';
 import { Project } from './projects';
 
-// Re-export types for convenience
 export type { ProjectPayment } from './project-payments';
 export type { Payout } from './payouts';
 
