@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SliderProps {
-  children: React.ReactNode[];
+  children: React.ReactNode;
   autoPlay?: boolean;
   autoPlayInterval?: number;
   showControls?: boolean;

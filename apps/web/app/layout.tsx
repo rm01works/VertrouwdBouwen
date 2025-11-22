@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider } from '@/components/providers/ToastProvider';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { Providers } from '@/components/providers/Providers';
 
 export const metadata: Metadata = {
   title: 'VertrouwdBouwen - Escrow Platform',
@@ -21,13 +19,9 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <body className="antialiased">
-        <ThemeProvider>
-          <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
