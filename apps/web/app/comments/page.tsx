@@ -1,7 +1,13 @@
+// LET OP: Deze page gebruikt direct Neon SQL i.p.v. Prisma
+// Dit is een aparte feature die niet via de Express API gaat
+// Runtime: Node.js (standaard voor server components)
 import { neon } from '@neondatabase/serverless';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card';
 import { CheckCircle } from 'lucide-react';
 import { CommentForm } from './CommentForm';
+
+// Force revalidation on every request to show new comments immediately
+export const revalidate = 0;
 
 async function getComments() {
   'use server';

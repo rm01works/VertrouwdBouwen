@@ -1,6 +1,10 @@
 'use server';
 
+// LET OP: Deze server action gebruikt direct Neon SQL i.p.v. Prisma
+// Dit is een aparte feature die niet via de Express API gaat
+// Runtime: Node.js (standaard voor server actions)
 import { neon } from '@neondatabase/serverless';
+import { revalidatePath } from 'next/cache';
 
 export async function createCommentAction(prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   if (!process.env.DATABASE_URL) {
@@ -20,6 +24,10 @@ export async function createCommentAction(prevState: { error?: string; success?:
     // Insert the comment from the form into the Postgres database
     // Using tagged template literal syntax (new Neon API)
     await sql`INSERT INTO comments (comment) VALUES (${comment.trim()})`;
+    
+    // Revalidate the comments page to show the new comment
+    revalidatePath('/comments');
+    
     return { success: true };
   } catch (error: unknown) {
     console.error('Error inserting comment:', error);

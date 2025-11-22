@@ -190,8 +190,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('📥 Response status:', response.status);
       console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
 
-      const data = await response.json();
-      console.log('📥 Response data:', JSON.stringify(data, null, 2));
+      let data;
+      try {
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === '') {
+          console.error('❌ Empty response from server');
+          throw new Error(`Server fout: ${response.status} ${response.statusText}. Lege response ontvangen. Controleer of de API server draait.`);
+        }
+        data = JSON.parse(responseText);
+        console.log('📥 Response data:', JSON.stringify(data, null, 2));
+      } catch (jsonError) {
+        console.error('❌ Failed to parse registration response as JSON:', jsonError);
+        // Try to get text response for debugging
+        try {
+          const text = await response.text();
+          console.error('❌ Response text:', text);
+        } catch (textError) {
+          console.error('❌ Could not read response text:', textError);
+        }
+        throw new Error(`Server fout: ${response.status} ${response.statusText}. Ongeldige response van server. Controleer of de API server draait.`);
+      }
 
       if (!response.ok || !data.success) {
         // Geef duidelijke foutmeldingen (bijv. "Email is al in gebruik")
