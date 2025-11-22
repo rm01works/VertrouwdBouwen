@@ -2,8 +2,32 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { validateEnv } from './config/env';
+import { AppError } from './utils/errors';
 
 export const app = express();
+
+// Environment validation middleware - runs on first request
+// This prevents module load failures in serverless environments
+let envValidated = false;
+app.use((req, res, next) => {
+  if (!envValidated) {
+    try {
+      validateEnv();
+      envValidated = true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('❌ Environment validation failed:', errorMessage);
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: 'Server configuratie fout: ' + errorMessage,
+        },
+      });
+    }
+  }
+  next();
+});
 
 // Cookie parser middleware (voor httpOnly cookies)
 app.use(cookieParser());

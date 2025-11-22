@@ -7,12 +7,26 @@ export const env = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
 };
 
-// Validate required environment variables
-const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET'];
+/**
+ * Validate required environment variables
+ * This function is called at runtime, not at module load time,
+ * to prevent serverless function initialization failures
+ */
+export function validateEnv(): void {
+  const requiredEnvVars: Array<keyof typeof env> = ['DATABASE_URL', 'JWT_SECRET'];
+  const missing: string[] = [];
 
-for (const envVar of requiredEnvVars) {
-  if (!env[envVar as keyof typeof env]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
+  for (const envVar of requiredEnvVars) {
+    if (!env[envVar] || env[envVar] === '') {
+      missing.push(envVar);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}. ` +
+      `Please set these in your Vercel project settings.`
+    );
   }
 }
 
