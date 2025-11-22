@@ -7,6 +7,10 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 export const metadata: Metadata = {
   title: 'VertrouwdBouwen - Escrow Platform',
   description: 'Nederlands escrow platform voor bouwprojecten',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
