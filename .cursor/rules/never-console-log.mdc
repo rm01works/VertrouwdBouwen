@@ -1,0 +1,35 @@
+---
+alwaysApply: true
+---
+
+# Never Use console.log in Backend
+
+**CRITICAL RULE**: Never use `console.log`, `console.warn`, `console.info`, `console.debug`, or other `console.*` methods for general logging in the backend code (anything in `apps/api/`).
+
+**Exception**: `console.error` is acceptable ONLY for legitimate, unexpected errors that need immediate attention. Do not use it for routine logging, debugging, or informational messages.
+
+## Why?
+- Console logging is synchronous and blocks the event loop, causing severe performance degradation
+- Excessive console calls are not suitable for production environments
+- It doesn't provide proper log levels, formatting, or structured logging
+- It can't be easily filtered, monitored, or aggregated
+- Debugging with `console.log` everywhere creates noise and makes real issues hard to find
+
+## What to Use Instead
+- Use a proper logging library (e.g., Winston, Pino, or similar) for all routine logging
+- If logging is needed temporarily for debugging, use a proper logger with appropriate log levels
+- For errors, prefer proper error handling and logging mechanisms over `console.error` when possible
+- Consider using structured logging that can be easily parsed and monitored
+
+## Scope
+This rule applies to ALL files in:
+- `apps/api/src/**`
+- `apps/api/scripts/**`
+- Any other backend TypeScript/JavaScript files
+
+## Enforcement
+When writing or reviewing backend code:
+- Remove all `console.log`, `console.warn`, `console.info`, `console.debug` calls
+- `console.error` is acceptable only for legitimate, unexpected errors (not for routine logging)
+- If logging is necessary, implement it using a proper logging solution
+- Prefer structured logging over console methods even for errors when possible
