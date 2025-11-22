@@ -39,8 +39,8 @@ export default function ContactPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">E-mail</h3>
                 <p className="text-foreground-muted mb-4">Stuur ons een e-mail</p>
-                <a href="mailto:info@vertrouwdbouwen.nl">
-                  <Button variant="outline" size="sm">info@vertrouwdbouwen.nl</Button>
+                <a href="mailto:info@vertrouwdbouwen.com">
+                  <Button variant="outline" size="sm">info@vertrouwdbouwen.com</Button>
                 </a>
               </CardBody>
             </Card>

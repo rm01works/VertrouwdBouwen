@@ -1,14 +1,105 @@
+# Default values for vertrouwd-bouwen
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  imagePullSecrets:
+    - name: github-registry
+  namespace: default
+
+# Environment
+env: dev
+
+# API Configuration
+api:
+  enabled: true
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+  
+  replicas: 1
+  revisionHistoryLimit: 3
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 5000
+  
+  container:
+    port: 5000
+    hostname: 0.0.0.0
+  
+  env:
+    jwtSecret:
+      valueFrom:
+        secretKeyRef:
+          name: api-secrets
+          key: jwt-secret
+    corsOrigin: "http://localhost:3000"
+    databaseUrl:
+      valueFrom:
+        secretKeyRef:
+          name: beun-db-app
+          key: uri
+  
+  resources: {}
+
+# Frontend Configuration
+frontend:
+  enabled: true
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+  
+  replicas: 1
+  revisionHistoryLimit: 3
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+  
+  container:
+    port: 3000
+    hostname: 0.0.0.0
+  
+  env:
+    apiBaseUrl: "http://api:80/api"
+  
+  ingress:
+    enabled: false
+    hostname: "frontend.vertrouwd-bouwen.juliamertz.dev"
+    gateway:
+      name: shared
+      namespace: default
+    certificate:
+      name: gateway-tls
+      namespace: default
+  
+  resources: {}
+
+# Database Configuration
+database:
+  enabled: true
+  name: beun-db
+  
+  instances: 1
+  
+  storage:
+    size: 1Gi
+    storageClass: longhorn-local
+  
+  primaryUpdateStrategy: unsupervised
+  primaryUpdateMethod: switchover
+  
+  replicationSlots:
+    highAvailability:
+      enabled: false
+  
+  resources: {}
+
+# TLS Configuration
 tls:
-  enabled: false
-
-controlPlane:
-  services:
-    - name: control-plane
-      subcommand: serve
-    - name: deployment-manager
-      subcommand: deploy
-    - name: api-server
-      subcommand: serve-api
-
-shadowDB: 
   enabled: false

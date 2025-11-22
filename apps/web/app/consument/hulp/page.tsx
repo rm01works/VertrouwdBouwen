@@ -81,8 +81,8 @@ export default function HulpPage() {
                 <div className="text-center p-6 bg-surface rounded-lg">
                   <Mail className="w-8 h-8 text-primary mx-auto mb-3" />
                   <h3 className="font-semibold text-foreground mb-2">E-mail</h3>
-                  <p className="text-sm text-foreground-muted mb-4">support@vertrouwdbouwen.nl</p>
-                  <a href="mailto:support@vertrouwdbouwen.nl">
+                  <p className="text-sm text-foreground-muted mb-4">support@vertrouwdbouwen.com</p>
+                  <a href="mailto:support@vertrouwdbouwen.com">
                     <Button variant="outline" size="sm">Stuur e-mail</Button>
                   </a>
                 </div>

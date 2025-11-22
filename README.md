@@ -425,7 +425,7 @@ De frontend kan worden gedeployed naar Vercel of Netlify:
 - **Output Directory**: Automatisch (`.next`)
 
 **Environment Variables in Vercel:**
-- `NEXT_PUBLIC_API_URL`: URL naar backend API (bijv. `https://api.vertrouwdbouwen.nl`)
+- `NEXT_PUBLIC_API_URL`: URL naar backend API (bijv. `https://api.vertrouwdbouwen.com`)
 - `API_BASE_URL`: Server-side API URL (optioneel)
 - `DATABASE_URL`: Neon PostgreSQL connection string (alleen voor comments feature)
 
@@ -438,7 +438,7 @@ De frontend kan worden gedeployed naar Vercel of Netlify:
 - **Publish Directory**: `apps/web/.next`
 
 **Environment Variables in Netlify:**
-- `NEXT_PUBLIC_API_URL`: URL naar backend API (bijv. `https://api.vertrouwdbouwen.nl`)
+- `NEXT_PUBLIC_API_URL`: URL naar backend API (bijv. `https://api.vertrouwdbouwen.com`)
 
 Zie [docs/NETLIFY_DEPLOY.md](./docs/NETLIFY_DEPLOY.md) voor details.
 

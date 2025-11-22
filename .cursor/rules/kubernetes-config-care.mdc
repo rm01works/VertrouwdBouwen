@@ -1,0 +1,66 @@
+---
+alwaysApply: true
+---
+
+# Take Great Care When Editing Kubernetes Config Files
+
+**CRITICAL RULE**: Kubernetes configuration files can cause production outages, security vulnerabilities, or service disruptions if edited incorrectly. Always exercise extreme caution and follow best practices when modifying any Kubernetes-related files.
+
+## Why This Matters
+- Kubernetes configs directly control production infrastructure
+- Syntax errors (especially YAML indentation) can prevent deployments from working
+- Incorrect resource limits can cause OOM kills or resource starvation
+- Wrong environment variables or secrets can break application functionality
+- Network/service misconfigurations can cause complete service unavailability
+- Changes can affect multiple services or the entire cluster
+
+## Files This Applies To
+- `helm/**/*.yaml` - All Helm chart templates and values
+- `helm/**/*.yml` - Helm configuration files
+- `steiger.yml` - Steiger deployment configuration
+- Any other Kubernetes manifest files (Deployments, Services, ConfigMaps, Secrets, etc.)
+
+## Required Practices
+
+### Before Making Changes
+1. **Understand the Impact**: Know what service(s) will be affected by your changes
+2. **Validate YAML Syntax**: Ensure proper indentation (YAML is whitespace-sensitive)
+3. **Review Dependencies**: Check if other services depend on the configuration you're changing
+4. **Check Resource Limits**: Verify CPU/memory limits are appropriate and won't cause issues
+
+### During Editing
+1. **Preserve Critical Values**: Be extremely careful with:
+   - Environment variables (especially `DATABASE_URL`, `JWT_SECRET`, etc.)
+   - Secret references and key names
+   - Port numbers and service names
+   - Image tags and pull policies
+   - Replica counts and scaling configurations
+2. **Maintain YAML Structure**: 
+   - Use consistent indentation (spaces, not tabs)
+   - Preserve all required fields
+   - Don't remove comments that explain non-obvious configurations
+3. **Test Locally First**: If possible, validate changes with `helm template` or `kubectl --dry-run`
+
+### After Making Changes
+1. **Review the Diff**: Carefully review all changes before committing
+2. **Test in Non-Production**: Deploy to staging/dev environments first
+3. **Monitor After Deployment**: Watch logs and metrics after applying changes
+4. **Have Rollback Plan**: Know how to quickly revert if something goes wrong
+
+## Common Pitfalls to Avoid
+- ❌ Changing secret names or keys without updating all references
+- ❌ Modifying port numbers without updating service configurations
+- ❌ Removing required environment variables
+- ❌ Incorrectly indenting YAML (causes parsing errors)
+- ❌ Changing image tags without verifying the image exists
+- ❌ Modifying resource limits without understanding current usage
+- ❌ Changing service selectors without updating pod labels
+
+## Enforcement
+When editing Kubernetes config files:
+- Double-check YAML syntax and indentation
+- Verify all environment variables and secrets are correctly referenced
+- Ensure service names, ports, and selectors are consistent
+- Test changes in a safe environment before production
+- Get a second pair of eyes for critical infrastructure changes
+- Document any non-obvious changes or configurations

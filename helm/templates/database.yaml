@@ -1,14 +1,21 @@
+{{- if .Values.database.enabled }}
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: beun-db
+  name: {{ .Values.database.name }}
 spec:
-  instances: 1
-  primaryUpdateStrategy: unsupervised
-  primaryUpdateMethod: switchover
+  instances: {{ .Values.database.instances }}
+  primaryUpdateStrategy: {{ .Values.database.primaryUpdateStrategy }}
+  primaryUpdateMethod: {{ .Values.database.primaryUpdateMethod }}
   storage:
-    size: 1Gi
-    storageClass: longhorn-local
+    size: {{ .Values.database.storage.size }}
+    storageClass: {{ .Values.database.storage.storageClass }}
   replicationSlots:
     highAvailability:
-      enabled: false
+      enabled: {{ .Values.database.replicationSlots.highAvailability.enabled }}
+  {{- if .Values.database.resources }}
+  resources:
+    {{- toYaml .Values.database.resources | nindent 4 }}
+  {{- end }}
+{{- end }}

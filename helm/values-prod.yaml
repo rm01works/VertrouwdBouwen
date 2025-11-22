@@ -1,67 +1,120 @@
+# Production values for vertrouwd-bouwen
+# Overrides values.yaml with production-specific settings
+
+# Environment
 env: prod
 
-tls:
-  enabled: true
-
-gateway:
-  name: shared
-
+# Global settings
 global:
   imagePullSecrets:
     - name: github-registry
+  namespace: default
 
-secrets: []
-
-clusterSecretStore: openbao
-
-opentelemetry:
-  clusterName: brainpod-prod
-  endpoint: http://otel.brainpod.signoz.brainhive.nl
-
-registry:
-  upstream: http://distribution-docker-registry.distribution:5000
-  host: registry.brainpod.io
-  gateway:
-    name: registry
-
-podStateController:
-  minReplicas: 1
-
-controlPlane:
-  minReplicas: 1
-  maxReplicas: 2
-
-frontend:
-  host: brainpod.io
-  trpcEndpoint: https://brainpod.io
-  minReplicas: 1
-  maxReplicas: 2
-  authURL: https://brainpod.io
-  basicAuth:
-    enabled: false
-  rateLimit:
-    requests: 5
-    unit: Second
-  openbao:
-    mountpoint: secret
-    endpoint: http://openbao.openbao:8200
-    token:
+# API Configuration - Production
+api:
+  enabled: true
+  image:
+    pullPolicy: Always
+  
+  replicas: 2
+  revisionHistoryLimit: 5
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 5000
+  
+  container:
+    port: 5000
+    hostname: 0.0.0.0
+  
+  env:
+    # JWT_SECRET must be provided via secret in production
+    jwtSecret:
       valueFrom:
         secretKeyRef:
-          name: vault-token
-          key: token
-
-oidc:
-  issuer: https://nice-archimedes-mjynule68a.projects.oryapis.com
-  audience: d2c0ab1b-bb3b-4b12-b5e6-68407ebd772d
-
-clusterDB:
-  replicas: 3
-  sharedBuffers: 256MB
-  workMem: 64MB
+          name: api-secrets
+          key: jwt-secret
+    corsOrigin: "https://vertrouwdbouwen.com"
+    databaseUrl:
+      valueFrom:
+        secretKeyRef:
+          name: beun-db-app
+          key: uri
+  
   resources:
     requests:
       cpu: 100m
-      memory: 350Mi
+      memory: 256Mi
     limits:
-      memory: 350Mi
+      cpu: 500m
+      memory: 512Mi
+
+# Frontend Configuration - Production
+frontend:
+  enabled: true
+  image:
+    pullPolicy: Always
+  
+  replicas: 2
+  revisionHistoryLimit: 5
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+  
+  container:
+    port: 3000
+    hostname: 0.0.0.0
+  
+  env:
+    apiBaseUrl: "https://api.vertrouwdbouwen.com/api"
+  
+  ingress:
+    enabled: true
+    hostname: "vertrouwdbouwen.com"
+    gateway:
+      name: shared
+      namespace: default
+    certificate:
+      name: gateway-tls
+      namespace: default
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Database Configuration - Production
+database:
+  enabled: true
+  name: beun-db
+  
+  instances: 3
+  
+  storage:
+    size: 20Gi
+    storageClass: longhorn-local
+  
+  primaryUpdateStrategy: supervised
+  primaryUpdateMethod: switchover
+  
+  replicationSlots:
+    highAvailability:
+      enabled: true
+  
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+# TLS Configuration - Production
+tls:
+  enabled: true
