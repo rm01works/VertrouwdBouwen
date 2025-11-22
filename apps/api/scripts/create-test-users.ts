@@ -11,7 +11,8 @@
 
 import dotenv from 'dotenv';
 import { resolve } from 'path';
-import { PrismaClient, UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
+import { prisma } from '../src/config/database';
 import { hashPassword } from '../src/utils/bcrypt';
 
 // Laad environment variables - probeer verschillende locaties
@@ -28,7 +29,7 @@ if (!process.env.DATABASE_URL) {
   console.log('💡 Tip: Maak een .env file aan om een andere database URL te gebruiken\n');
 }
 
-const prisma = new PrismaClient();
+// Gebruik de singleton prisma instance uit config/database.ts
 
 async function createTestUsers() {
   try {

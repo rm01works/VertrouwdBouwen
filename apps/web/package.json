@@ -13,6 +13,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@vercel/speed-insights": "^1.2.0",
     "@vertrouwdbouwen/shared": "*",
     "lucide-react": "^0.554.0",

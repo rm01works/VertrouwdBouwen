@@ -4,7 +4,7 @@
 
 import dotenv from 'dotenv';
 import { resolve } from 'path';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/config/database';
 
 // Laad environment variables
 dotenv.config({ path: resolve(__dirname, '../.env') });
@@ -16,7 +16,7 @@ if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL = 'postgresql://vertrouwdbouwen:password@localhost:5432/vertrouwdbouwen';
 }
 
-const prisma = new PrismaClient();
+// Gebruik de singleton prisma instance uit config/database.ts
 
 async function checkUsers() {
   try {

@@ -107,8 +107,7 @@ export default function HomePage() {
               {/* Description */}
               <FadeIn direction="up" delay={200}>
                 <p className="text-[15px] sm:text-base md:text-lg lg:text-xl text-foreground-muted mb-6 sm:mb-8 max-w-3xl mx-auto leading-[1.6] sm:leading-relaxed px-4">
-                  VertrouwdBouwen beschermt consumenten én aannemers met een onafhankelijk escrow-systeem
-                  dat betalingen veilig stelt tot de klus is afgerond.
+                  Ons escrow-systeem houdt betalingen veilig vast tot het werk echt is afgerond — voor consumenten én aannemers.
                 </p>
               </FadeIn>
 
@@ -117,12 +116,12 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6 sm:mb-8 px-4">
                   <Link href="/register?role=CUSTOMER" className="w-full sm:w-auto flex-1 sm:flex-initial">
                     <Button variant="primary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg shadow-elevated hover:shadow-popover transition-all duration-200" startIcon={<Home className="h-5 w-5" />}>
-                      Start als consument
+                      Start als consument — veilig en zonder gedoe
                     </Button>
                   </Link>
                   <Link href="/register?role=CONTRACTOR" className="w-full sm:w-auto flex-1 sm:flex-initial">
                     <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] text-base sm:text-lg transition-all duration-200" startIcon={<Building2 className="h-5 w-5" />}>
-                      Start als aannemer
+                      Start als aannemer — gegarandeerd helder en eerlijk
                     </Button>
                   </Link>
                 </div>
@@ -131,7 +130,7 @@ export default function HomePage() {
               {/* Secondary Link */}
               <FadeIn direction="up" delay={400}>
                 <Link href="/hoe-het-werkt" className="text-sm sm:text-base text-foreground-muted hover:text-primary transition-colors inline-flex items-center gap-1.5 min-h-[44px] justify-center mb-8 sm:mb-10">
-                  Bekijk hoe escrow werkt
+                  Bekijk hoe escrow werkt — kort en duidelijk
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </FadeIn>
@@ -147,7 +146,7 @@ export default function HomePage() {
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
                         €<Counter value="2.5M+" duration={2000} />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Escrow Volume</p>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">€2.5M+ veilig vastgezet</p>
                     </CardBody>
                   </Card>
                   
@@ -159,7 +158,7 @@ export default function HomePage() {
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
                         <Counter value={500} suffix="+" duration={2000} />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Projecten</p>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">500+ afgeronde projecten</p>
                     </CardBody>
                   </Card>
                   
@@ -171,7 +170,7 @@ export default function HomePage() {
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
                         <Counter value={1200} suffix="+" duration={2000} />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Gebruikers</p>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">1.200+ gebruikers</p>
                     </CardBody>
                   </Card>
                   
@@ -183,7 +182,7 @@ export default function HomePage() {
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
                         <Counter value={4.9} suffix="/5" duration={2000} decimals={1} />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">Beoordeling</p>
+                      <p className="text-[10px] sm:text-xs text-foreground-muted leading-tight">4.9 / 5 beoordeling</p>
                     </CardBody>
                   </Card>
                 </div>
@@ -198,7 +197,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-foreground-muted">
                     <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                    <span>Bank-level Security</span>
+                    <span>Beveiliging op bankniveau</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-foreground-muted">
                     <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success flex-shrink-0" />
@@ -216,10 +215,10 @@ export default function HomePage() {
             <FadeIn direction="up">
               <div className="text-center mb-6 sm:mb-8">
                 <h2 className="text-[20px] sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 tracking-tight px-4 leading-[1.3] sm:leading-tight">
-                  Hoe het werkt voor jou
+                  Hoe het werkt
                 </h2>
                 <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted max-w-2xl mx-auto px-4 leading-[1.6] sm:leading-relaxed">
-                  Kies jouw rol en ontdek hoe VertrouwdBouwen specifiek voor jou werkt
+                  Kies je rol en zie hoe VertrouwdBouwen voor jou werkt.
                 </p>
               </div>
             </FadeIn>
@@ -256,7 +255,7 @@ export default function HomePage() {
                               <div className="min-w-0 flex-1">
                                 <h4 className="font-semibold text-foreground mb-1 text-base md:text-lg">Start escrow</h4>
                                 <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                                  Maak je project aan en stort het budget veilig in escrow. Het geld blijft beschermd tot je tevreden bent.
+                                  Maak je project aan en zet het budget veilig apart. Het blijft beschermd tot je tevreden bent.
                                 </p>
                               </div>
                             </div>
@@ -267,7 +266,7 @@ export default function HomePage() {
                               <div className="min-w-0 flex-1">
                                 <h4 className="font-semibold text-foreground mb-1 text-base md:text-lg">Betaal veilig vooruit</h4>
                                 <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                                  Je geld wordt veilig bewaard door een onafhankelijke partij. Geen risico op verlies.
+                                  Je geld staat vast bij een onafhankelijke partij — zonder risico.
                                 </p>
                               </div>
                             </div>
@@ -278,7 +277,7 @@ export default function HomePage() {
                               <div className="min-w-0 flex-1">
                                 <h4 className="font-semibold text-foreground mb-1 text-base md:text-lg">Pas betalen bij goedkeuring</h4>
                                 <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                                  Keur elke milestone goed voordat betaling wordt vrijgegeven. Volledige controle over je project.
+                                  Je keurt elke milestone goed vóór de betaling vrijkomt. Simpel en volledig onder jouw controle.
                                 </p>
                               </div>
                             </div>
@@ -287,7 +286,7 @@ export default function HomePage() {
                         <div className="bg-primary-subtle/30 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 mt-4 md:mt-0">
                           <h4 className="font-semibold text-foreground mb-2 text-base md:text-lg">Mini-case</h4>
                           <p className="text-base md:text-lg text-foreground-muted mb-3 leading-relaxed">
-                            &quot;Ik wilde mijn keuken verbouwen maar was bang voor betalingsproblemen. Met VertrouwdBouwen kon ik rustig werken met een aannemer, wetende dat mijn geld veilig was tot alles klaar was.&quot;
+                            &quot;Ik wilde mijn keuken laten verbouwen, maar vooruitbetalen vond ik spannend. Met escrow voelde dat eindelijk veilig.&quot;
                           </p>
                           <div className="flex items-center gap-2 text-sm md:text-base">
                             <Star className="h-4 w-4 md:h-5 md:w-5 text-warning fill-warning flex-shrink-0" />
@@ -296,7 +295,7 @@ export default function HomePage() {
                           <div className="mt-3 pt-3 border-t border-border">
                             <p className="text-base md:text-lg font-semibold text-foreground mb-1.5">💡 Tip</p>
                             <p className="text-base md:text-lg text-foreground-muted leading-relaxed">
-                              Verdeel grote projecten in milestones voor betere controle en transparantie.
+                              Verdeel grote projecten in milestones — dat houdt alles overzichtelijk.
                             </p>
                           </div>
                         </div>
@@ -401,7 +400,7 @@ export default function HomePage() {
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Gegarandeerde betaling</h3>
                       <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
-                        Aannemers krijgen gegarandeerd betaald zodra werk is goedgekeurd. Geen incasso&apos;s meer.
+                        Aannemers worden gegarandeerd betaald zodra het werk is goedgekeurd. Geen incasso&apos;s meer.
                       </p>
                     </div>
                   </CardBody>
@@ -417,7 +416,7 @@ export default function HomePage() {
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Bescherming consumenten</h3>
                       <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
-                        Je geld blijft veilig tot je tevreden bent. Volledige controle over elke betaling.
+                        Je geld blijft veilig tot je tevreden bent. Jij bepaalt wanneer er wordt betaald.
                       </p>
                     </div>
                   </CardBody>
@@ -433,7 +432,7 @@ export default function HomePage() {
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Transparante afspraken</h3>
                       <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
-                        Duidelijke milestones en afspraken. Alles is vastgelegd en traceerbaar.
+                        Duidelijke afspraken en milestones. Alles staat vooraf vast.
                       </p>
                     </div>
                   </CardBody>
@@ -449,7 +448,7 @@ export default function HomePage() {
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Minder conflicten</h3>
                       <p className="text-[15px] sm:text-base md:text-lg text-foreground-muted leading-[1.6] sm:leading-relaxed">
-                        Duidelijke verwachtingen en automatische processen voorkomen misverstanden.
+                        Duidelijke afspraken en processen voorkomen misverstanden.
                       </p>
                     </div>
                   </CardBody>
@@ -490,13 +489,13 @@ export default function HomePage() {
                       <Link href="/hoe-het-werkt" className="group">
                         <div className="p-4 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors border border-border/30 hover:border-primary/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-primary transition-colors">Hoe escrow werkt</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Uitleg over het escrow proces</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Korte uitleg over escrow</p>
                         </div>
                       </Link>
                       <Link href="/consument/checklist" className="group">
                         <div className="p-4 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors border border-border/30 hover:border-primary/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-primary transition-colors">Checklist verbouwing</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Stap-voor-stap gids</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Stapsgewijze gids</p>
                         </div>
                       </Link>
                       <Link href="/calculator" className="group">
@@ -508,7 +507,7 @@ export default function HomePage() {
                       <Link href="/consument/hulp" className="group">
                         <div className="p-4 bg-primary-subtle/30 rounded-lg hover:bg-primary-subtle/50 transition-colors border border-border/30 hover:border-primary/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-primary transition-colors">Problemen oplossen</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">FAQ en hulp</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Hulp & FAQ</p>
                         </div>
                       </Link>
                     </div>
@@ -532,13 +531,13 @@ export default function HomePage() {
                       <Link href="/aannemer/werken-met-escrow" className="group">
                         <div className="p-4 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors border border-border/30 hover:border-success/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-success transition-colors">Werken met escrow</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Complete gids</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Volledige gids</p>
                         </div>
                       </Link>
                       <Link href="/aannemer/tips" className="group">
                         <div className="p-4 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors border border-border/30 hover:border-success/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-success transition-colors">Klantcommunicatie tips</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Beste praktijken</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Praktische tips</p>
                         </div>
                       </Link>
                       <Link href="/register?role=CONTRACTOR" className="group">
@@ -550,7 +549,7 @@ export default function HomePage() {
                       <Link href="/hoe-het-werkt" className="group">
                         <div className="p-4 bg-success-subtle/30 rounded-lg hover:bg-success-subtle/50 transition-colors border border-border/30 hover:border-success/30">
                           <h4 className="font-semibold text-foreground mb-1.5 text-base md:text-lg group-hover:text-success transition-colors">Hoe het werkt</h4>
-                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Platform uitleg</p>
+                          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">Korte platformuitleg</p>
                         </div>
                       </Link>
                     </div>
@@ -587,7 +586,7 @@ export default function HomePage() {
                           <Badge variant="info" className="mb-3 text-xs">Escrow Tijdlijn</Badge>
                           <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-2">Real-time project tracking</h3>
                           <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                            Volg je project van begin tot eind met real-time updates.
+                            Volg je project van begin tot eind met realtime updates.
                           </p>
                         </div>
 
@@ -595,7 +594,7 @@ export default function HomePage() {
                           <div className="space-y-2">
                             <h4 className="text-sm font-semibold text-foreground">Voor consumenten</h4>
                             <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                              Volg elke milestone in real-time en zie precies waar je project staat.
+                              Volg elke milestone in realtime en zie precies waar je project staat.
                             </p>
                           </div>
 

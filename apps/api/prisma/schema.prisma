@@ -14,6 +14,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Shadow database URL is optioneel - Neon ondersteunt dit voor migraties
+  // Indien niet ingesteld, gebruikt Prisma de main database voor shadow operaties
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
